@@ -1,6 +1,7 @@
 import configparser, os, time, glob, openpyxl
 from functions.download_plan import download_file
 from functions.unmerge_all import unmerge_all
+from functions.unmerge_all import convert_to_xlsm
 from functions.log import log
 import datetime
 import base64
@@ -15,11 +16,15 @@ from functions.helpers import (
     get_latest_checksum,
 )
 
+
 def refresh_plan():
+    start_time = time.time()
+    
     username = "przemek19r@gmail.com"
-    password = base64.b64decode("TWV0YWx6Ynl0MQ==").decode('utf-8')
+    password = base64.b64decode("TWV0YWx6Ynl0MQ==").decode("utf-8")
     try:
         os.remove("swiezy.xlsx")
+
     except:
         pass
     directory = os.getcwd()
@@ -36,9 +41,11 @@ def refresh_plan():
 
     # Move the new files to a folder with a timestamp
     newest_folder = directory
-    xlsx_file = [file for file in os.listdir(newest_folder) if file.endswith(".xlsx")][0]
+    xlsx_file = [file for file in os.listdir(newest_folder) if file.endswith(".xlsx")][
+        0
+    ]
     if not xlsx_file:
-        log("No .xlsx files found in the directory.")
+        log("No .xlsm files found in the directory.")
         exit()
     xlsx_file_new = "swiezy.xlsx"
     new_path = os.path.join(directory, xlsx_file_new)
@@ -54,8 +61,10 @@ def refresh_plan():
     log(f"Latest checksum from database: {checksum_db}")
     if checksum_before != checksum_db:
         log("Changes detected")
+        convert_to_xlsm("swiezy.xlsx")
         log("Unmerging all cells")
-        unmerge_all(new_path, os.getcwd() + "\macro.bas")
+        new_path = os.path.join(directory, "swiezy.xlsm")
+        unmerge_all(new_path)
         time.sleep(5)
 
         workbook = openpyxl.load_workbook(new_path)
@@ -122,7 +131,6 @@ def refresh_plan():
             df = pd.read_excel(
                 f"{current_date}\plan-edited-{grupa}.xlsx",
                 sheet_name="Sheet1",
-                
             )
             df.fillna("", inplace=True)
             df["godziny"] = df["godziny"].apply(format_time_range)
@@ -149,6 +157,8 @@ def refresh_plan():
                     if len(parts) < 2:
                         continue
                     course_name = parts[0].strip()
+                    
+                    
                     lesson_start, lesson_end = get_datetime_range(
                         df["godziny"][row_numbers[0]]
                         .replace("<sup>", "")
@@ -161,16 +171,49 @@ def refresh_plan():
                             type_of_course = toc
                             break
                     dates = cell_value.split("daty:")[-1].split("\n")[0]
+                    course_name1 = None
+                    if("Ekonomia" in str(parts) and "techniki" in str(parts)):
+                        course_name1 = parts[1].split("\n\n")[1]
+                        sala1 = parts[2].split("\n")[3]
+                        type_of_course1 = "wykład"
+                        dates1 = parts[2].split("\n")[2].split("daty:")[-1].strip()
+                        try:
+                            dates_list1 = [
+                                datetime.datetime.strptime(
+                                    f"{date.strip()}.{datetime.datetime.now().year}",
+                                    "%d.%m.%Y",
+                                )
+                                for date in dates1.split(",")
+                            ]
+                            current_date2 = datetime.datetime.now().date()
+                            upcoming_dates1 = [
+                                
+                                date for date in dates_list1 if date.date() >= current_date2 
+                            ]
+                            formatted_dates = [
+                                date.strftime("%d.%m") for date in upcoming_dates
+                            ]
+                            if len(formatted_dates) == 0:
+                                df.at[i, column_name] = ""
+                                continue
+                            formatted_dates1 = ", ".join(formatted_dates)
+                        except:
+                            dates_list1 = dates1
+                            formatted_dates1 = dates_list1
                     try:
-                        dates_list = [
-                            datetime.datetime.strptime(
-                                f"{date.strip()}.{datetime.datetime.now().year}", "%d.%m.%Y"
-                            )
-                            for date in dates.split(",")
-                        ]
-                        current_date2 = datetime.datetime.now()
+                        current_year = datetime.datetime.now().year
+                        current_month = datetime.datetime.now().month
+                        dates_list = []
+                        for date in dates.split(","):
+                            date_obj = datetime.datetime.strptime(f"{date.strip()}.{current_year}", "%d.%m.%Y")
+                            # If the current month is November or December and the date's month is January or February, assume the date is in the next year
+                            if current_month in [11, 12] and date_obj.month in [1, 2]:
+                                date_obj = date_obj.replace(year=current_year + 1)
+                            dates_list.append(date_obj)
+                        current_date2 = datetime.datetime.now().date()
                         upcoming_dates = [
-                            date for date in dates_list if date >= current_date2
+                            
+                            date for date in dates_list if date.date() >= current_date2 
                         ]
                         formatted_dates = [
                             date.strftime("%d.%m") for date in upcoming_dates
@@ -186,7 +229,11 @@ def refresh_plan():
                     # Filter out outdated dates
 
                     if course_name == "Wychowanie fizyczne":
-                        sala = cell_value.split("\n")[-2] + " " + cell_value.split("\n")[-1]
+                        sala = (
+                            cell_value.split("\n")[-2]
+                            + " "
+                            + cell_value.split("\n")[-1]
+                        )
                         df.at[
                             i, column_name
                         ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div>"
@@ -204,19 +251,28 @@ def refresh_plan():
                     elif type_of_course == "lektorat":
                         groups = cell_value.split("gr.")
                         formatted_groups = []
-                        for group in groups[1:]:  # Skip the first element because it's empty
+                        for group in groups[
+                            1:
+                        ]:  # Skip the first element because it's empty
                             group_parts = group.split("sala")
-                            formatted_group = f"gr. {group_parts[0]} " + group_parts[1].replace('\n', '<br>')
+                            formatted_group = f"gr. {group_parts[0]} " + group_parts[
+                                1
+                            ].replace("\n", "<br>")
                             formatted_groups.append(formatted_group)
                         formatted_groups_string = "<br>".join(formatted_groups)
                         df.at[
                             i, column_name
                         ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{formatted_groups_string}</div>"
+                    elif course_name == "Ekonomia" and  "cyfrowej" in course_name1:
+                        print("znaleziono")
+                        df.at[
+                            i, column_name
+                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div><br><div><b>{course_name1} - {type_of_course1}</b>,<br/>{sala1} <br>Daty: {formatted_dates1}</div>"
                     else:
                         df.at[
                             i, column_name
                         ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div>"
-            
+
             data = df.to_dict("records")
             json_data.append(data)
             try:
@@ -228,20 +284,37 @@ def refresh_plan():
             except:
                 log("Failed to saved the plan in json")
         print(len(json_data))
-        db_insert_mongodb(json_data, checksum_before, 24)
-        log("Successfully inserted the document into the database")
         now = datetime.datetime.now()
+        end_time = time.time()
+        execution_time = end_time - start_time
+        db_insert_mongodb(json_data, checksum_before, round(execution_time,2))
+        log("Successfully inserted the document into the database")
+        
         future = now + datetime.timedelta(minutes=15)
+        os.remove("swiezy.xlsx")
+        os.remove("swiezy.xlsm")
         print("Current time: ", now)
         print("Next update in 15 minutes at: ", future)
-        
+
     else:
+        try:
+            os.remove("swiezy.xlsx")
+        except Exception as e:
+            log(f"Error while removing the file or thers is no file")
+
+        try:
+            os.remove("swiezy.xlsm")
+        except Exception as e:
+            log(f"Error while removing the file or thers is no file")
+
         log("No changes detected")  # Next check in
         now = datetime.datetime.now()
         future = now + datetime.timedelta(minutes=15)
         print("Current time: ", now)
         print("Next update in 15 minutes at: ", future)
         # Close the connection
+
+
 refresh_plan()
 schedule.every(15).minutes.do(refresh_plan)
 

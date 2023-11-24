@@ -9,6 +9,7 @@ def download_file(username, password, directory):
     options = webdriver.ChromeOptions()
     prefs = {"download.default_directory" : directory}
     options.add_experimental_option("prefs",prefs)
+    options.add_argument("--headless")
 
     # Start a new browser session
     log("Starting a new browser session")
