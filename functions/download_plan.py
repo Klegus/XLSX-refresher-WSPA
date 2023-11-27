@@ -6,37 +6,41 @@ from selenium.webdriver.support.ui import WebDriverWait
 import configparser, os, requests, urllib.request, time
 from functions.log import log
 def download_file(username, password, directory):
-    options = webdriver.ChromeOptions()
-    prefs = {"download.default_directory" : directory}
-    options.add_experimental_option("prefs",prefs)
-    options.add_argument("--headless")
+    url_login = "https://puw.wspa.pl/login/index.php"
+    url_download = "https://puw.wspa.pl/pluginfile.php/97278/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1"
+    file_save_path = "downloaded_file.xlsx"  # Specify the path where you want to save the downloaded file
 
-    # Start a new browser session
-    log("Starting a new browser session")
-    driver = webdriver.Chrome(options=options)
-    driver.maximize_window()
+    payload = {'password': password, 'username': username}
+    headers = {'anchor': ''}
 
-    # Navigate to the login page
-    log("Navigating to the login page")
-    driver.get('https://puw.wspa.pl/mod/folder/view.php?id=68720')
+    # Create a session
+    session = requests.Session()
+    log("Downloading file from PUW")
+    # Make a POST request to login
+    response_login = session.post(url_login, headers=headers, data=payload)
+    
+    # Check if login was successful
+    if response_login.ok:
+        log("Login successful")
 
-    # Fill in the login form and submit
-    log("Filling in the login form and submitting")
-    username_field = driver.find_element(By.ID, 'username')
-    username_field.send_keys(username)
-    log("Username entered")
-    password_field = driver.find_element(By.ID, 'password')
-    password_field.send_keys(password)
-    log("Password entered")
-    password_field.send_keys(Keys.RETURN)
-    download_link = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '//*[@id="ygtvcontentel2"]/span/a'))
-    )
-    log("Downloading the file")
-    download_link.click()
-    time.sleep(1)
-    log("Closing the browser session")
-    driver.close()
+        # Now, you can make a GET request to download the file
+        try:
+            response_download = session.get(url_download)
+        except:
+            log("Error downloading the file")
+            return False
 
-    # Close the browser session
-    driver.quit()
+        # Check if the download request was successful
+        if response_download.ok:
+            log("File downloaded successfully")
+
+            # Save the file to the specified path
+            with open(file_save_path, 'wb') as file:
+                file.write(response_download.content)
+        else:
+            log("Error downloading the file")
+    else:
+        log("Error logging in")
+
+    # Close the session when you're done
+    session.close()
