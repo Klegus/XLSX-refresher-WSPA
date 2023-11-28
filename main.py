@@ -3,6 +3,7 @@ from functions.download_plan import download_file
 from functions.unmerge_all import unmerge_all
 from functions.unmerge_all import convert_to_xlsm
 from functions.log import log
+from dotenv import load_dotenv
 import datetime
 import base64
 import pandas as pd
@@ -15,13 +16,12 @@ from functions.helpers import (
     db_insert_mongodb,
     get_latest_checksum,
 )
-
+load_dotenv()
 
 def refresh_plan():
     start_time = time.time()
-    
-    username = "przemek19r@gmail.com"
-    password = base64.b64decode("TWV0YWx6Ynl0MQ==").decode("utf-8")
+    username = os.getenv("PUW_USERNAME")
+    password = base64.b64decode(os.getenv("PUW_PASSWORD")).decode("utf-8")
     try:
         os.remove("swiezy.xlsx")
 
