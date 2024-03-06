@@ -152,127 +152,17 @@ def refresh_plan():
             for column_name in relevant_columns:
                 for i, cell_value in enumerate(df[column_name]):
                     row_numbers = df.loc[df[column_name] == cell_value].index
-
                     parts = cell_value.split("-")
-                    if len(parts) < 2:
-                        continue
-                    course_name = parts[0].strip()
-                    
-                    
                     lesson_start, lesson_end = get_datetime_range(
                         df["godziny"][row_numbers[0]]
                         .replace("<sup>", "")
                         .replace("</sup>", "")
                     )
-                    sala = cell_value.split("\n")[-2]
-                    type_of_course = None
-                    for toc in types_of_course:
-                        if toc in cell_value:
-                            type_of_course = toc
-                            break
-                    dates = cell_value.split("daty:")[-1].split("\n")[0]
-                    course_name1 = None
-                    if("Ekonomia" in str(parts) and "techniki" in str(parts)):
-                        course_name1 = parts[1].split("\n\n")[1]
-                        sala1 = parts[2].split("\n")[3]
-                        type_of_course1 = "wykład"
-                        dates1 = parts[2].split("\n")[2].split("daty:")[-1].strip()
-                        try:
-                            dates_list1 = [
-                                datetime.datetime.strptime(
-                                    f"{date.strip()}.{datetime.datetime.now().year}",
-                                    "%d.%m.%Y",
-                                )
-                                for date in dates1.split(",")
-                            ]
-                            current_date2 = datetime.datetime.now().date()
-                            upcoming_dates1 = [
-                                
-                                date for date in dates_list1 if date.date() >= current_date2 
-                            ]
-                            formatted_dates = [
-                                date.strftime("%d.%m") for date in upcoming_dates
-                            ]
-                            if len(formatted_dates) == 0:
-                                df.at[i, column_name] = ""
-                                continue
-                            formatted_dates1 = ", ".join(formatted_dates)
-                        except:
-                            dates_list1 = dates1
-                            formatted_dates1 = dates_list1
-                    try:
-                        current_year = datetime.datetime.now().year
-                        current_month = datetime.datetime.now().month
-                        dates_list = []
-                        for date in dates.split(","):
-                            date_obj = datetime.datetime.strptime(f"{date.strip()}.{current_year}", "%d.%m.%Y")
-                            # If the current month is November or December and the date's month is January or February, assume the date is in the next year
-                            if current_month in [11, 12] and date_obj.month in [1, 2]:
-                                date_obj = date_obj.replace(year=current_year + 1)
-                            dates_list.append(date_obj)
-                        current_date2 = datetime.datetime.now().date()
-                        upcoming_dates = [
-                            
-                            date for date in dates_list if date.date() >= current_date2 
-                        ]
-                        formatted_dates = [
-                            date.strftime("%d.%m") for date in upcoming_dates
-                        ]
-                        if len(formatted_dates) == 0:
-                            df.at[i, column_name] = ""
-                            continue
-                        formatted_dates = ", ".join(formatted_dates)
-                    except:
-                        dates_list = dates
-                        formatted_dates = dates_list
-
-                    # Filter out outdated dates
-
-                    if course_name == "Wychowanie fizyczne":
-                        sala = (
-                            cell_value.split("\n")[-2]
-                            + " "
-                            + cell_value.split("\n")[-1]
-                        )
-                        df.at[
+                    course_name = parts[0].strip()
+                    cell_value = cell_value.replace(course_name, "")
+                    df.at[
                             i, column_name
-                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div>"
-                    # Replace the cell value with the extracted information
-                    elif course_name == "Komunikacja interpersonalna":
-                        sala = cell_value.split("\n")[-1]
-                        df.at[
-                            i, column_name
-                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div>"
-                    elif course_name == "Analiza matematyczna i algebra liniowa":
-                        sala = cell_value.split("\n")[-2]
-                        df.at[
-                            i, column_name
-                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div>"
-                    elif type_of_course == "lektorat":
-                        groups = cell_value.split("gr.")
-                        formatted_groups = []
-                        for group in groups[
-                            1:
-                        ]:  # Skip the first element because it's empty
-                            group_parts = group.split("sala")
-                            formatted_group = f"gr. {group_parts[0]} " + group_parts[
-                                1
-                            ].replace("\n", "<br>")
-                            formatted_groups.append(formatted_group)
-                        formatted_groups_string = "<br>".join(formatted_groups)
-                        df.at[
-                            i, column_name
-                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{formatted_groups_string}</div>"
-                    elif course_name == "Ekonomia" and  "cyfrowej" in course_name1:
-                        print("znaleziono")
-                        df.at[
-                            i, column_name
-                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div><br><div><b>{course_name1} - {type_of_course1}</b>,<br/>{sala1} <br>Daty: {formatted_dates1}</div>"
-                    else:
-                        df.at[
-                            i, column_name
-                        ] = f"<div><b>{course_name} - {type_of_course}</b>,<br/>{sala} <br>Daty: {formatted_dates}</div>"
-
+                        ] = f"<div><b>{course_name}</b><br>{cell_value}</div>"
             data = df.to_dict("records")
             json_data.append(data)
             try:
@@ -283,16 +173,13 @@ def refresh_plan():
                 )
             except:
                 log("Failed to saved the plan in json")
-        print(len(json_data))
+
         now = datetime.datetime.now()
         end_time = time.time()
+        future = now + datetime.timedelta(minutes=15)
         execution_time = end_time - start_time
         db_insert_mongodb(json_data, checksum_before, round(execution_time,2))
         log("Successfully inserted the document into the database")
-        
-        future = now + datetime.timedelta(minutes=15)
-        os.remove("swiezy.xlsx")
-        os.remove("swiezy.xlsm")
         print("Current time: ", now)
         print("Next update in 15 minutes at: ", future)
 
@@ -300,12 +187,12 @@ def refresh_plan():
         try:
             os.remove("swiezy.xlsx")
         except Exception as e:
-            log(f"Error while removing the file or thers is no file")
+            log(f"Error while removing the file or there's is no file")
 
         try:
             os.remove("swiezy.xlsm")
         except Exception as e:
-            log(f"Error while removing the file or thers is no file")
+            log(f"Error while removing the file or there's is no file")
 
         log("No changes detected")  # Next check in
         now = datetime.datetime.now()
