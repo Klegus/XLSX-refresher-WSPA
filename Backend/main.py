@@ -237,7 +237,7 @@ class LessonPlanManager:
             if isinstance(self.config.test_time, str):
                 return datetime.strptime(self.config.test_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=poland_tz)
             else:
-                return self.config.test_time.replace(tzinfo=poland_tz)
+                return self.config.test_time.astimezone(poland_tz)
         else:
             return datetime.now(poland_tz)
 
@@ -267,14 +267,14 @@ class LessonPlanManager:
                             'subject': self.format_subject(row[day_name]),
                             'start': start_time.strftime('%H:%M'),
                             'end': end_time.strftime('%H:%M'),
-                            'time_left': int((end_time - now).total_seconds() // 60)
+                            'time_left': int((end_time - now.astimezone(warsaw_tz)).total_seconds() // 60)
                         }
                     elif now < start_time:
                         next_lessons.append({
                             'subject': self.format_subject(row[day_name]),
                             'start': start_time.strftime('%H:%M'),
                             'end': end_time.strftime('%H:%M'),
-                            'time_to_start': int((start_time - now).total_seconds() // 60),
+                            'time_to_start': int((start_time - now.astimezone(warsaw_tz)).total_seconds() // 60),
                             'day': day_name,
                             'date': start_time.date()
                         })
