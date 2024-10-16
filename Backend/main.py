@@ -6,6 +6,7 @@ import json
 import traceback
 import threading
 import pytz
+import pytz
 import re
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -172,15 +173,21 @@ class LessonPlanManager:
         def status():
             is_active = self.status_checker.is_active()
             last_check = self.status_checker.get_last_activity_datetime()
+            current_time = datetime.now(pytz.timezone('Europe/Warsaw'))
+            last_check_time = datetime.fromisoformat(last_check).astimezone(pytz.timezone('Europe/Warsaw'))
+            minutes_since_last_check = int((current_time - last_check_time).total_seconds() / 60)
+            
             if is_active:
                 return jsonify({
                     "status": "active",
-                    "last_check": last_check
+                    "last_check": last_check,
+                    "minutes_since_last_check": minutes_since_last_check
                 }), 200
             else:
                 return jsonify({
                     "status": "inactive",
-                    "last_check": last_check
+                    "last_check": last_check,
+                    "minutes_since_last_check": minutes_since_last_check
                 }), 503
 
         @app.route('/api/whatnow/<int:group_number>')
