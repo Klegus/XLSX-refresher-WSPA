@@ -16,6 +16,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          EMAIL=${{ secrets.EMAIL }}
+          PASSWORD=${{ secrets.PASSWORD }}
+          OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+          SELECTED_MODEL=${{ secrets.SELECTED_MODEL }}
+          DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          WERKZEUG_RUN_MAIN=${{ secrets.WERKZEUG_RUN_MAIN }}
+          EOF
 
       - name: Log in to private registry
         uses: docker/login-action@v3
@@ -59,7 +71,14 @@ jobs:
             
             # Start new container
             docker run -d \
-              --name xlsx-refresher-wspa \
+              --name xlsx-refresher \
               --restart unless-stopped \
               -p 8081:80 \
+              -e EMAIL=${{ secrets.EMAIL }} \
+              -e PASSWORD=${{ secrets.PASSWORD }} \
+              -e OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }} \
+              -e SELECTED_MODEL=${{ secrets.SELECTED_MODEL }} \
+              -e DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }} \
+              -e MONGO_URI=${{ secrets.MONGO_URI }} \
+              -e WERKZEUG_RUN_MAIN=${{ secrets.WERKZEUG_RUN_MAIN }} \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
