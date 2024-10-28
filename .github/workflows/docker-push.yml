@@ -6,7 +6,7 @@ on:
     branches: [ "secondyear" ]
 env:
   REGISTRY: registry.klegus.tech
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: xlsx-refresher-wspa  # Changed to direct image name
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
