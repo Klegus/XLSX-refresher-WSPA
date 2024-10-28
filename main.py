@@ -275,7 +275,7 @@ def whatnow(group_number):
         message += f"Aktualna lekcja:\n"
         message += f"{current_lesson['subject']}\n"
         message += f"Koniec: {current_lesson['end']}\n"
-        message += f"Pozostało: {format_time_to_next_lesson(current_lesson['time_left'])}\n"
+        #message += f"Pozostało: {format_time_to_next_lesson(current_lesson['time_left'])}\n"
         
         if next_lesson:
             message += f"\nNastępna lekcja"
@@ -284,7 +284,7 @@ def whatnow(group_number):
             message += f":\n"
             message += f"{next_lesson['subject']}\n"
             message += f"Start: {next_lesson['start']}\n"
-            message += f"Za: {format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
+            #message += f"Za: {format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
     elif next_lesson:
         message += f"Następna lekcja"
         if days_ahead > 0:
@@ -292,7 +292,7 @@ def whatnow(group_number):
         message += f":\n"
         message += f"{next_lesson['subject']}\n"
         message += f"Start: {next_lesson['start']}\n"
-        message += f"Za: {format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
+        #message += f"Za: {format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
     else:
         message += "Brak zaplanowanych lekcji w ciągu najbliższych 7 dni.\n"
     
