@@ -1,15 +1,12 @@
 name: Docker Build and Deploy
-
 on:
   push:
     branches: [ "secondyear" ]
   pull_request:
     branches: [ "secondyear" ]
-
 env:
   REGISTRY: registry.klegus.tech
   IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -54,31 +51,26 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Deploy using password authentication
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USERNAME }}
           password: ${{ secrets.DEPLOY_PASSWORD }}
           script: |
-            # Pull the new image
             docker login ${{ env.REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            
-            # Stop and remove existing containers
-            docker ps -q --filter "name=xlsx-refresher-wspa" | xargs -r docker stop
-            docker ps -aq --filter "name=xlsx-refresher-wspa" | xargs -r docker rm
-            
-            # Start new container
+            docker stop xlsx-refresher-wspa || true
+            docker rm xlsx-refresher-wspa || true
             docker run -d \
-              --name xlsx-refresher \
+              --name xlsx-refresher-wspa \
               --restart unless-stopped \
               -p 8081:80 \
-              -e EMAIL=${{ secrets.EMAIL }} \
-              -e PASSWORD=${{ secrets.PASSWORD }} \
-              -e OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }} \
-              -e SELECTED_MODEL=${{ secrets.SELECTED_MODEL }} \
-              -e DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }} \
-              -e MONGO_URI=${{ secrets.MONGO_URI }} \
-              -e WERKZEUG_RUN_MAIN=${{ secrets.WERKZEUG_RUN_MAIN }} \
+              -e EMAIL="${{ secrets.EMAIL }}" \
+              -e PASSWORD="${{ secrets.PASSWORD }}" \
+              -e OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
+              -e SELECTED_MODEL="${{ secrets.SELECTED_MODEL }}" \
+              -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e WERKZEUG_RUN_MAIN="${{ secrets.WERKZEUG_RUN_MAIN }}" \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
