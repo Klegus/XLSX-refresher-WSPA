@@ -109,7 +109,7 @@ class LessonPlanManager:
         self.status_checker = status_checker
         self.database = database
         self.cached_plans = {}
-        self.check_interval = 600  
+        self.check_interval = 900  # 15 minutes
 
     def start(self):
         print("Starting LessonPlanManager...")
@@ -127,6 +127,14 @@ class LessonPlanManager:
 
     def run(self):
         while True:
+            current_hour = datetime.now().hour
+            
+            # Skip checks between 21:00 and 06:00
+            if current_hour >= 21 or current_hour < 6:
+                print(f"\n--- Skipping check at {datetime.now()} - night hours (21:00-06:00) ---")
+                time.sleep(self.check_interval)
+                continue
+
             print(f"\n--- Starting new check at {datetime.now()} ---")
             self.status_checker.update_activity()
             new_checksum = self.lesson_plan.process_and_save_plan()
