@@ -202,6 +202,7 @@ class LessonPlanManager:
             
             df_group = self.parse_html_to_dataframe(latest_plan['groups'][group_key])
             now = self.get_current_time()
+            print(str(now))
             message = self.generate_whatnow_message(group_key, df_group, now)
             
             json_response = json.dumps({"message": message}, ensure_ascii=False, indent=2)
@@ -260,8 +261,9 @@ class LessonPlanManager:
                 if day_name in row and row[day_name].strip():  # Sprawdź, czy jest lekcja w danym dniu
                     time_range = row['Godziny'].split('-')
                     start_time = datetime.strptime(self.parse_custom_time(time_range[0].strip()), '%H:%M').replace(year=check_date.year, month=check_date.month, day=check_date.day, tzinfo=warsaw_tz)
+                    print(str(start_time))
                     end_time = datetime.strptime(self.parse_custom_time(time_range[1].strip()), '%H:%M').replace(year=check_date.year, month=check_date.month, day=check_date.day, tzinfo=warsaw_tz)
-                    
+                    print(str(end_time))
                     if day_offset == 0 and start_time <= now < end_time:
                         current_lesson = {
                             'subject': self.format_subject(row[day_name]),
@@ -285,7 +287,7 @@ class LessonPlanManager:
             message += f"Aktualna lekcja:\n"
             message += f"{current_lesson['subject']}\n"
             message += f"Koniec: {current_lesson['end']}\n"
-            message += f"Pozostało: {self.format_time_to_next_lesson(current_lesson['time_left'])}\n\n"
+           # message += f"Pozostało: {self.format_time_to_next_lesson(current_lesson['time_left'])}\n\n"
         
         next_lesson_with_valid_date = self.find_next_lesson_with_valid_date(next_lessons)
         if next_lesson_with_valid_date:
@@ -312,7 +314,7 @@ class LessonPlanManager:
         message = f"Następna lekcja ({next_lesson['day']}):\n"
         message += f"{next_lesson['subject']}\n"
         message += f"Start: {next_lesson['start']}\n"
-        message += f"Za: {self.format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
+        #message += f"Za: {self.format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
 
         dates_match = re.search(r'daty: ([\d., ]+)', next_lesson['subject'])
         if dates_match:
