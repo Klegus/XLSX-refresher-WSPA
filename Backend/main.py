@@ -127,12 +127,21 @@ class LessonPlanManager:
 
     def run(self):
         while True:
-            current_hour = datetime.now().hour
+            current_time = datetime.now()
+            current_hour = current_time.hour
             
             # Skip checks between 21:00 and 06:00
-            if current_hour >= 21 or current_hour < 6:
-                print(f"\n--- Skipping check at {datetime.now()} - night hours (21:00-06:00) ---")
-                time.sleep(self.check_interval)
+            is_night_time = current_hour >= 21 or current_hour < 6
+            if is_night_time:
+                next_check_time = (
+                    current_time.replace(hour=6, minute=0, second=0, microsecond=0)
+                    if current_hour < 6
+                    else (current_time + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)
+                )
+                sleep_seconds = (next_check_time - current_time).total_seconds()
+                print(f"\n--- Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00) ---")
+                print(f"Next check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                time.sleep(sleep_seconds)
                 continue
 
             print(f"\n--- Starting new check at {datetime.now()} ---")
