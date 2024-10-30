@@ -1,4 +1,5 @@
 import time
+import requests
 from datetime import datetime, timedelta
 import os
 import requests
@@ -144,25 +145,44 @@ class LessonPlanManager:
                 time.sleep(sleep_seconds)
                 continue
 
-            print(f"\n--- Starting new check at {datetime.now()} ---")
-            self.status_checker.update_activity()
-            new_checksum = self.lesson_plan.process_and_save_plan()
+            try:
+                print(f"\n--- Starting new check at {datetime.now()} ---")
+                self.status_checker.update_activity()
+                new_checksum = self.lesson_plan.process_and_save_plan()
 
-            if new_checksum:
-                print("Lesson plan has changed. Comparing plans...")
-                comparison_result = self.lesson_plan_comparator.compare_plans()
+                if new_checksum:
+                    print("Lesson plan has changed. Comparing plans...")
+                    comparison_result = self.lesson_plan_comparator.compare_plans()
+                    
+                    webhook_message = f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
+                    self.discord_notifier.send_webhook(webhook_message)
+
+                    self.update_cached_plans()
+                else:
+                    print("No changes in the lesson plan.")
+
+                self.file_manager.clean_new_files()
                 
-                webhook_message = f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
-                self.discord_notifier.send_webhook(webhook_message)
-
-                self.update_cached_plans()
-            else:
-                print("No changes in the lesson plan.")
-
-            self.file_manager.clean_new_files()
-
-            print(f"Waiting {self.check_interval} seconds before the next check...")
-            time.sleep(self.check_interval)
+                print(f"Waiting {self.check_interval} seconds before the next check...")
+                time.sleep(self.check_interval)
+                
+            except requests.exceptions.SSLError as e:
+                error_wait = 1800  # 30 minutes
+                print(f"\nWystąpił błąd SSL: {str(e)}")
+                print(f"Waiting {error_wait} seconds before next attempt...")
+                time.sleep(error_wait)
+                
+            except requests.exceptions.RequestException as e:
+                error_wait = 1800  # 30 minutes
+                print(f"\nWystąpił błąd połączenia: {str(e)}")
+                print(f"Waiting {error_wait} seconds before next attempt...")
+                time.sleep(error_wait)
+                
+            except Exception as e:
+                error_wait = 1800  # 30 minutes
+                print(f"\nWystąpił nieoczekiwany błąd: {str(e)}")
+                print(f"Waiting {error_wait} seconds before next attempt...")
+                time.sleep(error_wait)
 
     def parse_html_to_dataframe(self, html_content):
         soup = BeautifulSoup(html_content, 'html.parser')
