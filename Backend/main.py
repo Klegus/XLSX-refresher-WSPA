@@ -1,45 +1,31 @@
 import time
-import requests
+from colorama import init, Fore, Style
+
+init(autoreset=True)  # Initialize colorama
 from datetime import datetime, timedelta
-import os
-import requests
-import json
-import traceback
-import threading
-import pytz
-import pytz
-import re
-import pandas as pd
-from bs4 import BeautifulSoup
-from dotenv import load_dotenv
-from pymongo import MongoClient
-from flask import Flask, jsonify, request, Response
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
+import os, shutil, requests, json
+from dotenv import load_dotenv
+from pymongo import MongoClient
+from bson import ObjectId
+import traceback
+from flask import Flask, jsonify, request, Response
+import threading
+import pytz
+import pandas as pd
+from bs4 import BeautifulSoup
 
-class Config:
-    def __init__(self):
-        load_dotenv()
-        self.username = os.getenv("EMAIL")
-        self.password = os.getenv("PASSWORD")
-        self.mongo_uri = os.getenv("MONGO_URI")
-        self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        self.selected_model = os.getenv("SELECTED_MODEL")
-        self.discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
-        self.use_test_time = False
-        self.test_time = None
+app = Flask(__name__)
 
-class Database:
-    def __init__(self, mongo_uri):
-        self.client = MongoClient(mongo_uri)
-        self.db = self.client.Lesson
+# Load environment variables
+load_dotenv()
+USE_TEST_TIME = False
+TEST_TIME = None
+mongo_uri = os.getenv("MONGO_URI")
+client = MongoClient(mongo_uri)
+db = client.Lesson
 
-    def get_latest_lesson_plan(self):
-        try:
-            return self.db.plans.find_one(sort=[("timestamp", -1)])
-        except Exception as e:
-            print(f"Error fetching the latest lesson plan: {str(e)}")
-            return None
 
 class StatusChecker:
     def __init__(self):
@@ -49,21 +35,53 @@ class StatusChecker:
         self.last_activity = time.time()
 
     def is_active(self):
-        return time.time() - self.last_activity < 600  
+        return time.time() - self.last_activity < 600  # 10 minutes
 
     def get_last_activity_datetime(self):
         return datetime.fromtimestamp(self.last_activity).isoformat()
 
-class FileManager:
-    def __init__(self, working_directory):
+
+status_checker = StatusChecker()
+
+
+@app.route("/status")
+def status():
+    is_active = status_checker.is_active()
+    last_check = status_checker.get_last_activity_datetime()
+    if is_active:
+        return jsonify({"status": "active", "last_check": last_check}), 200
+    else:
+        return jsonify({"status": "inactive", "last_check": last_check}), 503
+
+
+def run_flask_app():
+    app.run(host="0.0.0.0", port=80)
+
+
+class LessonPlanManager:
+    def __init__(
+        self,
+        lesson_plan,
+        lesson_plan_comparator,
+        check_interval=600,
+        working_directory=".",
+        discord_webhook_url=None,
+    ):
+        self.lesson_plan = lesson_plan
+        self.lesson_plan_comparator = lesson_plan_comparator
+        self.plan_name = lesson_plan.plan_config["name"]
+        self.check_interval = check_interval
         self.working_directory = working_directory
-        self.initial_file_structure = self.get_file_structure()
+        self.initial_file_structure = set()
+        self.discord_webhook_url = discord_webhook_url
+        self.status_checker = status_checker
+        self.cached_plans = {}
 
     def get_file_structure(self):
         file_structure = set()
         for root, dirs, files in os.walk(self.working_directory):
-            if '__pycache__' in dirs:
-                dirs.remove('__pycache__')
+            if "__pycache__" in dirs:
+                dirs.remove("__pycache__")
             for file in files:
                 file_structure.add(os.path.join(root, file))
         return file_structure
@@ -72,351 +90,501 @@ class FileManager:
         current_structure = self.get_file_structure()
         new_files = current_structure - self.initial_file_structure
         for file in new_files:
-            if not file.endswith('.py') and not file.endswith('.env'):
+            if (
+                file.endswith(".xlsx")
+                and not file.startswith(".git")
+                and not file.endswith(".py")
+                and not file.endswith(".env")
+            ):
                 try:
                     os.remove(file)
-                    print(f"Removed file: {file}")
+                    print(f"Usunięto plik: {file}")
                 except Exception as e:
-                    print(f"Error while removing file {file}: {str(e)}")
+                    print(f"Błąd podczas usuwania pliku {file}: {str(e)}")
 
-class DiscordNotifier:
-    def __init__(self, webhook_url):
-        self.webhook_url = webhook_url
-
-    def send_webhook(self, message):
-        if self.webhook_url:
+    def send_discord_webhook(self, message):
+        if self.discord_webhook_url:
             payload = {
-                "embeds": [{
-                    "title": "Lesson Plan Update",
-                    "description": message,
-                    "color": 15158332,
-                    "timestamp": datetime.utcnow().isoformat()
-                }]
+                "embeds": [
+                    {
+                        "title": "Aktualizacja Planu Lekcji",
+                        "description": message,
+                        "color": 15158332,
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                ]
             }
             try:
-                response = requests.post(self.webhook_url, data=json.dumps(payload), headers={"Content-Type": "application/json"})
+                response = requests.post(
+                    self.discord_webhook_url,
+                    data=json.dumps(payload),
+                    headers={"Content-Type": "application/json"},
+                )
                 response.raise_for_status()
-                print("Discord webhook sent successfully")
+                print("Webhook Discord wysłany pomyślnie")
             except requests.exceptions.RequestException as e:
-                print(f"Error while sending Discord webhook: {str(e)}")
-
-class LessonPlanManager:
-    def __init__(self, config, lesson_plan, lesson_plan_comparator, file_manager, discord_notifier, status_checker, database):
-        self.config = config
-        self.lesson_plan = lesson_plan
-        self.lesson_plan_comparator = lesson_plan_comparator
-        self.file_manager = file_manager
-        self.discord_notifier = discord_notifier
-        self.status_checker = status_checker
-        self.database = database
-        self.cached_plans = {}
-        self.check_interval = 900  # 15 minutes
-
-    def start(self):
-        print("Starting LessonPlanManager...")
-        self.update_cached_plans()
-        flask_thread = threading.Thread(target=self.run_flask_app)
-        flask_thread.start()
-        try:
-            self.run()
-        except KeyboardInterrupt:
-            print("\nLessonPlanManager stopped by user.")
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-        finally:
-            print("LessonPlanManager stopped.")
+                print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
 
     def run(self):
         while True:
             current_time = datetime.now()
             current_hour = current_time.hour
-            
+
             # Skip checks between 21:00 and 06:00
             is_night_time = current_hour >= 21 or current_hour < 6
+            #is_night_time = False
             if is_night_time:
                 next_check_time = (
                     current_time.replace(hour=6, minute=0, second=0, microsecond=0)
                     if current_hour < 6
-                    else (current_time + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)
+                    else (current_time + timedelta(days=1)).replace(
+                        hour=6, minute=0, second=0, microsecond=0
+                    )
                 )
                 sleep_seconds = (next_check_time - current_time).total_seconds()
-                print(f"\n--- Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00) ---")
-                print(f"Next check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(
+                    f"\n--- Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00) ---"
+                )
+                print(
+                    f"Next check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}"
+                )
                 time.sleep(sleep_seconds)
                 continue
 
             try:
-                print(f"\n--- Starting new check at {datetime.now()} ---")
+                print(
+                    f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
+                )
                 self.status_checker.update_activity()
                 new_checksum = self.lesson_plan.process_and_save_plan()
 
                 if new_checksum:
                     print("Lesson plan has changed. Comparing plans...")
-                    comparison_result = self.lesson_plan_comparator.compare_plans()
-                    
-                    webhook_message = f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
+                    collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
+                    comparison_result = self.lesson_plan_comparator.compare_plans(
+                        collection_name
+                    )
+
+                    webhook_message = (
+                        f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
+                    )
                     self.discord_notifier.send_webhook(webhook_message)
 
                     self.update_cached_plans()
                 else:
                     print("No changes in the lesson plan.")
 
-                self.file_manager.clean_new_files()
-                
+                self.clean_new_files()
+
                 print(f"Waiting {self.check_interval} seconds before the next check...")
                 time.sleep(self.check_interval)
-                
+
             except requests.exceptions.SSLError as e:
                 error_wait = 1800  # 30 minutes
                 print(f"\nWystąpił błąd SSL: {str(e)}")
                 print(f"Waiting {error_wait} seconds before next attempt...")
                 time.sleep(error_wait)
-                
+
             except requests.exceptions.RequestException as e:
                 error_wait = 1800  # 30 minutes
                 print(f"\nWystąpił błąd połączenia: {str(e)}")
                 print(f"Waiting {error_wait} seconds before next attempt...")
                 time.sleep(error_wait)
-                
+
             except Exception as e:
                 error_wait = 1800  # 30 minutes
                 print(f"\nWystąpił nieoczekiwany błąd: {str(e)}")
                 print(f"Waiting {error_wait} seconds before next attempt...")
                 time.sleep(error_wait)
 
-    def parse_html_to_dataframe(self, html_content):
-        soup = BeautifulSoup(html_content, 'html.parser')
-        table = soup.find('table')
-        if not table:
-            return pd.DataFrame()
-
-        headers = [th.text for th in table.find_all('th')]
-        data = []
-        for row in table.find_all('tr')[1:]:
-            data.append([td.text for td in row.find_all('td')])
-
-        return pd.DataFrame(data, columns=headers)
     def update_cached_plans(self):
-        latest_plan = self.database.get_latest_lesson_plan()
+        latest_plan = get_latest_lesson_plan()
         if latest_plan:
-            for group, html_content in latest_plan['groups'].items():
-                self.cached_plans[group] = self.parse_html_to_dataframe(html_content)
-        print("Updated lesson plan cache.")
+            for group, html_content in latest_plan["groups"].items():
+                self.cached_plans[group] = parse_html_to_dataframe(html_content)
+        print("Zaktualizowano pamięć podręczną planów lekcji.")
 
-    def run_flask_app(self):
-        app = Flask(__name__)
-        
-        @app.route('/status')
-        def status():
-            is_active = self.status_checker.is_active()
-            last_check = self.status_checker.get_last_activity_datetime()
-            current_time = datetime.now(pytz.timezone('Europe/Warsaw'))
-            last_check_time = datetime.fromisoformat(last_check).astimezone(pytz.timezone('Europe/Warsaw'))
-            minutes_since_last_check = int((current_time - last_check_time).total_seconds() / 60)
-            
-            if is_active:
-                return jsonify({
-                    "status": "active",
-                    "last_check": last_check,
-                    "minutes_since_last_check": minutes_since_last_check
-                }), 200
+    def check_once(self):
+        """Wykonuje pojedynczy cykl sprawdzania planu"""
+        current_time = datetime.now()
+        current_hour = current_time.hour
+
+        # Skip checks between 21:00 and 06:00
+        is_night_time = current_hour >= 21 or current_hour < 6
+        if is_night_time:
+            print(
+                f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
+            )
+            return
+
+        try:
+            print(
+                f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
+            )
+            self.status_checker.update_activity()
+            new_checksum = self.lesson_plan.process_and_save_plan()
+
+            if new_checksum:
+                print("Lesson plan has changed. Comparing plans...")
+                if self.lesson_plan_comparator:
+                    collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
+                    comparison_result = self.lesson_plan_comparator.compare_plans(
+                        collection_name
+                    )
+                    webhook_message = (
+                        f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
+                    )
+                    self.send_discord_webhook(webhook_message)
+
+                self.update_cached_plans()
             else:
-                return jsonify({
-                    "status": "inactive",
-                    "last_check": last_check,
-                    "minutes_since_last_check": minutes_since_last_check
-                }), 503
+                print("No changes in the lesson plan.")
 
-        @app.route('/api/whatnow/<int:group_number>')
-        def whatnow(group_number):
-            group_key = self.get_group_key(group_number)
-            if group_key is None:
-                return jsonify({"message": "Nieprawidłowy numer grupy"}), 400
-            
-            latest_plan = self.database.get_latest_lesson_plan()
-            if not latest_plan or group_key not in latest_plan['groups']:
-                return jsonify({"message": "Brak planu lekcji dla tej grupy"}), 404
-            
-            df_group = self.parse_html_to_dataframe(latest_plan['groups'][group_key])
-            now = self.get_current_time()
-            print(str(now))
-            message = self.generate_whatnow_message(group_key, df_group, now)
-            
-            json_response = json.dumps({"message": message}, ensure_ascii=False, indent=2)
-            return Response(json_response, content_type="application/json; charset=utf-8")
+            self.clean_new_files()
 
-        @app.route('/api/set_test_time', methods=['POST'])
-        def set_test_time():
-            data = request.json
-            if 'use_test_time' in data:
-                self.config.use_test_time = data['use_test_time']
-            if 'test_time' in data:
-                try:
-                    self.config.test_time = datetime.strptime(data['test_time'], '%Y-%m-%d %H:%M:%S')
-                except ValueError:
-                    return jsonify({"error": "Invalid time format. Use YYYY-MM-DD HH:MM:SS"}), 400
-            return jsonify({
-                "message": "Test time settings updated",
-                "use_test_time": self.config.use_test_time,
-                "test_time": self.config.test_time.strftime('%Y-%m-%d %H:%M:%S') if self.config.test_time else None
-            })
+        except Exception as e:
+            print(f"\nWystąpił błąd podczas sprawdzania {self.plan_name}: {str(e)}")
+            raise
 
-        app.run(host='0.0.0.0', port=80)
-    def get_group_key(self, group_number):
-        groups = self.lesson_plan.get_groups()
-        group_keys = list(groups.keys())
-        if 0 <= group_number < len(group_keys):
-            return group_keys[group_number]
+    def start(self):
+        """Deprecated - use check_once() instead"""
+        print("Warning: start() is deprecated. Use check_once() instead.")
+        self.check_once()
+
+
+lesson_plan_manager = None
+lesson_plan = None
+
+
+def get_group_key(group_number):
+    # Wczytaj konfigurację grup z plans.json
+    with open("plans.json", "r", encoding="utf-8") as f:
+        plans_config = json.load(f)
+
+    # Pobierz grupy dla informatyka2
+    groups = plans_config["informatyka2"]["groups"]
+    group_keys = list(groups.keys())
+
+    if 0 <= group_number < len(group_keys):
+        return group_keys[group_number]
+    return None
+
+
+def get_latest_lesson_plan():
+    try:
+        return db.plans.find_one(sort=[("timestamp", -1)])
+    except Exception as e:
+        print(f"Error fetching the latest lesson plan: {str(e)}")
         return None
 
-    def get_current_time(self):
-        poland_tz = pytz.timezone('Europe/Warsaw')
-        if self.config.use_test_time and self.config.test_time:
-            if isinstance(self.config.test_time, str):
-                return datetime.strptime(self.config.test_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=poland_tz)
-            else:
-                return self.config.test_time.astimezone(poland_tz)
-        else:
-            return datetime.now(poland_tz)
 
-    def generate_whatnow_message(self, group_key, df_group, now):
-        warsaw_tz = pytz.timezone('Europe/Warsaw')
-        now = now.astimezone(warsaw_tz)
-        
-        day_names = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela']
-        current_day = now.weekday()
-        
-        current_lesson = None
-        next_lessons = []
-        
-        for day_offset in range(60):
-            check_day = (current_day + day_offset) % 7
-            check_date = now.date() + timedelta(days=day_offset)
-            day_name = day_names[check_day]
-            
-            for _, row in df_group.iterrows():
-                if day_name in row and row[day_name].strip():  # Sprawdź, czy jest lekcja w danym dniu
-                    time_range = row['Godziny'].split('-')
-                    start_time = datetime.strptime(self.parse_custom_time(time_range[0].strip()), '%H:%M').replace(year=check_date.year, month=check_date.month, day=check_date.day, tzinfo=warsaw_tz)
-                    print(str(start_time))
-                    end_time = datetime.strptime(self.parse_custom_time(time_range[1].strip()), '%H:%M').replace(year=check_date.year, month=check_date.month, day=check_date.day, tzinfo=warsaw_tz)
-                    print(str(end_time))
-                    if day_offset == 0 and start_time <= now < end_time:
-                        current_lesson = {
-                            'subject': self.format_subject(row[day_name]),
-                            'start': start_time.strftime('%H:%M'),
-                            'end': end_time.strftime('%H:%M'),
-                            'time_left': int((end_time - now.astimezone(warsaw_tz)).total_seconds() // 60)
-                        }
-                    elif now < start_time:
-                        next_lessons.append({
-                            'subject': self.format_subject(row[day_name]),
-                            'start': start_time.strftime('%H:%M'),
-                            'end': end_time.strftime('%H:%M'),
-                            'time_to_start': int((start_time - now.astimezone(warsaw_tz)).total_seconds() // 60),
-                            'day': day_name,
-                            'date': start_time.date()
-                        })
-        
-        message = f"Grupa: {group_key}\n\n"
-        
-        if current_lesson:
-            message += f"Aktualna lekcja:\n"
-            message += f"{current_lesson['subject']}\n"
-            message += f"Koniec: {current_lesson['end']}\n"
-           # message += f"Pozostało: {self.format_time_to_next_lesson(current_lesson['time_left'])}\n\n"
-        
-        next_lesson_with_valid_date = self.find_next_lesson_with_valid_date(next_lessons)
-        if next_lesson_with_valid_date:
-            message += self.format_next_lesson_message(next_lesson_with_valid_date)
+def parse_custom_time(time_str):
+    """
+    Parse time strings in the format '815' or '1005' to datetime.time objects.
+    """
+    if len(time_str) == 3:
+        hours = int(time_str[0])
+        minutes = int(time_str[1:])
+    elif len(time_str) == 4:
+        hours = int(time_str[:2])
+        minutes = int(time_str[2:])
+    else:
+        raise ValueError(f"Invalid time format: {time_str}")
+
+    return f"{hours:02d}:{minutes:02d}"
+
+
+def format_subject(subject):
+    if not subject:
+        return "Brak informacji o przedmiocie"
+    # Zwracamy pełną informację o przedmiocie
+    return subject.replace("\n", " ")
+
+
+def format_time_to_next_lesson(minutes):
+    hours, mins = divmod(minutes, 60)
+    if hours > 0:
+        return f"{hours} godz. {mins} min"
+    else:
+        return f"{mins} min"
+
+
+def parse_html_to_dataframe(html_content):
+    soup = BeautifulSoup(html_content, "html.parser")
+    table = soup.find("table")
+    if not table:
+        return pd.DataFrame()
+
+    headers = [th.text for th in table.find_all("th")]
+    data = []
+    for row in table.find_all("tr")[1:]:
+        data.append([td.text for td in row.find_all("td")])
+
+    return pd.DataFrame(data, columns=headers)
+
+
+@app.route("/api/whatnow/<int:group_number>")
+def whatnow(group_number):
+    global lesson_plan_manager, USE_TEST_TIME, TEST_TIME
+
+    poland_tz = pytz.timezone("Europe/Warsaw")
+
+    if USE_TEST_TIME and TEST_TIME:
+        if isinstance(TEST_TIME, str):
+            now = datetime.strptime(TEST_TIME, "%Y-%m-%d %H:%M:%S").replace(
+                tzinfo=poland_tz
+            )
         else:
-            message += "Brak zaplanowanych lekcji z poprawną datą w ciągu najbliższych 60 dni.\n"
-        
-        # Usuń ewentualne podwójne nowe linie i końcowe białe znaki
-        message = '\n'.join(line for line in message.split('\n') if line.strip())
-        
-        return message
-    
-    def find_next_lesson_with_valid_date(self, next_lessons):
-        for lesson in next_lessons:
-            dates_match = re.search(r'daty: ([\d., ]+)', lesson['subject'])
-            if dates_match:
-                dates = dates_match.group(1).split(', ')
-                lesson_date = lesson['date'].strftime('%d.%m')
-                if lesson_date in dates:
-                    return lesson
-        return None
-    
-    def format_next_lesson_message(self, next_lesson):
-        message = f"Następna lekcja ({next_lesson['day']}):\n"
+            now = TEST_TIME.replace(tzinfo=poland_tz)
+    else:
+        now = datetime.now(poland_tz)
+
+    # Pobierz najnowszy plan z odpowiedniej kolekcji
+    collection = db["plans_informatyka___studia_i_stopnia_st_2"]
+    latest_plan = collection.find_one(sort=[("timestamp", -1)])
+
+    if not latest_plan:
+        return jsonify({"message": "Brak dostępnego planu lekcji"}), 404
+
+    group_key = get_group_key(group_number)
+    if group_key is None:
+        return jsonify({"message": "Nieprawidłowy numer grupy"}), 400
+
+    if group_key not in latest_plan["groups"]:
+        return jsonify({"message": f"Brak planu dla grupy {group_key}"}), 404
+
+    # Konwertuj HTML na DataFrame
+    html_content = latest_plan["groups"][group_key]
+    from io import StringIO
+
+    df_group = pd.read_html(StringIO(html_content))[0]
+    if df_group is None or df_group.empty:
+        return jsonify({"message": "Brak planu lekcji dla tej grupy"}), 404
+
+    day_names = [
+        "Poniedziałek",
+        "Wtorek",
+        "Środa",
+        "Czwartek",
+        "Piątek",
+        "Sobota",
+        "Niedziela",
+    ]
+    current_day = now.weekday()
+
+    current_lesson = None
+    next_lesson = None
+    days_ahead = 0
+
+    # Sprawdź lekcje na najbliższe 7 dni
+    for day_offset in range(7):
+        check_day = (current_day + day_offset) % 7
+        check_date = now.date() + timedelta(days=day_offset)
+        day_name = day_names[check_day]
+
+        for _, row in df_group.iterrows():
+            if (
+                day_name in row
+                and pd.notna(row[day_name])
+                and str(row[day_name]).strip()
+            ):  # Sprawdź, czy jest lekcja w danym dniu
+                time_range = row["Godziny"].split("-")
+                start_time = datetime.strptime(
+                    parse_custom_time(time_range[0].strip()), "%H:%M"
+                ).replace(
+                    year=check_date.year,
+                    month=check_date.month,
+                    day=check_date.day,
+                    tzinfo=poland_tz,
+                )
+                end_time = datetime.strptime(
+                    parse_custom_time(time_range[1].strip()), "%H:%M"
+                ).replace(
+                    year=check_date.year,
+                    month=check_date.month,
+                    day=check_date.day,
+                    tzinfo=poland_tz,
+                )
+
+                if day_offset == 0 and start_time <= now < end_time:
+                    current_lesson = {
+                        "subject": format_subject(row[day_name]),
+                        "start": start_time.strftime("%H:%M"),
+                        "end": end_time.strftime("%H:%M"),
+                        "time_left": int((end_time - now).total_seconds() // 60),
+                    }
+                elif now < start_time and not next_lesson:
+                    next_lesson = {
+                        "subject": format_subject(row[day_name]),
+                        "start": start_time.strftime("%H:%M"),
+                        "end": end_time.strftime("%H:%M"),
+                        "time_to_start": int((start_time - now).total_seconds() // 60),
+                        "day": day_name,
+                    }
+                    days_ahead = day_offset
+                    break
+
+        if next_lesson:
+            break
+
+    message = f"Grupa: {group_key}\n\n"
+
+    if current_lesson:
+        message += f"Aktualna lekcja:\n"
+        message += f"{current_lesson['subject']}\n"
+        message += f"Koniec: {current_lesson['end']}\n"
+        if next_lesson:
+            message += f"\nNastępna lekcja"
+            if days_ahead > 0:
+                message += f" ({next_lesson['day']})"
+            message += f":\n"
+            message += f"{next_lesson['subject']}\n"
+            message += f"Start: {next_lesson['start']}\n"
+    elif next_lesson:
+        message += f"Następna lekcja"
+        if days_ahead > 0:
+            message += f" ({next_lesson['day']})"
+        message += f":\n"
         message += f"{next_lesson['subject']}\n"
         message += f"Start: {next_lesson['start']}\n"
-        #message += f"Za: {self.format_time_to_next_lesson(next_lesson['time_to_start'])}\n"
+    else:
+        message += "Brak zaplanowanych lekcji w ciągu najbliższych 7 dni.\n"
 
-        dates_match = re.search(r'daty: ([\d., ]+)', next_lesson['subject'])
-        if dates_match:
-            dates = dates_match.group(1).split(', ')
-            next_lesson_date = next_lesson['date'].strftime('%d.%m')
-            message += f"Data zajęć potwierdzona: {next_lesson_date}\n"
+    # Usuń ewentualne podwójne nowe linie i końcowe białe znaki
+    message = "\n".join(line for line in message.split("\n") if line.strip())
+    json_response = json.dumps({"message": message}, ensure_ascii=False, indent=2)
+    return Response(json_response, content_type="application/json; charset=utf-8")
 
-        return message
 
-    def parse_custom_time(self, time_str):
-        if len(time_str) == 3:
-            hours = int(time_str[0])
-            minutes = int(time_str[1:])
-        elif len(time_str) == 4:
-            hours = int(time_str[:2])
-            minutes = int(time_str[2:])
-        else:
-            raise ValueError(f"Invalid time format: {time_str}")
-        
-        return f"{hours:02d}:{minutes:02d}"
+@app.route("/api/set_test_time", methods=["POST"])
+def set_test_time():
+    global USE_TEST_TIME, TEST_TIME
+    data = request.json
+    if "use_test_time" in data:
+        USE_TEST_TIME = data["use_test_time"]
+    if "test_time" in data:
+        try:
+            TEST_TIME = datetime.strptime(data["test_time"], "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return (
+                jsonify({"error": "Invalid time format. Use YYYY-MM-DD HH:MM:SS"}),
+                400,
+            )
+    return jsonify(
+        {
+            "message": "Test time settings updated",
+            "use_test_time": USE_TEST_TIME,
+            "test_time": TEST_TIME.strftime("%Y-%m-%d %H:%M:%S") if TEST_TIME else None,
+        }
+    )
 
-    def format_subject(self, subject):
-        if not subject:
-            return "Brak informacji o przedmiocie"
-        return subject.replace('\n', ' ')
-
-    def format_time_to_next_lesson(self, minutes):
-        hours, mins = divmod(minutes, 60)
-        if hours > 0:
-            return f"{hours} godz. {mins} min"
-        else:
-            return f"{mins} min"
 
 def main():
-    print("Starting main.py")
-    
-    try:
-        config = Config()
-        database = Database(config.mongo_uri)
-        status_checker = StatusChecker()
-        
-        lesson_plan = LessonPlan(
-            username=config.username,
-            password=config.password,
-            mongo_uri=config.mongo_uri
-        )
-        
-        lesson_plan_comparator = LessonPlanComparator(
-            mongo_uri=config.mongo_uri,
-            openrouter_api_key=config.openrouter_api_key,
-            selected_model=config.selected_model
-        )
-        
-        file_manager = FileManager(".")
-        discord_notifier = DiscordNotifier(config.discord_webhook_url)
+    print(f"{Fore.GREEN}Starting main.py{Style.RESET_ALL}")
+    check_interval = 600
 
+    try:
+        print(f"{Fore.CYAN}Loading .env file{Style.RESET_ALL}")
+        load_dotenv()
+        print(f"{Fore.GREEN}.env file loaded successfully{Style.RESET_ALL}")
+
+        global lesson_plan, lesson_plan_manager
+        username = os.getenv("EMAIL")
+        password = os.getenv("PASSWORD")
+        mongo_uri = os.getenv("MONGO_URI")
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+        selected_model = os.getenv("SELECTED_MODEL")
+        discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+        # Load plans configuration
+        with open("plans.json", "r", encoding="utf-8") as f:
+            plans_config = json.load(f)
+
+        lesson_plans = {}
+        lesson_plan_comparators = {}
+        lesson_plan_managers = {}
+
+        for plan_id, plan_config in plans_config.items():
+            print(f"Initializing LessonPlan for {plan_config['name']}")
+            lesson_plans[plan_id] = LessonPlan(
+                username=username,
+                password=password,
+                mongo_uri=mongo_uri,
+                plan_config=plan_config,
+            )
+            print(f"LessonPlan for {plan_config['name']} initialized successfully")
+
+            enable_comparer = os.getenv("ENABLE_COMPARER", "true").lower() == "true"
+            if enable_comparer:
+                print(f"Initializing LessonPlanComparator for {plan_config['name']}")
+                lesson_plan_comparators[plan_id] = LessonPlanComparator(
+                    mongo_uri=mongo_uri,
+                    openrouter_api_key=openrouter_api_key,
+                    selected_model=selected_model,
+                )
+                print(
+                    f"LessonPlanComparator for {plan_config['name']} initialized successfully"
+                )
+            else:
+                print(
+                    f"Skipping LessonPlanComparator initialization for {plan_config['name']} (disabled in config)"
+                )
+
+            print(f"Initializing LessonPlanManager for {plan_config['name']}")
+            comparator = (
+                lesson_plan_comparators.get(plan_id) if enable_comparer else None
+            )
+            lesson_plan_managers[plan_id] = LessonPlanManager(
+                lesson_plans[plan_id],
+                comparator,
+                working_directory=".",
+                discord_webhook_url=discord_webhook_url,
+            )
+            print(
+                f"LessonPlanManager for {plan_config['name']} initialized successfully"
+            )
+
+        flask_thread = threading.Thread(target=run_flask_app)
+        flask_thread.daemon = True
+        flask_thread.start()
+
+        # Run managers sequentially in the main thread
+        try:
+            while True:
+                for plan_id, manager in lesson_plan_managers.items():
+                    print(f"\nStarting check cycle for {plans_config[plan_id]['name']}")
+                    try:
+                        manager.check_once()
+                    except Exception as e:
+                        print(
+                            f"Error in manager for {plans_config[plan_id]['name']}: {str(e)}"
+                        )
+
+                print(
+                    f"\nAll plans checked. Waiting {check_interval} seconds before next cycle..."
+                )
+                time.sleep(check_interval)
+
+        except KeyboardInterrupt:
+            print("\nShutting down gracefully...")
+        except Exception as e:
+            print(f"Fatal error: {str(e)}")
+
+        print("Initializing LessonPlanComparator")
+        lesson_plan_comparator = LessonPlanComparator(
+            mongo_uri=mongo_uri,
+            openrouter_api_key=openrouter_api_key,
+            selected_model=selected_model,
+        )
+        print("LessonPlanComparator initialized successfully")
+
+        print("Initializing LessonPlanManager")
         lesson_plan_manager = LessonPlanManager(
-            config,
             lesson_plan,
             lesson_plan_comparator,
-            file_manager,
-            discord_notifier,
-            status_checker,
-            database
+            working_directory=".",
+            discord_webhook_url=discord_webhook_url,
         )
+        print("LessonPlanManager initialized successfully")
 
         print("Starting LessonPlanManager")
         lesson_plan_manager.start()
@@ -424,6 +592,7 @@ def main():
         print(f"An error occurred in main.py: {str(e)}")
         print("Traceback:")
         print(traceback.format_exc())
+
 
 if __name__ == "__main__":
     main()
