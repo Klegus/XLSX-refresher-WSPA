@@ -10,7 +10,7 @@ from models.base_lesson_plan import BaseLessonPlan
 from LessonPlanDownloader import LessonPlanDownloader
 
 class LessonPlan(BaseLessonPlan):
-    def __init__(self, name, url, sheet_name, groups, username, password, directory=""):
+    def __init__(self, name, url, sheet_name, groups, username, password, mongo_uri, directory=""):
         super().__init__(name, url, sheet_name, groups)
         self.downloader = LessonPlanDownloader(username, password, directory)
         self.converted_lesson_plan = None
