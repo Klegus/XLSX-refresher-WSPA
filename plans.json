@@ -1,0 +1,17 @@
+{
+    "plans": [
+        {
+            "name": "Informatyka II stopień",
+            "url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+            "sheet_name": "INF st II",
+            "groups": {
+                "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczy\ngrupa 1\npodział wg nazwisk: A-K",
+                "Technologie Webowe i Internet rzeczy grupa 2": "Technologie Webowe i Internet rzeczy\ngrupa 2\npodział wg nazwisk: L-Z",
+                "Technologie mobilne": "Sp.: Technologie mobilne",
+                "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
+                "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrupa 1\npodział wg nazwisk:A-K",
+                "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrupa 2\npodział wg nazwisk: L-Z"
+            }
+        }
+    ]
+}

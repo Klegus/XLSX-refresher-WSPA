@@ -6,27 +6,14 @@ import os, re
 import pymongo
 from datetime import datetime
 
-class LessonPlan(LessonPlanDownloader):
-    def __init__(self, username, password, mongo_uri, directory="", sheet_name="INF st II"):
-        super().__init__(username, password, directory)
-        self.sheet_name = sheet_name
+from models.base_lesson_plan import BaseLessonPlan
+from LessonPlanDownloader import LessonPlanDownloader
+
+class LessonPlan(BaseLessonPlan):
+    def __init__(self, name, url, sheet_name, groups, username, password, directory=""):
+        super().__init__(name, url, sheet_name, groups)
+        self.downloader = LessonPlanDownloader(username, password, directory)
         self.converted_lesson_plan = None
-        self.groups = {
-            'Technologie Webowe i Internet rzeczy grupa 1':'''Sp.: Technologie Webowe i Internet rzeczy
-grupa 1
-podział wg nazwisk: A-K''',
-            'Technologie Webowe i Internet rzeczy grupa 2':'''Technologie Webowe i Internet rzeczy
-grupa 2
-podział wg nazwisk: L-Z''',
-            'Technologie mobilne':'Sp.: Technologie mobilne',
-            'Grafika komputerowa i projektowanie gier':'Sp.: Grafika komputerowa i projektowanie gier',
-            'Cyberbezpieczeństwo i informatyka śledcza grupa 1':'''Sp.: Cyberbezpieczeństwo i informatyka śledcza
-grupa 1
-podział wg nazwisk:A-K''',
-            'Cyberbezpieczeństwo i informatyka śledcza grupa 2': '''Sp.: Cyberbezpieczeństwo i informatyka śledcza
-grupa 2
-podział wg nazwisk: L-Z''',
-        }
         self.group_columns = {}
         
         try:
