@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-import hashlib
+import hashlib, os, requests
 
 class BaseLessonPlan(ABC):
     def __init__(self, name, url, sheet_name, groups):
@@ -14,7 +14,44 @@ class BaseLessonPlan(ABC):
     @abstractmethod
     def download_file(self):
         """Download the lesson plan file"""
-        pass
+        url_login = "https://puw.wspa.pl/login/index.php"
+        url_download = "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1"
+        file_save_path = os.path.join(self.directory, "downloaded_file.xlsx")
+    
+        payload = {'password': self.password, 'username': self.username}
+        headers = {'anchor': ''}
+    
+        session = requests.Session()
+        print("Downloading file from PUW")
+        response_login = session.post(url_login, headers=headers, data=payload)
+        
+        if response_login.ok:
+            print("Login successful")
+    
+            try:
+                response_download = session.get(url_download)
+            except:
+                print("Error downloading the file")
+                return False
+    
+            if response_download.ok:
+                print("File downloaded successfully")
+    
+                with open(file_save_path, 'wb') as file:
+                    file.write(response_download.content)
+                self.file_save_path = os.path.abspath(file_save_path)
+                print(f"File saved path = {self.file_save_path}")
+                
+                # Calculate and return checksum
+                checksum = self.calculate_checksum(self.file_save_path)
+                return checksum
+            else:
+                print("Error downloading the file")
+        else:
+            print("Error logging in")
+    
+        session.close()
+        return None
 
     @abstractmethod
     def process_file(self):
