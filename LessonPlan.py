@@ -174,8 +174,8 @@ class LessonPlan(LessonPlanDownloader):
                     # Read data into DataFrame
                     df = pd.read_excel(xls, sheet_name=sheet_name)
 
-                    # Clean text data
-                    df = df.apply(self.clean_text)
+                    # Clean text data - 
+                    #df = df.apply(self.clean_text)
 
                     # Create new worksheet
                     ws = wb.create_sheet(title=sheet_name)
