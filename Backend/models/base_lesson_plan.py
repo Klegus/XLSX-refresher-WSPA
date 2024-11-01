@@ -14,53 +14,45 @@ class BaseLessonPlan(ABC):
     @abstractmethod
     def download_file(self):
         """Download the lesson plan file"""
-        url_login = "https://puw.wspa.pl/login/index.php"
-        url_download = "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1"
-        file_save_path = os.path.join(self.directory, "downloaded_file.xlsx")
-    
-        payload = {'password': self.password, 'username': self.username}
-        headers = {'anchor': ''}
-    
-        session = requests.Session()
-        print("Downloading file from PUW")
-        response_login = session.post(url_login, headers=headers, data=payload)
-        
-        if response_login.ok:
-            print("Login successful")
-    
-            try:
-                response_download = session.get(url_download)
-            except:
-                print("Error downloading the file")
-                return False
-    
-            if response_download.ok:
-                print("File downloaded successfully")
-    
-                with open(file_save_path, 'wb') as file:
-                    file.write(response_download.content)
-                self.file_save_path = os.path.abspath(file_save_path)
-                print(f"File saved path = {self.file_save_path}")
-                
-                # Calculate and return checksum
-                checksum = self.calculate_checksum(self.file_save_path)
-                return checksum
-            else:
-                print("Error downloading the file")
-        else:
-            print("Error logging in")
-    
-        session.close()
-        return None
+        pass
 
     @abstractmethod
     def process_file(self):
         """Process the downloaded file"""
+        # Implementacja powinna zawierać:
+        # - unmerge_and_fill_data()
+        # - clean_excel_file()
+        # - find_group_columns()
         pass
 
     @abstractmethod
     def extract_group_data(self, group_name):
         """Extract data for specific group"""
+        # Implementacja powinna zawierać:
+        # - get_lessons_for_group()
+        # - save_group_lessons()
+        # - convert_to_html_and_save_to_db()
+        pass
+
+    @abstractmethod
+    def process_and_save_plan(self):
+        """Process and save the lesson plan"""
+        # Główna metoda wykonująca pełny proces:
+        # 1. Pobranie pliku i obliczenie checksum
+        # 2. Sprawdzenie czy plan się zmienił
+        # 3. Przetworzenie pliku
+        # 4. Wyodrębnienie danych dla grup
+        # 5. Zapisanie do bazy danych
+        pass
+
+    @abstractmethod
+    def get_groups(self):
+        """Get available groups"""
+        pass
+
+    @abstractmethod
+    def get_converted_lesson_plan(self):
+        """Get the converted lesson plan"""
         pass
 
     def calculate_checksum(self, file_path):
