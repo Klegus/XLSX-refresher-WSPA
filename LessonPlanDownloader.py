@@ -46,16 +46,16 @@ class LessonPlanDownloader:
         response_login = session.post(url_login, headers=headers, data=payload)
         
         if response_login.ok:
-            print(f"{Fore.GREEN}Login successful{Style.RESET_ALL}")
+            print(f"Login successful")
     
             try:
                 response_download = session.get(url_download)
             except:
-                print(f"{Fore.RED}Error downloading the file{Style.RESET_ALL}")
+                print(f"Error downloading the file")
                 return False
     
             if response_download.ok:
-                print(f"{Fore.GREEN}File downloaded successfully{Style.RESET_ALL}")
+                print(f"File downloaded successfully")
     
                 with open(file_save_path, 'wb') as file:
                     file.write(response_download.content)
@@ -68,7 +68,7 @@ class LessonPlanDownloader:
             else:
                 print("Error downloading the file")
         else:
-            print(f"{Fore.RED}Error logging in{Style.RESET_ALL}")
+            print(f"Error logging in")
     
         session.close()
         return None

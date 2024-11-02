@@ -144,7 +144,7 @@ class LessonPlan(LessonPlanDownloader):
 
         wb.save(self.converted_lesson_plan)
         print(
-            f"{Fore.CYAN}Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}"
+            f"Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}"
         )
         return True
 
