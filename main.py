@@ -1,7 +1,19 @@
 import time
 from colorama import init, Fore, Style
+import colorama
 
-init(autoreset=True)  # Initialize colorama
+# Initialize colorama with fallback for Windows
+init(autoreset=True, convert=True)
+
+# Define fallback colors in case colorama fails
+try:
+    GREEN = Fore.GREEN
+    CYAN = Fore.CYAN
+    RESET = Style.RESET_ALL
+except:
+    GREEN = ""
+    CYAN = ""
+    RESET = ""
 from datetime import datetime, timedelta
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
@@ -480,13 +492,13 @@ def set_test_time():
 
 
 def main():
-    print(f"{Fore.GREEN}Starting main.py{Style.RESET_ALL}")
+    print(f"{GREEN}Starting main.py{RESET}")
     check_interval = 600
 
     try:
-        print(f"{Fore.CYAN}Loading .env file{Style.RESET_ALL}")
+        print(f"{CYAN}Loading .env file{RESET}")
         load_dotenv()
-        print(f"{Fore.GREEN}.env file loaded successfully{Style.RESET_ALL}")
+        print(f"{GREEN}.env file loaded successfully{RESET}")
 
         global lesson_plan, lesson_plan_manager
         username = os.getenv("EMAIL")
