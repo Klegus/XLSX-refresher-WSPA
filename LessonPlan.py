@@ -65,11 +65,12 @@ class LessonPlan(LessonPlanDownloader):
                 print(
                     f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum})."
                 )
-                should_process = False
+                return False  # Plan się nie zmienił
             else:
                 print(
                     f"Plan has changed or no previous plan found (old checksum: {latest_checksum}, new checksum: {new_checksum})"
                 )
+                should_process = True
         else:
             # Check local files for changes
             if os.path.exists(self.plans_directory):

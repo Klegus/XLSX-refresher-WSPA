@@ -221,7 +221,11 @@ class LessonPlanManager:
             self.status_checker.update_activity()
             new_checksum = self.lesson_plan.process_and_save_plan()
 
-            if new_checksum:
+            if new_checksum is None:
+                print("Wystąpił błąd podczas sprawdzania planu.")
+            elif new_checksum is False:
+                print("Plan nie uległ zmianie.")
+            else:  # new_checksum zawiera wartość sumy kontrolnej
                 print("Plan został zaktualizowany - wykryto nową wersję.")
                 if self.lesson_plan_comparator:
                     collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
@@ -233,10 +237,6 @@ class LessonPlanManager:
                     )
                     self.send_discord_webhook(webhook_message)
                 self.update_cached_plans()
-            elif new_checksum is False:
-                print("Plan nie uległ zmianie.")
-            else:
-                print("Wystąpił błąd podczas sprawdzania planu.")
 
             self.clean_new_files()
 
