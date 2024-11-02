@@ -222,20 +222,21 @@ class LessonPlanManager:
             new_checksum = self.lesson_plan.process_and_save_plan()
 
             if new_checksum:
-                print("Lesson plan has changed. Comparing plans...")
+                print("Plan został zaktualizowany - wykryto nową wersję.")
                 if self.lesson_plan_comparator:
                     collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
                     comparison_result = self.lesson_plan_comparator.compare_plans(
                         collection_name
                     )
                     webhook_message = (
-                        f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
+                        f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
                     )
                     self.send_discord_webhook(webhook_message)
-
                 self.update_cached_plans()
+            elif new_checksum is False:
+                print("Plan nie uległ zmianie.")
             else:
-                print("No changes in the lesson plan.")
+                print("Wystąpił błąd podczas sprawdzania planu.")
 
             self.clean_new_files()
 
