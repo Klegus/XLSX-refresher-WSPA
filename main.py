@@ -124,35 +124,37 @@ class LessonPlanManager:
 
     def run(self):
         while True:
-            current_time = datetime.now()
-            current_hour = current_time.hour
-
-            # Skip checks between 21:00 and 06:00
-            is_night_time = current_hour >= 21 or current_hour < 6
-            #is_night_time = False
-            if is_night_time:
-                next_check_time = (
-                    current_time.replace(hour=6, minute=0, second=0, microsecond=0)
-                    if current_hour < 6
-                    else (current_time + timedelta(days=1)).replace(
-                        hour=6, minute=0, second=0, microsecond=0
-                    )
-                )
-                sleep_seconds = (next_check_time - current_time).total_seconds()
-                print(
-                    f"\n--- Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00) ---"
-                )
-                print(
-                    f"Next check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}"
-                )
-                time.sleep(sleep_seconds)
-                continue
-
             try:
-                print(
-                    f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
-                )
+                current_time = datetime.now()
+                current_hour = current_time.hour
+                
+                # Zawsze aktualizuj status
                 self.status_checker.update_activity()
+                print(f"\n--- Status check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} ---")
+
+                # Skip checks between 21:00 and 06:00
+                is_night_time = current_hour >= 21 or current_hour < 6
+                if is_night_time:
+                    next_check_time = (
+                        current_time.replace(hour=6, minute=0, second=0, microsecond=0)
+                        if current_hour < 6
+                        else (current_time + timedelta(days=1)).replace(
+                            hour=6, minute=0, second=0, microsecond=0
+                        )
+                    )
+                    sleep_seconds = (next_check_time - current_time).total_seconds()
+                    print(
+                        f"Skipping plan check - night hours (21:00-06:00)"
+                    )
+                    print(
+                        f"Next plan check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}"
+                    )
+                    time.sleep(sleep_seconds)
+                    continue
+
+                print(
+                    f"Starting plan check for {self.plan_name}"
+                )
                 new_checksum = self.lesson_plan.process_and_save_plan()
 
                 if new_checksum:
