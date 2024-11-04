@@ -91,7 +91,7 @@ class LessonPlan(LessonPlanDownloader):
 
             # Always process the downloaded file
             self.unmerge_and_fill_data()
-            #self.clean_excel_file()
+            self.clean_excel_file()
 
             # Read the entire plan as DataFrame
             try:
