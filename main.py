@@ -152,26 +152,23 @@ class LessonPlanManager:
                     time.sleep(sleep_seconds)
                     continue
 
-                print(
-                    f"Starting plan check for {self.plan_name}"
-                )
+                print(f"Starting plan check for {self.plan_name}")
                 new_checksum = self.lesson_plan.process_and_save_plan()
 
-                if new_checksum:
-                    print("Lesson plan has changed. Comparing plans...")
+                # Always compare plans at the end of cycle
+                if self.lesson_plan_comparator:
+                    print("Comparing plans...")
                     collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
-                    comparison_result = self.lesson_plan_comparator.compare_plans(
-                        collection_name
-                    )
-
-                    webhook_message = (
-                        f"Lesson plan has been updated. Changes:\n\n{comparison_result}"
-                    )
-                    self.discord_notifier.send_webhook(webhook_message)
-
-                    self.update_cached_plans()
-                else:
-                    print("No changes in the lesson plan.")
+                    comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
+                    
+                    if new_checksum and comparison_result:
+                        webhook_message = f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
+                        self.send_discord_webhook(webhook_message)
+                        self.update_cached_plans()
+                    elif new_checksum:
+                        print("Plan został zaktualizowany, ale nie wykryto zmian w porównaniu.")
+                    else:
+                        print("Nie wykryto zmian w planie.")
 
                 self.clean_new_files()
 
@@ -217,28 +214,28 @@ class LessonPlanManager:
             return
 
         try:
-            print(
-                f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
-            )
+            print(f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---")
             self.status_checker.update_activity()
             new_checksum = self.lesson_plan.process_and_save_plan()
 
             if new_checksum is None:
                 print("Wystąpił błąd podczas sprawdzania planu.")
-            elif new_checksum is False:
-                print("Plan nie uległ zmianie.")
-            else:  # new_checksum zawiera wartość sumy kontrolnej
-                print("Plan został zaktualizowany - wykryto nową wersję.")
+            else:
+                # Always compare plans at the end of cycle
                 if self.lesson_plan_comparator:
+                    print("Porównywanie planów...")
                     collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
-                    comparison_result = self.lesson_plan_comparator.compare_plans(
-                        collection_name
-                    )
-                    webhook_message = (
-                        f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
-                    )
-                    self.send_discord_webhook(webhook_message)
-                self.update_cached_plans()
+                    comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
+                    
+                    if new_checksum and comparison_result:
+                        webhook_message = f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
+                        self.send_discord_webhook(webhook_message)
+                        self.update_cached_plans()
+                        print("Plan został zaktualizowany - wykryto i zapisano zmiany.")
+                    elif new_checksum:
+                        print("Plan został zaktualizowany, ale nie wykryto zmian w porównaniu.")
+                    else:
+                        print("Nie wykryto zmian w planie.")
 
             self.clean_new_files()
 
