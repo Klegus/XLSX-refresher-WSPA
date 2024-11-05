@@ -257,14 +257,15 @@ class LessonPlan(LessonPlanDownloader):
                 if not isinstance(text1, str) or not isinstance(text2, str):
                     return 0.0
                 
+                # Normalize texts
                 text1 = ' '.join(text1.lower().split())
                 text2 = ' '.join(text2.lower().split())
                 
-
+                # Remove common prefixes
                 text1 = text1.replace('sp.:', '').replace('sps.:', '').strip()
                 text2 = text2.replace('sp.:', '').replace('sps.:', '').strip()
                 
-
+                # Remove newlines but keep group numbers
                 text1 = re.sub(r'\s*\n\s*', ' ', text1)
                 text2 = re.sub(r'\s*\n\s*', ' ', text2)
                 
@@ -277,7 +278,7 @@ class LessonPlan(LessonPlanDownloader):
                     return False
                     
                 if group_number:
-                    group_pattern = rf"grupa\s*{group_number}\b"
+                    group_pattern = rf"gr+upa\s*{group_number}\b"
                     has_group = bool(re.search(group_pattern, str(text).lower()))
                     return has_group
                     
@@ -287,7 +288,7 @@ class LessonPlan(LessonPlanDownloader):
                 matching_columns = []
                 
                 group_number = None
-                group_match = re.search(r'grupa\s*(\d+)', group_identifier.lower())
+                group_match = re.search(r'gr+upa\s*(\d+)', group_identifier.lower())
                 if group_match:
                     group_number = group_match.group(1)
                 
