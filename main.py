@@ -158,7 +158,7 @@ class LessonPlanManager:
                 # Always compare plans at the end of cycle
                 if self.lesson_plan_comparator:
                     print("Comparing plans...")
-                    collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
+                    collection_name = self.plan_name.lower().replace(' ', '_').replace('-', '_')
                     comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
                     
                     if new_checksum and comparison_result:
