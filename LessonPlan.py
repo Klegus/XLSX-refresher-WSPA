@@ -28,6 +28,7 @@ class LessonPlan(LessonPlanDownloader):
         self.save_to_mongodb = os.getenv("SAVE_TO_MONGODB", "true").lower() == "true"
         self.save_to_file = os.getenv("SAVE_TO_FILE", "true").lower() == "true"
         self.plans_directory = os.getenv("PLANS_DIRECTORY", "lesson_plans")
+        self.schedule_type = plan_config.get("category", "st")  # Default to standard schedule
 
         if self.save_to_mongodb:
             try:
@@ -38,7 +39,14 @@ class LessonPlan(LessonPlanDownloader):
                 print(f"Could not connect to MongoDB: {e}")
             except Exception as e:
                 print(f"An error occurred: {e}")
-
+    def get_schedule_headers(self):
+        """Return appropriate headers based on schedule type"""
+        headers = {
+            "st": ["Godziny", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
+            "nst": ["Godziny", "Piątek", "Sobota", "Niedziela"],
+            "nst-puw": ["Godziny", "Sobota", "Niedziela"]
+        }
+        return headers.get(self.schedule_type, headers["st"])
     def process_and_save_plan(self):
         """Process and save the lesson plan, returns checksum if plan was processed"""
         new_checksum = self.download_file()
@@ -314,76 +322,81 @@ class LessonPlan(LessonPlanDownloader):
             return None
 
     def get_lessons_for_group(self, group_name):
-        if not self.converted_lesson_plan:
-            print("No converted file found. Please run unmerge_and_fill_data() first.")
-            return None
+      if not self.converted_lesson_plan:
+          print("No converted file found. Please run unmerge_and_fill_data() first.")
+          return None
 
-        if not self.group_columns:
-            self.find_group_columns_with_similarity()
+      if not self.group_columns:
+          self.find_group_columns_with_similarity()
 
-        try:
-            df = pd.read_excel(
-                self.converted_lesson_plan, sheet_name=self.sheet_name, header=None
-            )
+      try:
+          print(f"\nReading Excel file for group: {group_name}")
+          df = pd.read_excel(
+              self.converted_lesson_plan, sheet_name=self.sheet_name, header=None
+          )
 
-            if group_name not in self.group_columns:
-                print(f"Group '{group_name}' not found.")
-                return None
+          if group_name not in self.group_columns:
+              print(f"Group '{group_name}' not found.")
+              return None
 
-            # Znajdź indeksy kolumn dla danej grupy
-            group_col_indices = [
-                df.columns[df.iloc[0] == col].tolist()[0]
-                for col in self.group_columns[group_name]
-            ]
-            columns_to_extract = [
-                0
-            ] + group_col_indices  # 0 to indeks pierwszej kolumny
+          # Extract column numbers from the column names
+          group_col_indices = []
+          for col_name in self.group_columns[group_name]:
+              # Extract the number after the last dot
+              col_number = int(col_name.split('.')[-1]) if '.' in col_name else None
+              if col_number is not None:
+                  group_col_indices.append(col_number)
 
-            # Wyodrębnij kolumny
-            df_filtered = df.iloc[:, columns_to_extract]
+          if not group_col_indices:
+              print(f"Could not extract column numbers for group {group_name}")
+              return None
 
-            # Usuń wiersze zawierające "INFORMATYKA III SEMESTR rok akademicki 2024/2025"
-            df_filtered = df_filtered[
-                ~df_filtered.apply(
-                    lambda row: row.astype(str)
-                    .str.contains("INFORMATYKA III SEMESTR rok akademicki 2024/2025")
-                    .any(),
-                    axis=1,
-                )
-            ]
+          print(f"Found column indices for {group_name}: {group_col_indices}")
+          
+          # Add time column (always first column) and sort indices
+          columns_to_extract = [0] + group_col_indices
+          print(f"Columns to extract: {columns_to_extract}")
+          
+          # Extract columns
+          df_filtered = df.iloc[:, columns_to_extract]
 
-            # Usuń pierwsze 3 wiersze i ostatni wiersz
-            df_filtered = df_filtered.iloc[4:-1]
-            df_filtered = df_filtered[
-                ~df_filtered[0]
-                .astype(str)
-                .str.contains("godz.|GODZ.", case=False, regex=True)
-            ]
+          # Remove title rows
+          df_filtered = df_filtered[
+              ~df_filtered.apply(
+                  lambda row: row.astype(str)
+                  .str.contains("INFORMATYKA.*SEMESTR", case=False, regex=True)
+                  .any(),
+                  axis=1,
+              )
+          ]
 
-            # Usuń wiersze, gdzie wszystkie kolumny grupy (oprócz pierwszej) są NaN
-            df_filtered = df_filtered.dropna(subset=df_filtered.columns[1:], how="all")
+          # Remove header rows and reset index
+          df_filtered = df_filtered.iloc[4:-1]
+          df_filtered = df_filtered[
+              ~df_filtered[0]
+              .astype(str)
+              .str.contains("godz.|GODZ.", case=False, regex=True)
+          ]
 
-            # Ustaw nagłówki
-            headers = [
-                "Godziny",
-                "Poniedziałek",
-                "Wtorek",
-                "Środa",
-                "Czwartek",
-                "Piątek",
-            ]
-            df_filtered.columns = headers[: len(df_filtered.columns)]
+          # Remove rows where all group columns are NaN
+          df_filtered = df_filtered.dropna(subset=df_filtered.columns[1:], how="all")
 
-            # Zresetuj indeks
-            df_filtered = df_filtered.reset_index(drop=True)
+          # Set headers
+          headers = self.get_schedule_headers()
+          df_filtered.columns = headers[: len(df_filtered.columns)]
 
-            return df_filtered
+          # Reset index
+          df_filtered = df_filtered.reset_index(drop=True)
 
-        except Exception as e:
-            print(
-                f"An error occurred while getting lessons for group '{group_name}': {str(e)}"
-            )
-            return None
+          return df_filtered
+
+      except Exception as e:
+          print(
+              f"An error occurred while getting lessons for group '{group_name}': {str(e)}"
+          )
+          import traceback
+          traceback.print_exc()
+          return None
 
     def save_group_lessons(self, group_name, df):
         if df is None or df.empty:
@@ -436,6 +449,7 @@ class LessonPlan(LessonPlanDownloader):
             "timestamp": current_datetime,
             "checksum": checksum,  # Just store the raw checksum
             "plan_name": self.plan_config["name"],
+            "category": self.schedule_type,
             "groups": {},
         }
 
