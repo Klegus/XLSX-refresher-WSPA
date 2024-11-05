@@ -14,13 +14,14 @@ class LessonPlanComparator:
         self.selected_model = selected_model
 
     def get_last_two_plans(self, plan_name):
-        collection_name = f"plans_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
+        collection_name = plan_name.lower().replace(' ', '_').replace('-', '_')
         collection = self.db[collection_name]
         plans = list(collection.find().sort("timestamp", -1).limit(2))
         if len(plans) < 2:
             print(f"{Fore.YELLOW}Nie znaleziono wystarczającej liczby planów do porównania w kolekcji {collection_name}.{Style.RESET_ALL}")
             return None, None
-        return plans[0], plans[1]
+        # Upewnij się, że plans[0] to najnowszy plan, a plans[1] to poprzedni
+        return plans[0], plans[1]  # plans[0] jest najnowszy dzięki sort("timestamp", -1)
 
     def format_plan_for_group(self, plan, group):
         if group not in plan['groups']:
@@ -84,7 +85,7 @@ class LessonPlanComparator:
             "results": comparison_results
         }
         
-        collection_name = f"plan_comparisons_{newer_plan['plan_name'].lower().replace(' ', '_').replace('-', '_')}"
+        collection_name = f"comparisons_{newer_plan['plan_name'].lower().replace(' ', '_').replace('-', '_')}"
         collection = self.db[collection_name]
         result = collection.insert_one(comparison_document)
         print(f"Wyniki porównania dla {newer_plan['plan_name']} zapisane w bazie danych z ID: {result.inserted_id}")
