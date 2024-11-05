@@ -1,6 +1,8 @@
 from LessonPlanDownloader import LessonPlanDownloader
 import os, requests, time
 from colorama import init, Fore, Style
+from difflib import SequenceMatcher
+
 
 init(autoreset=True)  # Initialize colorama
 import pandas as pd
@@ -30,7 +32,7 @@ class LessonPlan(LessonPlanDownloader):
         if self.save_to_mongodb:
             try:
                 self.mongo_client = pymongo.MongoClient(mongo_uri)
-                self.db = self.mongo_client["Lesson"]
+                self.db = self.mongo_client["Lesson_dev"]
                 print("Successfully connected to MongoDB")
             except pymongo.errors.ConnectionFailure as e:
                 print(f"Could not connect to MongoDB: {e}")
@@ -96,7 +98,7 @@ class LessonPlan(LessonPlanDownloader):
             # Read the entire plan as DataFrame
             try:
                 # Process individual groups
-                self.find_group_columns()
+                self.find_group_columns_with_similarity()
                 for group in self.groups.keys():
                     df_group = self.get_lessons_for_group(group)
                     if df_group is not None and not df_group.empty:
@@ -240,6 +242,75 @@ class LessonPlan(LessonPlanDownloader):
         except Exception as e:
             print(f"An error occurred while finding group columns: {str(e)}")
             return None
+        
+    def find_group_columns_with_similarity(self):
+        if not self.converted_lesson_plan:
+            print("No converted file found. Please run unmerge_and_fill_data() first.")
+            return False
+
+        try:
+            df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
+            used_columns = set()
+            group_columns = {}
+
+            def calculate_similarity(text1, text2):
+                if not isinstance(text1, str) or not isinstance(text2, str):
+                    return 0.0
+                
+                text1 = ' '.join(text1.lower().split())
+                text2 = ' '.join(text2.lower().split())
+                
+
+                text1 = text1.replace('sp.:', '').replace('sps.:', '').strip()
+                text2 = text2.replace('sp.:', '').replace('sps.:', '').strip()
+                
+
+                text1 = re.sub(r'\s*\n\s*', ' ', text1)
+                text2 = re.sub(r'\s*\n\s*', ' ', text2)
+                
+                return SequenceMatcher(None, text1, text2).ratio()
+
+            def is_matching_group(text, pattern, group_number=None):
+                similarity = calculate_similarity(str(text), str(pattern))
+                
+                if similarity < 0.85:  
+                    return False
+                    
+                if group_number:
+                    group_pattern = rf"grupa\s*{group_number}\b"
+                    has_group = bool(re.search(group_pattern, str(text).lower()))
+                    return has_group
+                    
+                return True
+
+            for group_name, group_identifier in self.groups.items():
+                matching_columns = []
+                
+                group_number = None
+                group_match = re.search(r'grupa\s*(\d+)', group_identifier.lower())
+                if group_match:
+                    group_number = group_match.group(1)
+                
+                for column in df.columns:
+                    if column in used_columns:
+                        continue
+                        
+                    unique_values = df[column].dropna().unique()
+                    
+                    for value in unique_values:
+                        if is_matching_group(value, group_identifier, group_number):
+                            matching_columns.append(column)
+                            used_columns.add(column)
+                            break
+
+                group_columns[group_name] = matching_columns
+
+            self.group_columns = group_columns
+            return self.group_columns
+
+        except Exception as e:
+            print(f"An error occurred while finding group columns: {str(e)}")
+            return None
 
     def get_lessons_for_group(self, group_name):
         if not self.converted_lesson_plan:
@@ -247,7 +318,7 @@ class LessonPlan(LessonPlanDownloader):
             return None
 
         if not self.group_columns:
-            self.find_group_columns()
+            self.find_group_columns_with_similarity()
 
         try:
             df = pd.read_excel(
