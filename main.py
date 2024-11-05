@@ -155,13 +155,13 @@ class LessonPlanManager:
                 print(f"Starting plan check for {self.plan_name}")
                 new_checksum = self.lesson_plan.process_and_save_plan()
 
-                # Always compare plans at the end of cycle
-                if self.lesson_plan_comparator:
-                    print("Comparing plans...")
+                # Only compare plans if there was a change
+                if new_checksum and self.lesson_plan_comparator:
+                    print("Plan został zaktualizowany, porównywanie planów...")
                     collection_name = self.plan_name.lower().replace(' ', '_').replace('-', '_')
                     comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
                     
-                    if new_checksum and comparison_result:
+                    if comparison_result:
                         webhook_message = f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
                         self.send_discord_webhook(webhook_message)
                         self.update_cached_plans()
@@ -224,7 +224,7 @@ class LessonPlanManager:
                 # Always compare plans at the end of cycle
                 if self.lesson_plan_comparator:
                     print("Porównywanie planów...")
-                    collection_name = f"plans_{self.plan_name.lower().replace(' ', '_').replace('-', '_')}"
+                    collection_name = self.plan_name.lower().replace(' ', '_').replace('-', '_')
                     comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
                     
                     if new_checksum and comparison_result:
