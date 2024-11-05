@@ -14,12 +14,24 @@ class LessonPlanComparator:
         self.selected_model = selected_model
 
     def get_last_two_plans(self, plan_name):
-        collection_name = plan_name.lower().replace(' ', '_').replace('-', '_')
+        collection_name = f"plans_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
+        print(f"\n{Fore.CYAN}Debugowanie get_last_two_plans:{Style.RESET_ALL}")
+        print(f"- Szukam planów w kolekcji: {collection_name}")
+        
         collection = self.db[collection_name]
         plans = list(collection.find().sort("timestamp", -1).limit(2))
+        
+        print(f"- Znaleziono planów: {len(plans)}")
+        if plans:
+            print("- Daty znalezionych planów:")
+            for i, plan in enumerate(plans):
+                print(f"  {i+1}. {plan.get('timestamp', 'brak daty')}")
+        
         if len(plans) < 2:
             print(f"{Fore.YELLOW}Nie znaleziono wystarczającej liczby planów do porównania w kolekcji {collection_name}.{Style.RESET_ALL}")
+            print(f"- Wymagane są minimum 2 plany, znaleziono: {len(plans)}")
             return None, None
+            
         # Upewnij się, że plans[0] to najnowszy plan, a plans[1] to poprzedni
         return plans[0], plans[1]  # plans[0] jest najnowszy dzięki sort("timestamp", -1)
 
