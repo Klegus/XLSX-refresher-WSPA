@@ -207,7 +207,8 @@ class LessonPlanManager:
         current_hour = current_time.hour
 
         # Skip checks between 21:00 and 06:00
-        is_night_time = current_hour >= 21 or current_hour < 6
+        #is_night_time = current_hour >= 21 or current_hour < 6
+        is_night_time = False
         if is_night_time:
             print(
                 f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
