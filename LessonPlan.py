@@ -50,7 +50,7 @@ class LessonPlan(LessonPlanDownloader):
         headers = {
             "st": ["Godziny", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
             "nst": ["Godziny", "Piątek", "Sobota", "Niedziela"],
-            "nst-puw": ["Godziny", "Sobota", "Niedziela"]
+            "nst-online": ["Godziny", "Sobota", "Niedziela"],
         }
         return headers.get(self.schedule_type, headers["st"])
     def process_and_save_plan(self):
