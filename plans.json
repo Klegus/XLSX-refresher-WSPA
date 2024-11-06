@@ -196,13 +196,13 @@
         },
         "category": "nst-online",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF IV rok PUW - z. stacjonarne"
+        "sheet_name": "INF IV PUW - z. stacjonarne"
     },
     "informatyka20": {
         "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. online",
         "groups": null,
         "category": "nst-online",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF IV rok PUW - z. on-line"
+        "sheet_name": "INF IV PUW - z. on-line"
     }
 }
