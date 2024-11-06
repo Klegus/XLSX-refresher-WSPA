@@ -32,7 +32,7 @@ class StatusChecker:
         self.last_activity = time.time()
 
     def is_active(self):
-        return time.time() - self.last_activity < 600  # 10 minutes
+        return True
 
     def get_last_activity_datetime(self):
         return datetime.fromtimestamp(self.last_activity).isoformat()
