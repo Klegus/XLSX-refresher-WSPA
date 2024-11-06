@@ -63,6 +63,13 @@
         "sheet_name": "INF NST I - z. stacjonarne"
     },
     "informatyka6": {
+        "name": "Informatyka - studia I stopnia nst 1 - semestr zimowy - z. online",
+        "groups": null,
+        "category": "nst",
+        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+        "sheet_name": "INF NST I - z. on-line"
+    },
+    "informatyka7": {
         "name": "Informatyka - studia I stopnia PUW 1 - semestr zimowy",
         "groups": {
             "Grupa 1": "grupa 1 wg nazwisk: A-I",
@@ -74,5 +81,13 @@
         "category": "nst",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "INF I rok PUW - z. stacjonarne"
+    }
+    ,
+    "informatyka8": {
+        "name": "Informatyka - studia I stopnia PUW 1 - semestr zimowy",
+        "groups": null,
+        "category": "nst-puw",
+        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+        "sheet_name": "INF I rok PUW - z. on-line"
     }
 }

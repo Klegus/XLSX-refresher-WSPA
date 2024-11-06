@@ -39,6 +39,12 @@ class LessonPlan(LessonPlanDownloader):
                 print(f"Could not connect to MongoDB: {e}")
             except Exception as e:
                 print(f"An error occurred: {e}")
+        if plan_config.get("groups") is None:
+            self.groups = {"cały kierunek": "all"}
+        else:
+            self.groups = plan_config["groups"]
+            
+        self.group_columns = {}
     def get_schedule_headers(self):
         """Return appropriate headers based on schedule type"""
         headers = {
@@ -99,26 +105,31 @@ class LessonPlan(LessonPlanDownloader):
         if should_process:
             print(f"Processing plan for {self.plan_config['name']}")
 
-            # Always process the downloaded file
-            self.unmerge_and_fill_data()
-            self.clean_excel_file()
-
-            # Read the entire plan as DataFrame
             try:
-                # Process individual groups
+                # Always process the downloaded file
+                self.unmerge_and_fill_data()
+                self.clean_excel_file()
+
+                # Process groups
                 self.find_group_columns_with_similarity()
-                for group in self.groups.keys():
-                    df_group = self.get_lessons_for_group(group)
+                
+                # Get groups from instance (handles both None and defined groups cases)
+                groups_to_process = self.groups.keys() if self.groups else []
+                
+                for group_name in groups_to_process:
+                    df_group = self.get_lessons_for_group(group_name)
                     if df_group is not None and not df_group.empty:
-                        self.save_group_lessons(group, df_group)
+                        self.save_group_lessons(group_name, df_group)
                     else:
-                        print(f"No data available for group '{group}'.")
+                        print(f"No data available for group '{group_name}'.")
 
                 if self.save_to_mongodb:
                     self.convert_to_html_and_save_to_db(new_checksum)
 
             except Exception as e:
                 print(f"Error processing plan: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 return None
 
         return new_checksum
@@ -258,6 +269,44 @@ class LessonPlan(LessonPlanDownloader):
 
         try:
             df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
+            print("\nSearching for group columns...")
+            print("Available columns:", df.columns.tolist())
+
+            # Jeśli mamy grupę "cały kierunek", szukamy kolumn z dniami
+            if len(self.groups) == 1 and "cały kierunek" in self.groups:
+                print("Processing entire course without group division")
+                
+                # Get appropriate day names based on schedule type
+                days = {
+                    "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
+                    "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
+                    "nst-puw": ["SOBOTA", "NIEDZIELA"]
+                }
+                schedule_days = days.get(self.schedule_type, days["st"])
+                
+                # Find columns containing day names
+                matching_columns = []
+                used_columns = set()
+                
+                for column in df.columns:
+                    if column in used_columns:
+                        continue
+                    
+                    unique_values = df[column].dropna().unique()
+                    for value in unique_values:
+                        value_str = str(value).upper().strip()
+                        if value_str in schedule_days:
+                            matching_columns.append(column)
+                            used_columns.add(column)
+                            break
+                
+                # Sort columns by their numbers
+                matching_columns.sort(key=lambda x: int(x.split('.')[-1]) if '.' in x else 0)
+                self.group_columns["cały kierunek"] = matching_columns
+                print(f"Found columns for entire course: {matching_columns}")
+                return self.group_columns
+
+            # Standardowa logika dla zdefiniowanych grup
             used_columns = set()
             group_columns = {}
 
@@ -265,19 +314,18 @@ class LessonPlan(LessonPlanDownloader):
                 if not isinstance(text1, str) or not isinstance(text2, str):
                     return 0.0
                 
-                # Normalize texts
                 text1 = ' '.join(text1.lower().split())
                 text2 = ' '.join(text2.lower().split())
                 
-                # Remove common prefixes
                 text1 = text1.replace('sp.:', '').replace('sps.:', '').strip()
                 text2 = text2.replace('sp.:', '').replace('sps.:', '').strip()
                 
-                # Remove newlines but keep group numbers
                 text1 = re.sub(r'\s*\n\s*', ' ', text1)
                 text2 = re.sub(r'\s*\n\s*', ' ', text2)
                 
-                return SequenceMatcher(None, text1, text2).ratio()
+                similarity = SequenceMatcher(None, text1, text2).ratio()
+                print(f"Comparing '{text1}' with '{text2}' - Similarity: {similarity}")
+                return similarity
 
             def is_matching_group(text, pattern, group_number=None):
                 similarity = calculate_similarity(str(text), str(pattern))
@@ -293,26 +341,32 @@ class LessonPlan(LessonPlanDownloader):
                 return True
 
             for group_name, group_identifier in self.groups.items():
+                print(f"\nProcessing group: {group_name} (identifier: {group_identifier})")
                 matching_columns = []
                 
                 group_number = None
                 group_match = re.search(r'gr+upa\s*(\d+)', group_identifier.lower())
                 if group_match:
                     group_number = group_match.group(1)
+                    print(f"Extracted group number: {group_number}")
                 
                 for column in df.columns:
                     if column in used_columns:
                         continue
                         
+                    print(f"\nChecking column: {column}")
                     unique_values = df[column].dropna().unique()
+                    print(f"Unique values in column: {unique_values}")
                     
                     for value in unique_values:
                         if is_matching_group(value, group_identifier, group_number):
                             matching_columns.append(column)
                             used_columns.add(column)
+                            print(f"Found matching column: {column}")
                             break
 
                 group_columns[group_name] = matching_columns
+                print(f"Columns found for {group_name}: {matching_columns}")
 
             self.group_columns = group_columns
             return self.group_columns
@@ -362,13 +416,13 @@ class LessonPlan(LessonPlanDownloader):
 
           # Remove title rows
           df_filtered = df_filtered[
-              ~df_filtered.apply(
-                  lambda row: row.astype(str)
-                  .str.contains("INFORMATYKA.*SEMESTR", case=False, regex=True)
-                  .any(),
-                  axis=1,
-              )
-          ]
+            ~df_filtered.apply(
+                lambda row: row.astype(str)
+                .str.contains("semestr", case=False)
+                .any(),
+                axis=1,
+            )
+        ]
 
           # Remove header rows and reset index
           df_filtered = df_filtered.iloc[4:-1]
