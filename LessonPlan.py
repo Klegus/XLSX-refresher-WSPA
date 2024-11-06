@@ -280,7 +280,7 @@ class LessonPlan(LessonPlanDownloader):
                 days = {
                     "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
                     "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
-                    "nst-puw": ["SOBOTA", "NIEDZIELA"]
+                    "nst-online": ["SOBOTA", "NIEDZIELA"]
                 }
                 schedule_days = days.get(self.schedule_type, days["st"])
                 
