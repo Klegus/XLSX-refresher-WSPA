@@ -45,14 +45,25 @@ class LessonPlan(LessonPlanDownloader):
             self.groups = plan_config["groups"]
             
         self.group_columns = {}
-    def get_schedule_headers(self):
-        """Return appropriate headers based on schedule type"""
-        headers = {
+    def get_schedule_headers(self, num_columns):
+        """Return appropriate headers based on schedule type and actual number of columns"""
+        base_headers = {
             "st": ["Godziny", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
             "nst": ["Godziny", "Piątek", "Sobota", "Niedziela"],
-            "nst-online": ["Godziny", "Sobota", "Niedziela"],
+            "nst-puw": ["Godziny", "Sobota", "Niedziela"]
         }
-        return headers.get(self.schedule_type, headers["st"])
+        
+        # Get base headers for schedule type
+        headers = base_headers.get(self.schedule_type, base_headers["st"])
+        
+        # If we have more columns than headers, add numbered columns
+        while len(headers) < num_columns:
+            headers.append(f"Column_{len(headers)}")
+            
+        # If we have more headers than columns, trim the headers
+        headers = headers[:num_columns]
+        
+        return headers
     def process_and_save_plan(self):
         """Process and save the lesson plan, returns checksum if plan was processed"""
         new_checksum = self.download_file()
