@@ -279,9 +279,7 @@ class LessonPlan(LessonPlanDownloader):
           return False
       def is_matching_group(text, pattern, group_number=None):
         """
-        Sprawdza czy tekst odpowiada wzorcowi grupy używając dwóch metod:
-        1. Dokładne dopasowanie dla grup numerowanych z zakresami nazwisk
-        2. Podobieństwo tekstu dla pozostałych przypadków
+        Rozszerzona funkcja sprawdzająca dopasowanie grup z obsługą różnych formatów
         """
         if not isinstance(text, str) or not isinstance(pattern, str):
             return False
@@ -293,34 +291,54 @@ class LessonPlan(LessonPlanDownloader):
         # Usuwanie prefiksów specjalizacji
         text = text.replace('sp.:', '').replace('sps.:', '').strip()
         pattern = pattern.replace('sp.:', '').replace('sps.:', '').strip()
+
+        # Identyfikacja typu wzorca
+        is_numbered_with_names = bool(re.search(r'gr(?:upa)?\s*\d+\s*(?:wg|według)\s*nazwisk:\s*[A-Z]-[A-Z]', pattern))
+        is_simple_numbered = bool(re.search(r'gr(?:upa)?\s*\d+$', pattern))
+        is_numbered_with_division = bool(re.search(r'gr(?:upa)?\s*\d+:\s*(?:podział\s*)?(?:wg|według)\s*nazwisk', pattern))
         
-        # Sprawdzenie czy mamy do czynienia z grupą numerowaną
-        has_group_number = bool(re.search(r'gr\.?\s*\d+', pattern))
-        has_name_range = bool(re.search(r'(?:wg nazwisk:|:)\s*[\w-]+(?:\s*-\s*[\w-]+)?', pattern))
-        
-        if has_group_number and has_name_range:
-            # Używamy dokładnego dopasowania dla grup numerowanych z zakresami nazwisk
+        # Przypadek 1: Grupa numerowana z zakresem nazwisk (np. "grupa 1 wg nazwisk: A-I")
+        if is_numbered_with_names:
+            # Wyciągnięcie numeru grupy i zakresu nazwisk ze wzorca
+            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
+            pattern_range = re.search(r'nazwisk:\s*([A-Z])-([A-Z])', pattern)
             
-            # Sprawdzenie numeru grupy
-            pattern_group = re.search(r'gr\.?\s*(\d+)', pattern)
-            text_group = re.search(r'gr\.?\s*(\d+)', text)
-            if not (pattern_group and text_group and pattern_group.group(1) == text_group.group(1)):
+            # Wyciągnięcie tych samych informacji z tekstu
+            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
+            text_range = re.search(r'nazwisk:\s*([A-Z])-([A-Z])', text)
+            
+            if not (pattern_group and text_group and pattern_range and text_range):
                 return False
                 
-            # Sprawdzenie zakresu nazwisk
-            pattern_range = re.search(r'(?:wg nazwisk:|:)\s*([\w-]+)(?:\s*-\s*([\w-]+))?', pattern)
-            text_range = re.search(r'(?:wg nazwisk:|:)\s*([\w-]+)(?:\s*-\s*([\w-]+))?', text)
-            
-            if pattern_range and text_range:
-                pattern_start, pattern_end = pattern_range.groups()
-                text_start, text_end = text_range.groups()
+            # Sprawdzenie czy numer grupy i zakres nazwisk się zgadzają
+            if pattern_group.group(1) != text_group.group(1):
+                return False
                 
-                if pattern_start != text_start or pattern_end != text_end:
-                    return False
+            if (pattern_range.group(1) != text_range.group(1) or 
+                pattern_range.group(2) != text_range.group(2)):
+                return False
+                
+            return True
             
-            # Podstawowe podobieństwo musi być wciąż wysokie
-            similarity = SequenceMatcher(None, text, pattern).ratio()
-            return similarity > 0.85
+        # Przypadek 2: Prosta grupa numerowana (np. "grupa 1")
+        elif is_simple_numbered:
+            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
+            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
+            
+            if not (pattern_group and text_group):
+                return False
+                
+            return pattern_group.group(1) == text_group.group(1)
+            
+        # Przypadek 3: Grupa numerowana z informacją o podziale (np. "grupa 1: podział wg nazwisk:")
+        elif is_numbered_with_division:
+            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
+            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
+            
+            if not (pattern_group and text_group):
+                return False
+                
+            return pattern_group.group(1) == text_group.group(1)
             
         else:
             # Dla pozostałych przypadków używamy poprzedniej logiki podobieństwa
