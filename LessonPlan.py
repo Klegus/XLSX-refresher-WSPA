@@ -50,7 +50,7 @@ class LessonPlan(LessonPlanDownloader):
         base_headers = {
             "st": ["Godziny", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
             "nst": ["Godziny", "Piątek", "Sobota", "Niedziela"],
-            "nst-puw": ["Godziny", "Sobota", "Niedziela"]
+            "nst-online": ["Godziny", "Sobota", "Niedziela"]
         }
         
         # Get base headers for schedule type
@@ -339,7 +339,7 @@ class LessonPlan(LessonPlanDownloader):
               days = {
                   "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
                   "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
-                  "nst-puw": ["SOBOTA", "NIEDZIELA"]
+                  "nst-online": ["SOBOTA", "NIEDZIELA"]
               }
               schedule_days = days.get(self.schedule_type, days["st"])
               
