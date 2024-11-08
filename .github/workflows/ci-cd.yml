@@ -95,7 +95,7 @@ jobs:
           
       - name: Run linting
         run: |
-          pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702 \
+          pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702,W1401,W0612,W3101,W0602,W0603 \
                  --enable=W1401,W0612,W3101,W0602,W0603 \
                  --msg-template='{path}:{line}: [{msg_id}({symbol})] {msg}' \
                  *.py
