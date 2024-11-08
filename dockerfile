@@ -14,6 +14,7 @@ COPY *.py .
 COPY .bandit.yaml .
 COPY .codecov.yml .
 COPY mypy.ini .
+COPY .safety-policy.yml . 
 
 
 CMD ["python", "main.py"]

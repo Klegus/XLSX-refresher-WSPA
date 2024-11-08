@@ -58,7 +58,7 @@ jobs:
       - name: Run security checks
         run: |
           bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml
-          safety check
+          safety scan --policy-file .safety-policy.yml --output text
           
       - name: Run tests with coverage
         run: |
