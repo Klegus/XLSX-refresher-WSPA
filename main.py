@@ -153,27 +153,28 @@ class LessonPlanManager:
             if new_checksum is None:
                 print("Wystąpił błąd podczas sprawdzania planu.")
             else:
-                # Always compare plans at the end of cycle
-                if self.lesson_plan_comparator:
-                    print("Porównywanie planów...")
-                    collection_name = (
-                        self.plan_name.lower().replace(" ", "_").replace("-", "_")
-                    )
-                    comparison_result = self.lesson_plan_comparator.compare_plans(
-                        collection_name
-                    )
-
-                    if new_checksum and comparison_result:
-                        webhook_message = f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
-                        self.send_discord_webhook(webhook_message)
-                        self.update_cached_plans()
-                        print("Plan został zaktualizowany - wykryto i zapisano zmiany.")
-                    elif new_checksum:
-                        print(
-                            "Plan został zaktualizowany, ale nie wykryto zmian w porównaniu."
+                if new_checksum:
+                    print("Plan został zaktualizowany")
+                    webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                    
+                    # Jeśli comparator jest włączony, dodaj szczegóły zmian
+                    if self.lesson_plan_comparator:
+                        print("Porównywanie planów...")
+                        collection_name = (
+                            self.plan_name.lower().replace(" ", "_").replace("-", "_")
                         )
-                    else:
-                        print("Nie wykryto zmian w planie.")
+                        comparison_result = self.lesson_plan_comparator.compare_plans(
+                            collection_name
+                        )
+                        if comparison_result:
+                            webhook_message += f"\n\nZmiany:\n{comparison_result}"
+                            print("Wykryto i zapisano zmiany w planie.")
+                    
+                    self.send_discord_webhook(webhook_message)
+                    self.update_cached_plans()
+                    print("Zaktualizowano pamięć podręczną planów.")
+                else:
+                    print("Nie wykryto zmian w planie.")
 
             self.clean_new_files()
 
