@@ -11,7 +11,7 @@ COPY plans.json .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY *.py .
-COPY .bandit.yaml .
+COPY .bandit.yml .
 COPY .codecov.yml .
 COPY mypy.ini .
 COPY .safety-policy.yml . 
