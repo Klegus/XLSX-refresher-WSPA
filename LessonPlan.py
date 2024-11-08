@@ -35,7 +35,7 @@ class LessonPlan(LessonPlanDownloader):
         if self.save_to_mongodb:
             try:
                 self.mongo_client = pymongo.MongoClient(mongo_uri)
-                self.db = self.mongo_client["Lesson"]
+                self.db = self.mongo_client["Lesson_dev"]
                 print("Successfully connected to MongoDB")
             except pymongo.errors.ConnectionFailure as e:
                 print(f"Could not connect to MongoDB: {e}")
