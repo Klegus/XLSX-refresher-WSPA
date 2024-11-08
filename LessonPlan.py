@@ -28,7 +28,9 @@ class LessonPlan(LessonPlanDownloader):
         self.save_to_mongodb = os.getenv("SAVE_TO_MONGODB", "true").lower() == "true"
         self.save_to_file = os.getenv("SAVE_TO_FILE", "true").lower() == "true"
         self.plans_directory = os.getenv("PLANS_DIRECTORY", "lesson_plans")
-        self.schedule_type = plan_config.get("category", "st")  # Default to standard schedule
+        self.schedule_type = plan_config.get(
+            "category", "st"
+        )  # Default to standard schedule
 
         if self.save_to_mongodb:
             try:
@@ -43,27 +45,29 @@ class LessonPlan(LessonPlanDownloader):
             self.groups = {"cały kierunek": "all"}
         else:
             self.groups = plan_config["groups"]
-            
+
         self.group_columns = {}
+
     def get_schedule_headers(self, num_columns):
         """Return appropriate headers based on schedule type and actual number of columns"""
         base_headers = {
             "st": ["Godziny", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
             "nst": ["Godziny", "Piątek", "Sobota", "Niedziela"],
-            "nst-online": ["Godziny", "Sobota", "Niedziela"]
+            "nst-online": ["Godziny", "Sobota", "Niedziela"],
         }
-        
+
         # Get base headers for schedule type
         headers = base_headers.get(self.schedule_type, base_headers["st"])
-        
+
         # If we have more columns than headers, add numbered columns
         while len(headers) < num_columns:
             headers.append(f"Column_{len(headers)}")
-            
+
         # If we have more headers than columns, trim the headers
         headers = headers[:num_columns]
-        
+
         return headers
+
     def process_and_save_plan(self):
         """Process and save the lesson plan, returns checksum if plan was processed"""
         new_checksum = self.download_file()
@@ -123,10 +127,10 @@ class LessonPlan(LessonPlanDownloader):
 
                 # Process groups
                 self.find_group_columns_with_similarity()
-                
+
                 # Get groups from instance (handles both None and defined groups cases)
                 groups_to_process = self.groups.keys() if self.groups else []
-                
+
                 for group_name in groups_to_process:
                     df_group = self.get_lessons_for_group(group_name)
                     if df_group is not None and not df_group.empty:
@@ -140,6 +144,7 @@ class LessonPlan(LessonPlanDownloader):
             except Exception as e:
                 print(f"Error processing plan: {str(e)}")
                 import traceback
+
                 traceback.print_exc()
                 return None
 
@@ -176,9 +181,7 @@ class LessonPlan(LessonPlanDownloader):
         self.converted_lesson_plan = os.path.join(dir_path, new_file_name)
 
         wb.save(self.converted_lesson_plan)
-        print(
-            f"Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}"
-        )
+        print(f"Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}")
         return True
 
     @staticmethod
@@ -207,8 +210,8 @@ class LessonPlan(LessonPlanDownloader):
                     # Read data into DataFrame
                     df = pd.read_excel(xls, sheet_name=sheet_name)
 
-                    # Clean text data - 
-                    #df = df.apply(self.clean_text)
+                    # Clean text data -
+                    # df = df.apply(self.clean_text)
 
                     # Create new worksheet
                     ws = wb.create_sheet(title=sheet_name)
@@ -272,274 +275,344 @@ class LessonPlan(LessonPlanDownloader):
         except Exception as e:
             print(f"An error occurred while finding group columns: {str(e)}")
             return None
-        
+
     def find_group_columns_with_similarity(self):
-      if not self.converted_lesson_plan:
-          print("No converted file found. Please run unmerge_and_fill_data() first.")
-          return False
-      def is_matching_group(text, pattern, group_number=None):
-        """
-        Rozszerzona funkcja sprawdzająca dopasowanie grup z obsługą różnych formatów
-        """
-        if not isinstance(text, str) or not isinstance(pattern, str):
+        if not self.converted_lesson_plan:
+            print("No converted file found. Please run unmerge_and_fill_data() first.")
             return False
-            
-        # Normalizacja tekstu
-        text = ' '.join(text.lower().split())
-        pattern = ' '.join(pattern.lower().split())
-        
-        # Usuwanie prefiksów specjalizacji
-        text = text.replace('sp.:', '').replace('sps.:', '').strip()
-        pattern = pattern.replace('sp.:', '').replace('sps.:', '').strip()
 
-        # Identyfikacja typu wzorca
-        is_numbered_with_names = bool(re.search(r'gr(?:upa)?\s*\d+\s*(?:wg|według)\s*nazwisk:\s*[A-Z]-[A-Z]', pattern))
-        is_simple_numbered = bool(re.search(r'gr(?:upa)?\s*\d+$', pattern))
-        is_numbered_with_division = bool(re.search(r'gr(?:upa)?\s*\d+:\s*(?:podział\s*)?(?:wg|według)\s*nazwisk', pattern))
-        
-        # Przypadek 1: Grupa numerowana z zakresem nazwisk (np. "grupa 1 wg nazwisk: A-I")
-        if is_numbered_with_names:
-            # Wyciągnięcie numeru grupy i zakresu nazwisk ze wzorca
-            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
-            pattern_range = re.search(r'nazwisk:\s*([A-Z])-([A-Z])', pattern)
-            
-            # Wyciągnięcie tych samych informacji z tekstu
-            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
-            text_range = re.search(r'nazwisk:\s*([A-Z])-([A-Z])', text)
-            
-            if not (pattern_group and text_group and pattern_range and text_range):
+        def is_matching_group(text, pattern, similarity_threshold=1.0):
+            """
+            Sprawdza czy tekst odpowiada wzorcowi grupy z zadanym progiem podobieństwa
+            """
+            if not isinstance(text, str) or not isinstance(pattern, str):
                 return False
-                
-            # Sprawdzenie czy numer grupy i zakres nazwisk się zgadzają
-            if pattern_group.group(1) != text_group.group(1):
-                return False
-                
-            if (pattern_range.group(1) != text_range.group(1) or 
-                pattern_range.group(2) != text_range.group(2)):
-                return False
-                
-            return True
-            
-        # Przypadek 2: Prosta grupa numerowana (np. "grupa 1")
-        elif is_simple_numbered:
-            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
-            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
-            
-            if not (pattern_group and text_group):
-                return False
-                
-            return pattern_group.group(1) == text_group.group(1)
-            
-        # Przypadek 3: Grupa numerowana z informacją o podziale (np. "grupa 1: podział wg nazwisk:")
-        elif is_numbered_with_division:
-            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
-            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
-            
-            if not (pattern_group and text_group):
-                return False
-                
-            return pattern_group.group(1) == text_group.group(1)
-            
-        else:
-            # Dla pozostałych przypadków używamy poprzedniej logiki podobieństwa
-            similarity = SequenceMatcher(None, text, pattern).ratio()
+
+            # Normalizacja tekstu
+            def normalize_text(t):
+                t = " ".join(t.split())
+                return t.lower().strip()
+
+            text_normalized = normalize_text(text)
+            pattern_normalized = normalize_text(pattern)
+
+            # 1. Najpierw sprawdź dokładne dopasowanie
+            if text_normalized == pattern_normalized:
+                print(
+                    f"Exact match found after normalization for '{text}' and '{pattern}'"
+                )
+                return True
+
+            # 2. Jeśli nie ma dokładnego dopasowania, sprawdź podobieństwo
+            similarity = SequenceMatcher(
+                None, text_normalized, pattern_normalized
+            ).ratio()
             print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
-            return similarity > 0.85
+            return similarity >= similarity_threshold
 
-      try:
-          df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
-          print("\nSearching for group columns...")
-          print("Available columns:", df.columns.tolist())
+        def verify_columns(columns, schedule_type):
+            """
+            Sprawdza czy znalezione kolumny są prawidłowe dla danego typu planu
+            """
+            expected_columns = {
+                "st": 6,  # Godziny + 5 dni
+                "nst": 4,  # Godziny + 3 dni
+                "nst-online": 3,  # Godziny + 2 dni
+            }
 
-          # Jeśli mamy grupę "cały kierunek", używamy poprzedniej logiki
-          if len(self.groups) == 1 and "cały kierunek" in self.groups:
-              print("Processing entire course without group division")
-              days = {
-                  "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
-                  "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
-                  "nst-online": ["SOBOTA", "NIEDZIELA"]
-              }
-              schedule_days = days.get(self.schedule_type, days["st"])
-              
-              matching_columns = []
-              used_columns = set()
-              
-              for column in df.columns:
-                  if column in used_columns:
-                      continue
-                      
-                  unique_values = df[column].dropna().unique()
-                  for value in unique_values:
-                      value_str = str(value).upper().strip()
-                      if value_str in schedule_days:
-                          matching_columns.append(column)
-                          used_columns.add(column)
-                          break
-                          
-              matching_columns.sort(key=lambda x: int(x.split('.')[-1]) if '.' in x else 0)
-              self.group_columns["cały kierunek"] = matching_columns
-              return self.group_columns
+            # Sprawdź liczbę kolumn
+            if len(columns) != expected_columns.get(schedule_type, 6):
+                return False
 
-          # Standardowa logika dla zdefiniowanych grup
-          used_columns = set()
-          group_columns = {}
+            # Sprawdź czy nie ma kolumn numerowanych
+            return not any("Column_" in col for col in columns)
 
-          for group_name, group_identifier in self.groups.items():
-              print(f"\nProcessing group: {group_name} (identifier: {group_identifier})")
-              matching_columns = []
+        try:
+            df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
+            print("\nSearching for group columns...")
+            print("Available columns:", df.columns.tolist())
 
-              for column in df.columns:
-                  if column in used_columns:
-                      continue
+            # Jeśli mamy grupę "cały kierunek", używamy poprzedniej logiki
+            if len(self.groups) == 1 and "cały kierunek" in self.groups:
+                print("Processing entire course without group division")
+                days = {
+                    "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
+                    "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
+                    "nst-online": ["SOBOTA", "NIEDZIELA"],
+                }
+                schedule_days = days.get(self.schedule_type, days["st"])
 
-                  print(f"\nChecking column: {column}")
-                  unique_values = df[column].dropna().unique()
-                  print(f"Unique values in column: {unique_values}")
+                matching_columns = []
+                used_columns = set()
 
-                  for value in unique_values:
-                      if is_matching_group(str(value), group_identifier):
-                          matching_columns.append(column)
-                          used_columns.add(column)
-                          print(f"Found matching column: {column}")
-                          break
+                for column in df.columns:
+                    if column in used_columns:
+                        continue
 
-              if matching_columns:
-                  group_columns[group_name] = matching_columns
-                  print(f"Columns found for {group_name}: {matching_columns}")
-              else:
-                  print(f"No columns found for {group_name}")
+                    unique_values = df[column].dropna().unique()
+                    for value in unique_values:
+                        value_str = str(value).upper().strip()
+                        if value_str in schedule_days:
+                            matching_columns.append(column)
+                            used_columns.add(column)
+                            break
 
-          self.group_columns = group_columns
-          return self.group_columns
+                matching_columns.sort(
+                    key=lambda x: int(x.split(".")[-1]) if "." in x else 0
+                )
+                self.group_columns["cały kierunek"] = matching_columns
+                return self.group_columns
 
-      except Exception as e:
-          print(f"An error occurred while finding group columns: {str(e)}")
-          return None
+            # Standardowa logika dla zdefiniowanych grup
+            used_columns = set()
+            group_columns = {}
+            backup_columns = {}
+
+            for group_name, group_identifier in self.groups.items():
+                print(
+                    f"\nProcessing group: {group_name} (identifier: {group_identifier})"
+                )
+
+                # Szukamy od dokładnego dopasowania do minimalnego progu
+                for similarity_threshold in [x / 100.0 for x in range(100, 84, -1)]:
+                    matching_columns = []
+                    used_columns = set()
+
+                    for column in df.columns:
+                        if column in used_columns:
+                            continue
+
+                        print(f"\nChecking column: {column}")
+                        unique_values = df[column].dropna().unique()
+
+                        for value in unique_values:
+                            if is_matching_group(
+                                str(value), group_identifier, similarity_threshold
+                            ):
+                                matching_columns.append(column)
+                                used_columns.add(column)
+                                print(f"Found matching column: {column}")
+                                break
+
+                    if matching_columns:
+                        # Jeśli znaleźliśmy kolumny, sprawdź czy są prawidłowe
+                        if verify_columns(matching_columns, self.schedule_type):
+                            group_columns[group_name] = matching_columns
+                            print(
+                                f"Found valid columns for {group_name}: {matching_columns}"
+                            )
+                            break
+                        else:
+                            # Zachowaj jako backup jeśli jeszcze nie mamy
+                            if group_name not in backup_columns:
+                                backup_columns[group_name] = matching_columns
+                                print(
+                                    f"Saving backup columns for {group_name}: {matching_columns}"
+                                )
+
+                # Jeśli nie znaleźliśmo prawidłowych kolumn, użyj backup
+                if group_name not in group_columns and group_name in backup_columns:
+                    group_columns[group_name] = backup_columns[group_name]
+                    print(
+                        f"Using backup columns for {group_name}: {backup_columns[group_name]}"
+                    )
+                elif group_name not in group_columns:
+                    print(f"No columns found for {group_name}")
+
+                self.group_columns = group_columns
+                return self.group_columns
+
+        except Exception as e:
+            print(f"An error occurred while finding group columns: {str(e)}")
+            return None
+
     def get_lessons_for_group(self, group_name):
-      if not self.converted_lesson_plan:
-          print("No converted file found. Please run unmerge_and_fill_data() first.")
-          return None
+        if not self.converted_lesson_plan:
+            print("No converted file found. Please run unmerge_and_fill_data() first.")
+            return None
 
-      if not self.group_columns:
-          self.find_group_columns_with_similarity()
+        if not self.group_columns:
+            self.find_group_columns_with_similarity()
 
-      try:
-          print(f"\nReading Excel file for group: {group_name}")
-          df = pd.read_excel(
-              self.converted_lesson_plan, sheet_name=self.sheet_name, header=None
-          )
+        try:
+            print(f"\nReading Excel file for group: {group_name}")
+            df = pd.read_excel(
+                self.converted_lesson_plan, sheet_name=self.sheet_name, header=None
+            )
 
-          if group_name not in self.group_columns:
-              print(f"Group '{group_name}' not found.")
-              return None
+            if group_name not in self.group_columns:
+                print(f"Group '{group_name}' not found.")
+                return None
 
-          # Extract column numbers from the column names
-          group_col_indices = []
-          for col_name in self.group_columns[group_name]:
-              try:
-                  if '.' in col_name:
-                      col_number = int(col_name.split('.')[-1])
-                      group_col_indices.append(col_number)
-              except ValueError as e:
-                  print(f"Warning: Could not parse column number from {col_name}: {e}")
-                  continue
+            # Extract column numbers from the column names
+            group_col_indices = []
+            for col_name in self.group_columns[group_name]:
+                try:
+                    if "." in col_name:
+                        col_number = int(col_name.split(".")[-1])
+                        group_col_indices.append(col_number)
+                except ValueError as e:
+                    print(
+                        f"Warning: Could not parse column number from {col_name}: {e}"
+                    )
+                    continue
 
-          if not group_col_indices:
-              print(f"Could not extract column numbers for group {group_name}")
-              return None
+            if not group_col_indices:
+                print(f"Could not extract column numbers for group {group_name}")
+                return None
 
-          print(f"Found column indices for {group_name}: {group_col_indices}")
+            print(f"Found column indices for {group_name}: {group_col_indices}")
 
-          # Add time column (always first column) and sort indices
-          columns_to_extract = [0] + sorted(group_col_indices)
-          print(f"Columns to extract: {columns_to_extract}")
+            # Add time column (always first column) and sort indices
+            columns_to_extract = [0] + sorted(group_col_indices)
+            print(f"Columns to extract: {columns_to_extract}")
 
-          # Extract columns
-          df_filtered = df.iloc[:, columns_to_extract].copy()
+            # Extract columns
+            df_filtered = df.iloc[:, columns_to_extract].copy()
 
-          # Remove semester information rows (improved logic)
-          df_filtered = df_filtered[
-              ~df_filtered.apply(
-                  lambda row: row.astype(str)
-                  .str.contains("semestr|zjazd", case=False)
-                  .any(),
-                  axis=1,
-              )
-          ]
+            # Remove semester information rows (improved logic)
+            df_filtered = df_filtered[
+                ~df_filtered.apply(
+                    lambda row: row.astype(str)
+                    .str.contains("semestr|zjazd", case=False)
+                    .any(),
+                    axis=1,
+                )
+            ]
 
-          # Find the first row with time information
-          time_row_index = None
-          for idx, row in df_filtered.iterrows():
-              if isinstance(row[0], str) and any(
-                  pattern in row[0].lower() 
-                  for pattern in ['godz', 'godziny', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
-              ):
-                  time_row_index = idx
-                  break
+            # Find the first row with time information
+            time_row_index = None
+            for idx, row in df_filtered.iterrows():
+                if isinstance(row[0], str) and any(
+                    pattern in row[0].lower()
+                    for pattern in [
+                        "godz",
+                        "godziny",
+                        "7",
+                        "8",
+                        "9",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15",
+                        "16",
+                        "17",
+                        "18",
+                        "19",
+                        "20",
+                    ]
+                ):
+                    time_row_index = idx
+                    break
 
-          if time_row_index is not None:
-              # Remove all rows before the time row
-              df_filtered = df_filtered.iloc[time_row_index:]
-          else:
-              print("Warning: Could not find time row")
+            if time_row_index is not None:
+                # Remove all rows before the time row
+                df_filtered = df_filtered.iloc[time_row_index:]
+            else:
+                print("Warning: Could not find time row")
 
-          # Remove header rows that contain "godz" or "GODZ"
-          df_filtered = df_filtered[
-              ~df_filtered[0]
-              .astype(str)
-              .str.contains("godz\.|GODZ\.", case=False, regex=True)
-          ]
+            # Remove header rows that contain "godz" or "GODZ"
+            df_filtered = df_filtered[
+                ~df_filtered[0]
+                .astype(str)
+                .str.contains("godz\.|GODZ\.", case=False, regex=True)
+            ]
 
-          # Improved empty row removal
-          # Convert all values to string and check if they're empty or whitespace
-          df_filtered = df_filtered[
-              df_filtered.apply(
-                  lambda row: any(
-                      str(cell).strip() and str(cell).strip().lower() != 'nan'
-                      for cell in row
-                  ),
-                  axis=1
-              )
-          ]
+            # Improved empty row removal
+            # Convert all values to string and check if they're empty or whitespace
+            df_filtered = df_filtered[
+                df_filtered.apply(
+                    lambda row: any(
+                        str(cell).strip() and str(cell).strip().lower() != "nan"
+                        for cell in row
+                    ),
+                    axis=1,
+                )
+            ]
 
-          # Remove rows where all group columns (excluding time column) are NaN
-          df_filtered = df_filtered.dropna(subset=df_filtered.columns[1:], how='all')
+            # Remove rows where all group columns (excluding time column) are NaN
+            df_filtered = df_filtered.dropna(subset=df_filtered.columns[1:], how="all")
 
-          # Get appropriate headers
-          headers = self.get_schedule_headers(len(df_filtered.columns))
-          df_filtered.columns = headers
+            # Get appropriate headers
+            headers = self.get_schedule_headers(len(df_filtered.columns))
+            df_filtered.columns = headers
 
-          # Reset index
-          df_filtered = df_filtered.reset_index(drop=True)
+            # Reset index
+            df_filtered = df_filtered.reset_index(drop=True)
 
-          # Final validation of the data
-          if df_filtered.empty:
-              print(f"Warning: No data found for group {group_name}")
-              return None
+            # Final validation of the data
+            if df_filtered.empty:
+                print(f"Warning: No data found for group {group_name}")
+                return None
 
-          # Verify that we have all expected time slots
-          expected_time_slots = [
-              '725- 810', '815- 900', '905- 950', '1000-1045',
-              '1050- 1135', '1145- 1230', '1235- 1320', '1330- 1415',
-              '1420- 1505', '1515- 1600', '1605- 1650', '1700- 1745',
-              '1750- 1835', '1845- 1930', '1935- 2020', '2030- 2115'
-          ]
+            # Verify that we have all expected time slots
+            expected_time_slots = [
+                "725- 810",
+                "815- 900",
+                "905- 950",
+                "1000-1045",
+                "1050- 1135",
+                "1145- 1230",
+                "1235- 1320",
+                "1330- 1415",
+                "1420- 1505",
+                "1515- 1600",
+                "1605- 1650",
+                "1700- 1745",
+                "1750- 1835",
+                "1845- 1930",
+                "1935- 2020",
+                "2030- 2115",
+            ]
 
-          missing_slots = []
-          for slot in expected_time_slots:
-              if not any(df_filtered['Godziny'].astype(str).str.contains(slot, regex=False)):
-                  missing_slots.append(slot)
+            missing_slots = []
+            for slot in expected_time_slots:
+                if not any(
+                    df_filtered["Godziny"].astype(str).str.contains(slot, regex=False)
+                ):
+                    missing_slots.append(slot)
 
-          if missing_slots:
-              print(f"Warning: Missing time slots for {group_name}: {missing_slots}")
+            if missing_slots:
+                print(f"Warning: Missing time slots for {group_name}: {missing_slots}")
+            if not df_filtered.empty:
+                last_row_time = str(df_filtered.iloc[-1]["Godziny"]).strip()
+                # Sprawdź czy ostatni wiersz nie zawiera godziny
+                if not any(
+                    time_pattern in last_row_time
+                    for time_pattern in [
+                        "725-",
+                        "815-",
+                        "905-",
+                        "1000-",
+                        "1050-",
+                        "1145-",
+                        "1235-",
+                        "1330-",
+                        "1420-",
+                        "1515-",
+                        "1605-",
+                        "1700-",
+                        "1750-",
+                        "1845-",
+                        "1935-",
+                        "2030-",
+                    ]
+                ):
+                    # Usuń ostatni wiersz
+                    df_filtered = df_filtered.iloc[:-1]
+                    print(f"Removed last row with non-time value: {last_row_time}")
+            return df_filtered
 
-          return df_filtered
+        except Exception as e:
+            print(
+                f"An error occurred while getting lessons for group '{group_name}': {str(e)}"
+            )
+            import traceback
 
-      except Exception as e:
-          print(f"An error occurred while getting lessons for group '{group_name}': {str(e)}")
-          import traceback
-          traceback.print_exc()
-          return None
+            traceback.print_exc()
+            return None
 
     def save_group_lessons(self, group_name, df):
         if df is None or df.empty:
