@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mongodb:
-        image: mongo:${{ env.MONGODB_VERSION }}
+        image: mongo:4.4
         ports:
           - 27017:27017
 
@@ -50,7 +50,7 @@ jobs:
           
       - name: Run tests with coverage
         run: |
-          pytest --cov=./ --cov-report=xml --cov-report=term-missing
+          pytest --cov=./ --cov-report=xml --cov-report=html --cov-report=term-missing
         env:
           MONGO_URI: mongodb://localhost:27017/
           PLANS_DIRECTORY: lesson_plans
@@ -61,8 +61,22 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
           fail_ci_if_error: true
+          verbose: true
+          name: codecov-umbrella
+          flags: unittests
+          
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: |
+            htmlcov
+            coverage.xml
+          retention-days: 14
+        
 
   lint:
     name: Code Quality
@@ -106,7 +120,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa
+          images: ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=long
@@ -119,8 +133,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:buildcache
-          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:buildcache,mode=max
 
   deploy:
     name: Deploy
@@ -140,15 +154,15 @@ jobs:
             docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
             
             # Pull latest image
-            docker pull ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:latest
+            docker pull ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:latest
             
             # Stop and remove existing container
-            docker stop xlsx-refresher-wspa || true
-            docker rm xlsx-refresher-wspa || true
+            docker stop xlsx-refresher-wspa-dev || true
+            docker rm xlsx-refresher-wspa-dev || true
             
             # Run new container
             docker run -d \
-              --name xlsx-refresher-wspa \
+              --name xlsx-refresher-wspa-dev \
               --restart unless-stopped \
               -p 8080:80 \
               -e EMAIL="${{ secrets.EMAIL }}" \
@@ -159,4 +173,4 @@ jobs:
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e WERKZEUG_RUN_MAIN="${{ secrets.WERKZEUG_RUN_MAIN }}" \
               -e ENABLE_COMPARER="${{ secrets.ENABLE_COMPARER }}" \
-              ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:latest
+              ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:latest
