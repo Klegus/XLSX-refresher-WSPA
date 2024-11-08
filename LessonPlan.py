@@ -425,8 +425,8 @@ class LessonPlan(LessonPlanDownloader):
                 elif group_name not in group_columns:
                     print(f"No columns found for {group_name}")
 
-                self.group_columns = group_columns
-                return self.group_columns
+            self.group_columns = group_columns
+            return self.group_columns
 
         except Exception as e:
             print(f"An error occurred while finding group columns: {str(e)}")
