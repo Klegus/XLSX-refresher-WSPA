@@ -279,7 +279,8 @@ class LessonPlan(LessonPlanDownloader):
           return False
       def is_matching_group(text, pattern, group_number=None):
         """
-        Rozszerzona funkcja sprawdzająca dopasowanie grup z obsługą różnych formatów
+        Sprawdza czy tekst odpowiada wzorcowi grupy używając różnych metod dopasowania
+        dla różnych formatów grup
         """
         if not isinstance(text, str) or not isinstance(pattern, str):
             return False
@@ -292,12 +293,9 @@ class LessonPlan(LessonPlanDownloader):
         text = text.replace('sp.:', '').replace('sps.:', '').strip()
         pattern = pattern.replace('sp.:', '').replace('sps.:', '').strip()
 
-        # Identyfikacja typu wzorca
+        # Format 1: "grupa X wg nazwisk: A-I"
+        # Format "grupa X wg nazwisk: A-B"
         pattern_match = re.match(r'^gr(?:upa)?\s*(\d+)[\s:]*(?:wg|według)?\s*nazwisk:?\s*([A-Z])-([A-Z])$', pattern)
-        is_simple_numbered = bool(re.search(r'gr(?:upa)?\s*\d+$', pattern))
-        is_numbered_with_division = bool(re.search(r'gr(?:upa)?\s*\d+:\s*(?:podział\s*)?(?:wg|według)\s*nazwisk', pattern))
-        
-        # Przypadek 1: Grupa numerowana z zakresem nazwisk (np. "grupa 1 wg nazwisk: A-I")
         if pattern_match:
             pattern_group_num = pattern_match.group(1)
             pattern_start = pattern_match.group(2)
@@ -318,35 +316,58 @@ class LessonPlan(LessonPlanDownloader):
                     similarity = SequenceMatcher(None, text, pattern).ratio()
                     print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
                     # Require very high similarity (0.95) for these specific formats
-                    return similarity > 0.90
+                    return similarity > 0.95
                 
                 return False
-            
-        # Przypadek 2: Prosta grupa numerowana (np. "grupa 1")
-        elif is_simple_numbered:
-            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
-            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
-            
-            if not (pattern_group and text_group):
+
+        # Format 2: "grupa X" (prosta grupa numerowana)
+        simple_numbered = re.match(r'^gr(?:upa)?\s*(\d+)$', pattern)
+        if simple_numbered:
+            pattern_group_num = simple_numbered.group(1)
+            text_match = re.search(r'gr(?:upa)?\s*(\d+)', text)
+            if not text_match:
+                return False
+            return pattern_group_num == text_match.group(1)
+
+        # Format 3: "grupa X: podział wg nazwisk:"
+        numbered_with_division = re.match(r'^gr(?:upa)?\s*(\d+):\s*(?:podział\s*)?(?:wg|według)\s*nazwisk:$', pattern)
+        if numbered_with_division:
+            pattern_group_num = numbered_with_division.group(1)
+            text_match = re.search(r'gr(?:upa)?\s*(\d+)(?::|$)', text)
+            if not text_match:
+                return False
+            return pattern_group_num == text_match.group(1)
+
+        # Format 4: Grupy numerowane z zakresami nazwisk w innych formatach
+        has_group_number = bool(re.search(r'gr\.?\s*\d+', pattern))
+        has_name_range = bool(re.search(r'(?:wg nazwisk:|:)\s*[\w-]+(?:\s*-\s*[\w-]+)?', pattern))
+        
+        if has_group_number and has_name_range:
+            # Sprawdzenie numeru grupy
+            pattern_group = re.search(r'gr\.?\s*(\d+)', pattern)
+            text_group = re.search(r'gr\.?\s*(\d+)', text)
+            if not (pattern_group and text_group and pattern_group.group(1) == text_group.group(1)):
                 return False
                 
-            return pattern_group.group(1) == text_group.group(1)
+            # Sprawdzenie zakresu nazwisk
+            pattern_range = re.search(r'(?:wg nazwisk:|:)\s*([\w-]+)(?:\s*-\s*([\w-]+))?', pattern)
+            text_range = re.search(r'(?:wg nazwisk:|:)\s*([\w-]+)(?:\s*-\s*([\w-]+))?', text)
             
-        # Przypadek 3: Grupa numerowana z informacją o podziale (np. "grupa 1: podział wg nazwisk:")
-        elif is_numbered_with_division:
-            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
-            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
-            
-            if not (pattern_group and text_group):
-                return False
+            if pattern_range and text_range:
+                pattern_start, pattern_end = pattern_range.groups()
+                text_start, text_end = text_range.groups()
                 
-            return pattern_group.group(1) == text_group.group(1)
+                if pattern_start != text_start or pattern_end != text_end:
+                    return False
             
-        else:
-            # Dla pozostałych przypadków używamy poprzedniej logiki podobieństwa
+            # Podstawowe podobieństwo musi być wciąż wysokie
             similarity = SequenceMatcher(None, text, pattern).ratio()
-            print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
-            return similarity > 0.90
+            return similarity > 0.85
+
+        # Format 5: Specjalizacje i inne formaty bez numerów grup
+        similarity = SequenceMatcher(None, text, pattern).ratio()
+        print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
+        return similarity > 0.905
 
       try:
           df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
