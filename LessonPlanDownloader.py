@@ -14,7 +14,7 @@ class LessonPlanDownloader:
         return self.file_save_path
     
     def calculate_checksum(self, file_path):
-        hash_md5 = hashlib.md5()
+        hash_md5 = hashlib.new('md5', usedforsecurity=False)
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 hash_md5.update(chunk)
