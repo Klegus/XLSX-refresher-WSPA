@@ -2,12 +2,12 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
 
 env:
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.12"
   MONGODB_VERSION: "4.4"
 
 jobs:
@@ -55,8 +55,8 @@ jobs:
           MONGO_URI: mongodb://localhost:27017/
           PLANS_DIRECTORY: lesson_plans
           SAVE_TO_MONGODB: "true"
-          SAVE_TO_FILE: "true"
-          ENABLE_COMPARER: "true"
+          SAVE_TO_FILE: "false"
+          ENABLE_COMPARER: "false"
           
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -126,7 +126,7 @@ jobs:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     
     steps:
       - name: Deploy to Production
