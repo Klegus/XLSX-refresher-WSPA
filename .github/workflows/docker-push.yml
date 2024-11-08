@@ -1,12 +1,12 @@
 name: Docker Build and Deploy
 on:
   push:
-    branches: [ "secondyear" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "secondyear" ]
+    branches: [ "dev" ]
 env:
   REGISTRY: registry.klegus.tech
-  IMAGE_NAME: xlsx-refresher-wspa  # Changed to direct image name
+  IMAGE_NAME: xlsx-refresher-wspa-dev  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
           OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
           SELECTED_MODEL=${{ secrets.SELECTED_MODEL }}
           DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
-          MONGO_URI=${{ secrets.MONGO_URI }}
+          MONGO_URI=${{ secrets.MONGO_URI_DEV }}
           WERKZEUG_RUN_MAIN=${{ secrets.WERKZEUG_RUN_MAIN }}
           EOF
 
@@ -60,18 +60,18 @@ jobs:
           script: |
             docker login ${{ env.REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            docker stop xlsx-refresher-wspa || true
-            docker rm xlsx-refresher-wspa || true
+            docker stop xlsx-refresher-wspa-dev || true
+            docker rm xlsx-refresher-wspa-dev || true
             docker run -d \
-              --name xlsx-refresher-wspa \
+              --name xlsx-refresher-wspa-dev \
               --restart unless-stopped \
-              -p 8081:80 \
+              -p 8082:80 \
               -e EMAIL="${{ secrets.EMAIL }}" \
               -e PASSWORD="${{ secrets.PASSWORD }}" \
               -e OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
               -e SELECTED_MODEL="${{ secrets.SELECTED_MODEL }}" \
               -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
-              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e MONGO_URI="${{ secrets.MONGO_URI_DEV }}" \
               -e WERKZEUG_RUN_MAIN="${{ secrets.WERKZEUG_RUN_MAIN }}" \
               -e ENABLE_COMPARER="${{ secrets.ENABLE_COMPARER }}" \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
