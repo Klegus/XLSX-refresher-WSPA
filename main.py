@@ -2,7 +2,7 @@ import time
 from datetime import datetime, timedelta
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
-import os, shutil, requests, json
+import os, requests, json
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson import ObjectId
@@ -261,7 +261,7 @@ def parse_html_to_dataframe(html_content):
 
 @app.route("/api/whatnow/<int:group_number>")
 def whatnow(group_number):
-    global lesson_plan_manager, USE_TEST_TIME, TEST_TIME
+    global USE_TEST_TIME, TEST_TIME
 
     poland_tz = pytz.timezone("Europe/Warsaw")
 
@@ -366,21 +366,21 @@ def whatnow(group_number):
     message = f"Grupa: {group_key}\n\n"
 
     if current_lesson:
-        message += f"Aktualna lekcja:\n"
+        message += "Aktualna lekcja:\n"
         message += f"{current_lesson['subject']}\n"
         message += f"Koniec: {current_lesson['end']}\n"
         if next_lesson:
-            message += f"\nNastępna lekcja"
+            message += "\nNastępna lekcja"
             if days_ahead > 0:
                 message += f" ({next_lesson['day']})"
-            message += f":\n"
+            message += ":\n"
             message += f"{next_lesson['subject']}\n"
             message += f"Start: {next_lesson['start']}\n"
     elif next_lesson:
-        message += f"Następna lekcja"
+        message += "Następna lekcja"
         if days_ahead > 0:
             message += f" ({next_lesson['day']})"
-        message += f":\n"
+        message += ":\n"
         message += f"{next_lesson['subject']}\n"
         message += f"Start: {next_lesson['start']}\n"
     else:
