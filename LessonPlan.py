@@ -293,32 +293,34 @@ class LessonPlan(LessonPlanDownloader):
         pattern = pattern.replace('sp.:', '').replace('sps.:', '').strip()
 
         # Identyfikacja typu wzorca
-        is_numbered_with_names = bool(re.search(r'gr(?:upa)?\s*\d+\s*(?:wg|według)\s*nazwisk:\s*[A-Z]-[A-Z]', pattern))
+        pattern_match = re.match(r'^gr(?:upa)?\s*(\d+)[\s:]*(?:wg|według)?\s*nazwisk:?\s*([A-Z])-([A-Z])$', pattern)
         is_simple_numbered = bool(re.search(r'gr(?:upa)?\s*\d+$', pattern))
         is_numbered_with_division = bool(re.search(r'gr(?:upa)?\s*\d+:\s*(?:podział\s*)?(?:wg|według)\s*nazwisk', pattern))
         
         # Przypadek 1: Grupa numerowana z zakresem nazwisk (np. "grupa 1 wg nazwisk: A-I")
-        if is_numbered_with_names:
-            # Wyciągnięcie numeru grupy i zakresu nazwisk ze wzorca
-            pattern_group = re.search(r'gr(?:upa)?\s*(\d+)', pattern)
-            pattern_range = re.search(r'nazwisk:\s*([A-Z])-([A-Z])', pattern)
+        if pattern_match:
+            pattern_group_num = pattern_match.group(1)
+            pattern_start = pattern_match.group(2)
+            pattern_end = pattern_match.group(3)
             
-            # Wyciągnięcie tych samych informacji z tekstu
-            text_group = re.search(r'gr(?:upa)?\s*(\d+)', text)
-            text_range = re.search(r'nazwisk:\s*([A-Z])-([A-Z])', text)
-            
-            if not (pattern_group and text_group and pattern_range and text_range):
-                return False
+            text_match = re.search(r'gr(?:upa)?\s*(\d+)[\s:]*(?:wg|według)?\s*nazwisk:?\s*([A-Z])-([A-Z])', text)
+            if text_match:
+                text_group_num = text_match.group(1)
+                text_start = text_match.group(2)
+                text_end = text_match.group(3)
                 
-            # Sprawdzenie czy numer grupy i zakres nazwisk się zgadzają
-            if pattern_group.group(1) != text_group.group(1):
-                return False
+                # Require exact match for group number and letter range
+                exact_match = (pattern_group_num == text_group_num and 
+                            pattern_start == text_start and 
+                            pattern_end == text_end)
                 
-            if (pattern_range.group(1) != text_range.group(1) or 
-                pattern_range.group(2) != text_range.group(2)):
-                return False
+                if exact_match:
+                    similarity = SequenceMatcher(None, text, pattern).ratio()
+                    print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
+                    # Require very high similarity (0.95) for these specific formats
+                    return similarity > 0.90
                 
-            return True
+                return False
             
         # Przypadek 2: Prosta grupa numerowana (np. "grupa 1")
         elif is_simple_numbered:
@@ -344,7 +346,7 @@ class LessonPlan(LessonPlanDownloader):
             # Dla pozostałych przypadków używamy poprzedniej logiki podobieństwa
             similarity = SequenceMatcher(None, text, pattern).ratio()
             print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
-            return similarity > 0.85
+            return similarity > 0.90
 
       try:
           df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
