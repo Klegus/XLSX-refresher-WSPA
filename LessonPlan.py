@@ -83,7 +83,8 @@ class LessonPlan(LessonPlanDownloader):
             collection = self.db[collection_name]
             # Check MongoDB for changes
             latest_plan = collection.find_one(
-                {"plan_name": self.plan_config["name"]}, sort=[("timestamp", -1)]
+                {"plan_name": self.plan_config["name"]}, 
+                sort=[("timestamp", -1)]
             )
 
             latest_checksum = (
@@ -93,33 +94,15 @@ class LessonPlan(LessonPlanDownloader):
             )
 
             if latest_checksum and latest_checksum == new_checksum:
-                print(
-                    f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum})."
-                )
-                return False  # Plan się nie zmienił
+                print(f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum}).")
+                return False
             else:
-                print(
-                    f"Plan has changed or no previous plan found (old checksum: {latest_checksum}, new checksum: {new_checksum})"
-                )
+                print(f"Plan has changed or no previous plan found (old checksum: {latest_checksum}, new checksum: {new_checksum})")
                 should_process = True
-        else:
-            # Check local files for changes
-            if os.path.exists(self.plans_directory):
-                files = [
-                    f for f in os.listdir(self.plans_directory) if f.endswith(".pkl")
-                ]
-                if files:
-                    latest_file = max(
-                        files,
-                        key=lambda x: os.path.getctime(
-                            os.path.join(self.plans_directory, x)
-                        ),
-                    )
-                    print(f"Found latest local file: {latest_file}")
 
         if should_process:
             print(f"Processing plan for {self.plan_config['name']}")
-
+            
             try:
                 # Always process the downloaded file
                 self.unmerge_and_fill_data()
@@ -127,28 +110,51 @@ class LessonPlan(LessonPlanDownloader):
 
                 # Process groups
                 self.find_group_columns_with_similarity()
-
-                # Get groups from instance (handles both None and defined groups cases)
+                
+                # Get all groups from instance
                 groups_to_process = self.groups.keys() if self.groups else []
-
+                
+                processed_groups = []
+                failed_groups = []
+                
+                # Process each group
                 for group_name in groups_to_process:
-                    df_group = self.get_lessons_for_group(group_name)
-                    if df_group is not None and not df_group.empty:
-                        self.save_group_lessons(group_name, df_group)
-                    else:
-                        print(f"No data available for group '{group_name}'.")
+                    print(f"\nProcessing group: {group_name}")
+                    try:
+                        df_group = self.get_lessons_for_group(group_name)
+                        if df_group is not None and not df_group.empty:
+                            # Save group data
+                            self.save_group_lessons(group_name, df_group)
+                            processed_groups.append(group_name)
+                            print(f"Successfully processed group: {group_name}")
+                        else:
+                            print(f"No data available for group: {group_name}")
+                            failed_groups.append(group_name)
+                    except Exception as group_error:
+                        print(f"Error processing group {group_name}: {str(group_error)}")
+                        failed_groups.append(group_name)
+                        continue
 
-                if self.save_to_mongodb:
+                # Print summary
+                print("\nProcessing Summary:")
+                print(f"Successfully processed groups: {', '.join(processed_groups)}")
+                if failed_groups:
+                    print(f"Failed to process groups: {', '.join(failed_groups)}")
+
+                # Save to MongoDB if enabled
+                if self.save_to_mongodb and processed_groups:
                     self.convert_to_html_and_save_to_db(new_checksum)
+                
+                return new_checksum
 
             except Exception as e:
                 print(f"Error processing plan: {str(e)}")
                 import traceback
-
                 traceback.print_exc()
                 return None
 
         return new_checksum
+
 
     def get_converted_lesson_plan(self):
         return self.converted_lesson_plan
@@ -756,4 +762,14 @@ class LessonPlan(LessonPlanDownloader):
         return time
 
     def full_action(self):
-        self.process_and_save_plan()
+        """Execute the complete processing workflow"""
+        try:
+            checksum = self.process_and_save_plan()
+            if checksum:
+                print(f"Successfully completed processing with checksum: {checksum}")
+            else:
+                print("Processing completed but no new data was saved (no changes or errors occurred)")
+        except Exception as e:
+            print(f"Error during full action: {str(e)}")
+            import traceback
+            traceback.print_exc()
