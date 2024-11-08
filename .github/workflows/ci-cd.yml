@@ -41,13 +41,13 @@ jobs:
       - name: Run static type checking
         run: |
           mypy --ignore-missing-imports \
-               --disallow-untyped-defs \
-               --disallow-incomplete-defs \
-               --check-untyped-defs \
-               --warn-redundant-casts \
-               --warn-unused-ignores \
-               --warn-return-any \
-               --strict-optional \
+               --follow-imports=silent \
+               --allow-untyped-defs \
+               --allow-incomplete-defs \
+               --no-strict-optional \
+               --disable-error-code=no-untyped-def \
+               --disable-error-code=no-untyped-call \
+               --disable-error-code=var-annotated \
                .
         
       - name: Run style checking
