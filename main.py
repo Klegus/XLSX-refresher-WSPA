@@ -5,18 +5,29 @@ from comparer import LessonPlanComparator
 import os, requests, json
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from bson import ObjectId
 import traceback
 from flask import Flask, jsonify, request, Response
 import threading
 import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
+import sentry_sdk
+load_dotenv()
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 app = Flask(__name__)
 
 # Load environment variables
-load_dotenv()
+
 USE_TEST_TIME = False
 TEST_TIME = None
 mongo_uri = os.getenv("MONGO_URI")
