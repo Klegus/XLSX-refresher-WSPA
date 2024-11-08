@@ -83,8 +83,7 @@ class LessonPlan(LessonPlanDownloader):
             collection = self.db[collection_name]
             # Check MongoDB for changes
             latest_plan = collection.find_one(
-                {"plan_name": self.plan_config["name"]}, 
-                sort=[("timestamp", -1)]
+                {"plan_name": self.plan_config["name"]}, sort=[("timestamp", -1)]
             )
 
             latest_checksum = (
@@ -94,15 +93,19 @@ class LessonPlan(LessonPlanDownloader):
             )
 
             if latest_checksum and latest_checksum == new_checksum:
-                print(f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum}).")
+                print(
+                    f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum})."
+                )
                 return False
             else:
-                print(f"Plan has changed or no previous plan found (old checksum: {latest_checksum}, new checksum: {new_checksum})")
+                print(
+                    f"Plan has changed or no previous plan found (old checksum: {latest_checksum}, new checksum: {new_checksum})"
+                )
                 should_process = True
 
         if should_process:
             print(f"Processing plan for {self.plan_config['name']}")
-            
+
             try:
                 # Always process the downloaded file
                 self.unmerge_and_fill_data()
@@ -110,13 +113,13 @@ class LessonPlan(LessonPlanDownloader):
 
                 # Process groups
                 self.find_group_columns_with_similarity()
-                
+
                 # Get all groups from instance
                 groups_to_process = self.groups.keys() if self.groups else []
-                
+
                 processed_groups = []
                 failed_groups = []
-                
+
                 # Process each group
                 for group_name in groups_to_process:
                     print(f"\nProcessing group: {group_name}")
@@ -131,30 +134,32 @@ class LessonPlan(LessonPlanDownloader):
                             print(f"No data available for group: {group_name}")
                             failed_groups.append(group_name)
                     except Exception as group_error:
-                        print(f"Error processing group {group_name}: {str(group_error)}")
+                        print(
+                            f"Error processing group {group_name}: {str(group_error)}"
+                        )
                         failed_groups.append(group_name)
                         continue
 
                 # Print summary
-                print("\nProcessing Summary:")
-                print(f"Successfully processed groups: {', '.join(processed_groups)}")
+                #print("\nProcessing Summary:")
+                #print(f"Successfully processed groups: {', '.join(processed_groups)}")
                 if failed_groups:
                     print(f"Failed to process groups: {', '.join(failed_groups)}")
 
                 # Save to MongoDB if enabled
                 if self.save_to_mongodb and processed_groups:
                     self.convert_to_html_and_save_to_db(new_checksum)
-                
+
                 return new_checksum
 
             except Exception as e:
                 print(f"Error processing plan: {str(e)}")
                 import traceback
+
                 traceback.print_exc()
                 return None
 
         return new_checksum
-
 
     def get_converted_lesson_plan(self):
         return self.converted_lesson_plan
@@ -304,16 +309,14 @@ class LessonPlan(LessonPlanDownloader):
 
             # 1. Najpierw sprawdź dokładne dopasowanie
             if text_normalized == pattern_normalized:
-                print(
-                    f"Exact match found after normalization for '{text}' and '{pattern}'"
-                )
+                #print(f"Exact match found after normalization for '{text}' and '{pattern}'")
                 return True
 
             # 2. Jeśli nie ma dokładnego dopasowania, sprawdź podobieństwo
             similarity = SequenceMatcher(
                 None, text_normalized, pattern_normalized
             ).ratio()
-            print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
+            #print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
             return similarity >= similarity_threshold
 
         def verify_columns(columns, schedule_type):
@@ -375,9 +378,7 @@ class LessonPlan(LessonPlanDownloader):
             backup_columns = {}
 
             for group_name, group_identifier in self.groups.items():
-                print(
-                    f"\nProcessing group: {group_name} (identifier: {group_identifier})"
-                )
+                #print(f"\nProcessing group: {group_name} (identifier: {group_identifier})")
 
                 # Szukamy od dokładnego dopasowania do minimalnego progu
                 for similarity_threshold in [x / 100.0 for x in range(100, 84, -1)]:
@@ -388,7 +389,7 @@ class LessonPlan(LessonPlanDownloader):
                         if column in used_columns:
                             continue
 
-                        print(f"\nChecking column: {column}")
+                        #print(f"\nChecking column: {column}")
                         unique_values = df[column].dropna().unique()
 
                         for value in unique_values:
@@ -397,31 +398,25 @@ class LessonPlan(LessonPlanDownloader):
                             ):
                                 matching_columns.append(column)
                                 used_columns.add(column)
-                                print(f"Found matching column: {column}")
+                                #print(f"Found matching column: {column}")
                                 break
 
                     if matching_columns:
                         # Jeśli znaleźliśmy kolumny, sprawdź czy są prawidłowe
                         if verify_columns(matching_columns, self.schedule_type):
                             group_columns[group_name] = matching_columns
-                            print(
-                                f"Found valid columns for {group_name}: {matching_columns}"
-                            )
+                            #print(f"Found valid columns for {group_name}: {matching_columns}")
                             break
                         else:
                             # Zachowaj jako backup jeśli jeszcze nie mamy
                             if group_name not in backup_columns:
                                 backup_columns[group_name] = matching_columns
-                                print(
-                                    f"Saving backup columns for {group_name}: {matching_columns}"
-                                )
+                                #print(f"Saving backup columns for {group_name}: {matching_columns}")
 
                 # Jeśli nie znaleźliśmo prawidłowych kolumn, użyj backup
                 if group_name not in group_columns and group_name in backup_columns:
                     group_columns[group_name] = backup_columns[group_name]
-                    print(
-                        f"Using backup columns for {group_name}: {backup_columns[group_name]}"
-                    )
+                    print(f"Using backup columns for {group_name}: {backup_columns[group_name]}")
                 elif group_name not in group_columns:
                     print(f"No columns found for {group_name}")
 
@@ -458,20 +453,18 @@ class LessonPlan(LessonPlanDownloader):
                         col_number = int(col_name.split(".")[-1])
                         group_col_indices.append(col_number)
                 except ValueError as e:
-                    print(
-                        f"Warning: Could not parse column number from {col_name}: {e}"
-                    )
+                    #print(f"Warning: Could not parse column number from {col_name}: {e}")
                     continue
 
             if not group_col_indices:
-                print(f"Could not extract column numbers for group {group_name}")
+                #print(f"Could not extract column numbers for group {group_name}")
                 return None
 
-            print(f"Found column indices for {group_name}: {group_col_indices}")
+            #print(f"Found column indices for {group_name}: {group_col_indices}")
 
             # Add time column (always first column) and sort indices
             columns_to_extract = [0] + sorted(group_col_indices)
-            print(f"Columns to extract: {columns_to_extract}")
+            #print(f"Columns to extract: {columns_to_extract}")
 
             # Extract columns
             df_filtered = df.iloc[:, columns_to_extract].copy()
@@ -667,14 +660,14 @@ class LessonPlan(LessonPlanDownloader):
             return
 
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
+
         # Initialize the plans data structure
         plans_data = {
             "timestamp": current_datetime,
             "checksum": checksum,
             "plan_name": self.plan_config["name"],
             "category": self.schedule_type,
-            "groups": {}
+            "groups": {},
         }
 
         processed_groups = []
@@ -684,13 +677,13 @@ class LessonPlan(LessonPlanDownloader):
         if self.groups:
             for group_name in self.groups.keys():
                 try:
-                    print(f"\nProcessing group: {group_name}")
+                    #print(f"\nProcessing group: {group_name}")
                     df = self.get_lessons_for_group(group_name)
                     if df is not None and not df.empty:
                         html = self.generate_html_table(df)
                         plans_data["groups"][group_name] = html
                         processed_groups.append(group_name)
-                        print(f"Successfully processed HTML for group: {group_name}")
+                        #print(f"Successfully processed HTML for group: {group_name}")
                     else:
                         failed_groups.append(group_name)
                         print(f"No data available for group: {group_name}")
@@ -706,7 +699,7 @@ class LessonPlan(LessonPlanDownloader):
                     html = self.generate_html_table(df)
                     plans_data["groups"]["cały kierunek"] = html
                     processed_groups.append("cały kierunek")
-                    print("Successfully processed HTML for entire course")
+                    #print("Successfully processed HTML for entire course")
             except Exception as e:
                 print(f"Error processing entire course: {str(e)}")
 
@@ -721,27 +714,36 @@ class LessonPlan(LessonPlanDownloader):
                     # Check if this checksum already exists
                     existing_plan = collection.find_one({"checksum": checksum})
                     if existing_plan:
-                        print(f"Plan with checksum {checksum} already exists in {collection_name}. Skipping save.")
+                        print(
+                            f"Plan with checksum {checksum} already exists in {collection_name}. Skipping save."
+                        )
                         return
 
                     # Insert the new plan with all groups
                     result = collection.insert_one(plans_data)
-                    print(f"Saved plans to MongoDB collection {collection_name} with id: {result.inserted_id}")
-                    print(f"Successfully processed groups: {', '.join(processed_groups)}")
+                    print(
+                        f"Saved plans to MongoDB collection {collection_name} with id: {result.inserted_id}"
+                    )
+                    print(
+                        f"Successfully processed groups: {', '.join(processed_groups)}"
+                    )
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
-                    
+
                     # Verify the saved data
                     saved_plan = collection.find_one({"_id": result.inserted_id})
                     if saved_plan:
                         saved_groups = list(saved_plan.get("groups", {}).keys())
-                        print(f"Verified saved groups in MongoDB: {', '.join(saved_groups)}")
+                        print(
+                            f"Verified saved groups in MongoDB: {', '.join(saved_groups)}"
+                        )
                     else:
                         print("Warning: Could not verify saved data")
-                        
+
                 except Exception as e:
                     print(f"Error saving to MongoDB: {str(e)}")
                     import traceback
+
                     traceback.print_exc()
 
         # Save to files if enabled
@@ -806,8 +808,11 @@ class LessonPlan(LessonPlanDownloader):
             if checksum:
                 print(f"Successfully completed processing with checksum: {checksum}")
             else:
-                print("Processing completed but no new data was saved (no changes or errors occurred)")
+                print(
+                    "Processing completed but no new data was saved (no changes or errors occurred)"
+                )
         except Exception as e:
             print(f"Error during full action: {str(e)}")
             import traceback
+
             traceback.print_exc()

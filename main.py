@@ -127,13 +127,15 @@ class LessonPlanManager:
             try:
                 current_time = datetime.now()
                 current_hour = current_time.hour
-                
+
                 # Zawsze aktualizuj status
                 self.status_checker.update_activity()
-                print(f"\n--- Status check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} ---")
+                print(
+                    f"\n--- Status check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} ---"
+                )
 
                 # Skip checks between 21:00 and 06:00
-                #is_night_time = current_hour >= 21 or current_hour < 6
+                # is_night_time = current_hour >= 21 or current_hour < 6
                 is_night_time = False
                 if is_night_time:
                     next_check_time = (
@@ -144,9 +146,7 @@ class LessonPlanManager:
                         )
                     )
                     sleep_seconds = (next_check_time - current_time).total_seconds()
-                    print(
-                        f"Skipping plan check - night hours (21:00-06:00)"
-                    )
+                    print(f"Skipping plan check - night hours (21:00-06:00)")
                     print(
                         f"Next plan check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}"
                     )
@@ -159,15 +159,21 @@ class LessonPlanManager:
                 # Only compare plans if there was a change
                 if new_checksum and self.lesson_plan_comparator:
                     print("Plan został zaktualizowany, porównywanie planów...")
-                    collection_name = self.plan_name.lower().replace(' ', '_').replace('-', '_')
-                    comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
-                    
+                    collection_name = (
+                        self.plan_name.lower().replace(" ", "_").replace("-", "_")
+                    )
+                    comparison_result = self.lesson_plan_comparator.compare_plans(
+                        collection_name
+                    )
+
                     if comparison_result:
                         webhook_message = f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
                         self.send_discord_webhook(webhook_message)
                         self.update_cached_plans()
                     elif new_checksum:
-                        print("Plan został zaktualizowany, ale nie wykryto zmian w porównaniu.")
+                        print(
+                            "Plan został zaktualizowany, ale nie wykryto zmian w porównaniu."
+                        )
                     else:
                         print("Nie wykryto zmian w planie.")
 
@@ -207,7 +213,7 @@ class LessonPlanManager:
         current_hour = current_time.hour
 
         # Skip checks between 21:00 and 06:00
-        #is_night_time = current_hour >= 21 or current_hour < 6
+        # is_night_time = current_hour >= 21 or current_hour < 6
         is_night_time = False
         if is_night_time:
             print(
@@ -216,7 +222,9 @@ class LessonPlanManager:
             return
 
         try:
-            print(f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---")
+            print(
+                f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
+            )
             self.status_checker.update_activity()
             new_checksum = self.lesson_plan.process_and_save_plan()
 
@@ -226,16 +234,22 @@ class LessonPlanManager:
                 # Always compare plans at the end of cycle
                 if self.lesson_plan_comparator:
                     print("Porównywanie planów...")
-                    collection_name = self.plan_name.lower().replace(' ', '_').replace('-', '_')
-                    comparison_result = self.lesson_plan_comparator.compare_plans(collection_name)
-                    
+                    collection_name = (
+                        self.plan_name.lower().replace(" ", "_").replace("-", "_")
+                    )
+                    comparison_result = self.lesson_plan_comparator.compare_plans(
+                        collection_name
+                    )
+
                     if new_checksum and comparison_result:
                         webhook_message = f"Plan zajęć został zaktualizowany. Zmiany:\n\n{comparison_result}"
                         self.send_discord_webhook(webhook_message)
                         self.update_cached_plans()
                         print("Plan został zaktualizowany - wykryto i zapisano zmiany.")
                     elif new_checksum:
-                        print("Plan został zaktualizowany, ale nie wykryto zmian w porównaniu.")
+                        print(
+                            "Plan został zaktualizowany, ale nie wykryto zmian w porównaniu."
+                        )
                     else:
                         print("Nie wykryto zmian w planie.")
 
