@@ -35,7 +35,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov pylint flake8 mypy bandit safety
           # Install type stubs
-          pip install types-requests types-pytz types-pymongo types-colorama
+          pip install types-requests types-pytz types-colorama
 
           
       - name: Run static type checking
