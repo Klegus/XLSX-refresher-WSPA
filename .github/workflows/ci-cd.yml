@@ -57,7 +57,7 @@ jobs:
           
       - name: Run security checks
         run: |
-          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml
+          bandit -r . --confidence-level medium --severity-level medium -c bandit.yml
           safety check
           
       - name: Run tests with coverage
