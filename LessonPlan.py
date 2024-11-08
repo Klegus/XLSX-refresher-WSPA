@@ -667,57 +667,73 @@ class LessonPlan(LessonPlanDownloader):
             return
 
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Initialize the plans data structure
         plans_data = {
             "timestamp": current_datetime,
-            "checksum": checksum,  # Just store the raw checksum
+            "checksum": checksum,
             "plan_name": self.plan_config["name"],
             "category": self.schedule_type,
-            "groups": {},
+            "groups": {}
         }
 
-        # Create plans directory if saving to files is enabled
-        if self.save_to_file:
-            plan_specific_directory = os.path.join(
-                self.plans_directory, self.plan_config["name"].replace(" ", "_")
-            )
-            os.makedirs(plan_specific_directory, exist_ok=True)
-            self.plans_directory = plan_specific_directory
+        processed_groups = []
+        failed_groups = []
 
+        # Process all groups and collect their HTML
         for group_name in self.groups.keys():
-            df = self.get_lessons_for_group(group_name)
-            if df is None or df.empty:
-                print(f"No data available for group '{group_name}'.")
+            try:
+                df = self.get_lessons_for_group(group_name)
+                if df is not None and not df.empty:
+                    html = self.generate_html_table(df)
+                    plans_data["groups"][group_name] = html
+                    processed_groups.append(group_name)
+                    print(f"Successfully processed HTML for group: {group_name}")
+                else:
+                    failed_groups.append(group_name)
+                    print(f"No data available for group: {group_name}")
+            except Exception as e:
+                failed_groups.append(group_name)
+                print(f"Error processing group {group_name}: {str(e)}")
                 continue
 
-            html = self.generate_html_table(df)
-            plans_data["groups"][group_name] = html
+        # Only save to MongoDB if we have processed at least one group
+        if processed_groups:
+            if self.save_to_mongodb:
+                try:
+                    # Use plan-specific collection
+                    collection_name = f"plans_{self.plan_config['name'].lower().replace(' ','_').replace('-', '_')}"
+                    collection = self.db[collection_name]
 
-            # Save DataFrame to file if enabled
-            if self.save_to_file:
+                    # Check if this checksum already exists
+                    existing_plan = collection.find_one({"checksum": checksum})
+                    if existing_plan:
+                        print(f"Plan with checksum {checksum} already exists. Skipping save.")
+                        return
+
+                    # Insert the new plan with all groups
+                    collection.insert_one(plans_data)
+                    print(f"Saved plans to MongoDB collection {collection_name}")
+                    print(f"Successfully processed groups: {', '.join(processed_groups)}")
+                    if failed_groups:
+                        print(f"Failed to process groups: {', '.join(failed_groups)}")
+                except Exception as e:
+                    print(f"Error saving to MongoDB: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+
+        # Save to files if enabled
+        if self.save_to_file:
+            print("Saving plans to files...")
+            for group_name in processed_groups:
                 file_name = f"{current_datetime.replace(':', '-')}_{group_name}.pkl"
                 file_path = os.path.join(self.plans_directory, file_name)
-                df.to_pickle(file_path)
-                print(f"Lesson plan for {group_name} saved to file: {file_path}")
+                df = self.get_lessons_for_group(group_name)
+                if df is not None:
+                    df.to_pickle(file_path)
+                    print(f"Saved {group_name} plan to file: {file_path}")
 
-        # Save to MongoDB if enabled
-        if self.save_to_mongodb:
-
-            collection_name = f"plans_{self.plan_config['name'].lower().replace(' ','_').replace('-', '_')}"
-            collection = self.db[collection_name]
-
-            # Check if this checksum already exists in this collection
-            existing_plan = collection.find_one({"checksum": checksum})
-            if existing_plan:
-                print(
-                    f"Plan with checksum {checksum} alreadyexists in collection {collection_name}. Skipping save."
-                )
-                return
-
-            # Insert the new plan
-            collection.insert_one(plans_data)
-            print(
-                f"Lesson plans for {self.plan_config['name']} timestamp {current_datetime} saved to MongoDB collection        {collection_name} with checksum {checksum}."
-            )
+        return bool(processed_groups)
 
     def generate_html_table(self, df):
         html = "<table border='1'>\n"
