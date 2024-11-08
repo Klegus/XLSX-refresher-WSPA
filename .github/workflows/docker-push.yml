@@ -59,6 +59,7 @@ jobs:
           password: ${{ secrets.DEPLOY_PASSWORD }}
           script: |
             docker login ${{ env.REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+            docker rmi $(docker images -f "dangling=true" -q)
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             docker stop xlsx-refresher-wspa || true
             docker rm xlsx-refresher-wspa || true
