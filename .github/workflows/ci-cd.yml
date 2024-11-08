@@ -1,0 +1,162 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+env:
+  PYTHON_VERSION: "3.10"
+  MONGODB_VERSION: "4.4"
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:${{ env.MONGODB_VERSION }}
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pylint flake8 mypy bandit safety
+          
+      - name: Run static type checking
+        run: mypy --ignore-missing-imports .
+        
+      - name: Run style checking
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --statistics
+          
+      - name: Run security checks
+        run: |
+          bandit -r . -c .bandit.yml
+          safety check
+          
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=./ --cov-report=xml --cov-report=term-missing
+        env:
+          MONGO_URI: mongodb://localhost:27017/
+          PLANS_DIRECTORY: lesson_plans
+          SAVE_TO_MONGODB: "true"
+          SAVE_TO_FILE: "true"
+          ENABLE_COMPARER: "true"
+          
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
+
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+          
+      - name: Run linting
+        run: |
+          pylint --disable=R,C,W1203,W0703 *.py
+
+  build:
+    name: Build Docker Image
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=long
+            type=ref,event=branch
+            
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:buildcache,mode=max
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          script: |
+            # Login to registry
+            docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+            
+            # Pull latest image
+            docker pull ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:latest
+            
+            # Stop and remove existing container
+            docker stop xlsx-refresher-wspa || true
+            docker rm xlsx-refresher-wspa || true
+            
+            # Run new container
+            docker run -d \
+              --name xlsx-refresher-wspa \
+              --restart unless-stopped \
+              -p 8080:80 \
+              -e EMAIL="${{ secrets.EMAIL }}" \
+              -e PASSWORD="${{ secrets.PASSWORD }}" \
+              -e OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
+              -e SELECTED_MODEL="${{ secrets.SELECTED_MODEL }}" \
+              -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e WERKZEUG_RUN_MAIN="${{ secrets.WERKZEUG_RUN_MAIN }}" \
+              -e ENABLE_COMPARER="${{ secrets.ENABLE_COMPARER }}" \
+              ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:latest
