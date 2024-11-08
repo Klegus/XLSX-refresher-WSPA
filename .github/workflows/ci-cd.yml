@@ -11,34 +11,41 @@ env:
   MONGODB_VERSION: "4.4"
 
 jobs:
-  test:
-    name: Run Tests
+  lint:
+    name: Code Quality
     runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:4.4
-        ports:
-          - 27017:27017
-
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pylint flake8 mypy bandit safety
-          # Install type stubs
-          pip install types-requests types-pytz types-colorama
+          pip install pylint
+      - name: Run linting
+        run: |
+          pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702,W1401,W0612,W3101,W0602,W0603 *.py
 
-          
-      - name: Run static type checking
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy types-requests types-pytz types-colorama
+      - name: Run type checking
         run: |
           mypy --ignore-missing-imports \
                --follow-imports=silent \
@@ -49,18 +56,67 @@ jobs:
                --disable-error-code=no-untyped-call \
                --disable-error-code=var-annotated \
                .
-        
+
+  style:
+    name: Style Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
       - name: Run style checking
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --statistics
-          
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
       - name: Run security checks
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
         run: |
           bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml
-          safety scan --output screen --policy-file .safety-policy.yml
-        
-          
+          safety scan --api-key $SAFETY_API_KEY --output screen --policy-file .safety-policy.yml
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
       - name: Run tests with coverage
         run: |
           pytest --cov=./ --cov-report=xml --cov-report=term-missing
@@ -70,52 +126,27 @@ jobs:
           SAVE_TO_MONGODB: "true"
           SAVE_TO_FILE: "false"
           ENABLE_COMPARER: "false"
-          
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
           fail_ci_if_error: true
 
-  lint:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pylint
-          
-      - name: Run linting
-        run: |
-          pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702,W1401,W0612,W3101,W0602,W0603 *.py
-
   build:
     name: Build Docker Image
-    needs: [test, lint]
+    needs: [lint, type-check, style, security, test]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-          
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -125,7 +156,6 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=long
             type=ref,event=branch
-            
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -141,7 +171,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    
     steps:
       - name: Deploy to Production
         uses: appleboy/ssh-action@v1.0.0
@@ -150,22 +179,16 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           password: ${{ secrets.DEPLOY_PASSWORD }}
           script: |
-            # Login to registry
             docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-            
-            # Pull latest image
             docker pull ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:latest
-            
-            # Stop and remove existing container
             docker stop xlsx-refresher-wspa-dev || true
             docker rm xlsx-refresher-wspa-dev || true
-            
-            # Run new container
             docker run -d \
               --name xlsx-refresher-wspa-dev \
               --restart unless-stopped \
               -p 8080:80 \
               -e EMAIL="${{ secrets.EMAIL }}" \
+              -e SENTRY_DSN="${{ secrets.SENTRY_DSN }}" \
               -e PASSWORD="${{ secrets.PASSWORD }}" \
               -e OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
               -e SELECTED_MODEL="${{ secrets.SELECTED_MODEL }}" \
