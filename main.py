@@ -122,86 +122,6 @@ class LessonPlanManager:
             except requests.exceptions.RequestException as e:
                 print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
 
-    def run(self):
-        while True:
-            try:
-                current_time = datetime.now()
-                current_hour = current_time.hour
-
-                # Zawsze aktualizuj status
-                self.status_checker.update_activity()
-                print(
-                    f"\n--- Status check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} ---"
-                )
-
-                # Skip checks between 21:00 and 06:00
-                # is_night_time = current_hour >= 21 or current_hour < 6
-                is_night_time = False
-                if is_night_time:
-                    next_check_time = (
-                        current_time.replace(hour=6, minute=0, second=0, microsecond=0)
-                        if current_hour < 6
-                        else (current_time + timedelta(days=1)).replace(
-                            hour=6, minute=0, second=0, microsecond=0
-                        )
-                    )
-                    sleep_seconds = (next_check_time - current_time).total_seconds()
-                    print(f"Skipping plan check - night hours (21:00-06:00)")
-                    print(
-                        f"Next plan check scheduled for: {next_check_time.strftime('%Y-%m-%d %H:%M:%S')}"
-                    )
-                    time.sleep(sleep_seconds)
-                    continue
-
-                print(f"Starting plan check for {self.plan_name}")
-                new_checksum = self.lesson_plan.process_and_save_plan()
-
-                # Only compare plans if there was a change
-                if new_checksum:
-                    print("Plan został zaktualizowany")
-                    
-                    # Zawsze wysyłaj podstawowe powiadomienie o zmianie
-                    webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                    
-                    # Jeśli comparator jest włączony, dodaj szczegóły zmian
-                    if self.lesson_plan_comparator:
-                        print("Porównywanie planów...")
-                        collection_name = (
-                            self.plan_name.lower().replace(" ", "_").replace("-", "_")
-                        )
-                        comparison_result = self.lesson_plan_comparator.compare_plans(
-                            collection_name
-                        )
-                        if comparison_result:
-                            webhook_message += f"\n\nZmiany:\n{comparison_result}"
-                    
-                    self.send_discord_webhook(webhook_message)
-                    self.update_cached_plans()
-                else:
-                    print("Nie wykryto zmian w planie.")
-
-                self.clean_new_files()
-
-                print(f"Waiting {self.check_interval} seconds before the next check...")
-                time.sleep(self.check_interval)
-
-            except requests.exceptions.SSLError as e:
-                error_wait = 1800  # 30 minutes
-                print(f"\nWystąpił błąd SSL: {str(e)}")
-                print(f"Waiting {error_wait} seconds before next attempt...")
-                time.sleep(error_wait)
-
-            except requests.exceptions.RequestException as e:
-                error_wait = 1800  # 30 minutes
-                print(f"\nWystąpił błąd połączenia: {str(e)}")
-                print(f"Waiting {error_wait} seconds before next attempt...")
-                time.sleep(error_wait)
-
-            except Exception as e:
-                error_wait = 1800  # 30 minutes
-                print(f"\nWystąpił nieoczekiwany błąd: {str(e)}")
-                print(f"Waiting {error_wait} seconds before next attempt...")
-                time.sleep(error_wait)
 
     def update_cached_plans(self):
         latest_plan = get_latest_lesson_plan()
@@ -216,8 +136,7 @@ class LessonPlanManager:
         current_hour = current_time.hour
 
         # Skip checks between 21:00 and 06:00
-        # is_night_time = current_hour >= 21 or current_hour < 6
-        is_night_time = False
+        is_night_time = current_hour >= 21 or current_hour < 6
         if is_night_time:
             print(
                 f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
