@@ -681,21 +681,34 @@ class LessonPlan(LessonPlanDownloader):
         failed_groups = []
 
         # Process all groups and collect their HTML
-        for group_name in self.groups.keys():
+        if self.groups:
+            for group_name in self.groups.keys():
+                try:
+                    print(f"\nProcessing group: {group_name}")
+                    df = self.get_lessons_for_group(group_name)
+                    if df is not None and not df.empty:
+                        html = self.generate_html_table(df)
+                        plans_data["groups"][group_name] = html
+                        processed_groups.append(group_name)
+                        print(f"Successfully processed HTML for group: {group_name}")
+                    else:
+                        failed_groups.append(group_name)
+                        print(f"No data available for group: {group_name}")
+                except Exception as e:
+                    failed_groups.append(group_name)
+                    print(f"Error processing group {group_name}: {str(e)}")
+                    continue
+        else:
+            # Handle case where there are no specific groups (entire course)
             try:
-                df = self.get_lessons_for_group(group_name)
+                df = self.get_lessons_for_group("cały kierunek")
                 if df is not None and not df.empty:
                     html = self.generate_html_table(df)
-                    plans_data["groups"][group_name] = html
-                    processed_groups.append(group_name)
-                    print(f"Successfully processed HTML for group: {group_name}")
-                else:
-                    failed_groups.append(group_name)
-                    print(f"No data available for group: {group_name}")
+                    plans_data["groups"]["cały kierunek"] = html
+                    processed_groups.append("cały kierunek")
+                    print("Successfully processed HTML for entire course")
             except Exception as e:
-                failed_groups.append(group_name)
-                print(f"Error processing group {group_name}: {str(e)}")
-                continue
+                print(f"Error processing entire course: {str(e)}")
 
         # Only save to MongoDB if we have processed at least one group
         if processed_groups:
@@ -708,15 +721,24 @@ class LessonPlan(LessonPlanDownloader):
                     # Check if this checksum already exists
                     existing_plan = collection.find_one({"checksum": checksum})
                     if existing_plan:
-                        print(f"Plan with checksum {checksum} already exists. Skipping save.")
+                        print(f"Plan with checksum {checksum} already exists in {collection_name}. Skipping save.")
                         return
 
                     # Insert the new plan with all groups
-                    collection.insert_one(plans_data)
-                    print(f"Saved plans to MongoDB collection {collection_name}")
+                    result = collection.insert_one(plans_data)
+                    print(f"Saved plans to MongoDB collection {collection_name} with id: {result.inserted_id}")
                     print(f"Successfully processed groups: {', '.join(processed_groups)}")
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
+                    
+                    # Verify the saved data
+                    saved_plan = collection.find_one({"_id": result.inserted_id})
+                    if saved_plan:
+                        saved_groups = list(saved_plan.get("groups", {}).keys())
+                        print(f"Verified saved groups in MongoDB: {', '.join(saved_groups)}")
+                    else:
+                        print("Warning: Could not verify saved data")
+                        
                 except Exception as e:
                     print(f"Error saving to MongoDB: {str(e)}")
                     import traceback
