@@ -66,6 +66,7 @@ jobs:
             docker run -d \
               --name xlsx-refresher-wspa \
               --restart unless-stopped \
+              --network monitoring-network \
               -p 8081:80 \
               -e EMAIL="${{ secrets.EMAIL }}" \
               -e PASSWORD="${{ secrets.PASSWORD }}" \
