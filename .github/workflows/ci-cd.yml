@@ -258,7 +258,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           password: ${{ secrets.DEPLOY_PASSWORD }}
           source: ".github/workflows/templates/deploy-scripts/deploy.sh"
-          target: "/tmp"
+          target: "~/deploy-scripts/"
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
@@ -284,5 +284,6 @@ jobs:
             BRANCH_NAME=${{ github.event.inputs.branch || github.ref_name }}
             IMAGE_NAME=${{ secrets.IMAGE_NAME }}
           script: |
-            chmod +x /tmp/deploy.sh
-            /tmp/deploy.sh
+            mkdir -p ~/deploy-scripts
+            chmod +x ~/deploy-scripts/deploy.sh
+            ~/deploy-scripts/deploy.sh
