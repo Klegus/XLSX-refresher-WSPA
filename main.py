@@ -527,17 +527,16 @@ def main():
                         # Parsuj aktywności z nowego pliku
                         new_activities = parser.parse_activities()
                         
-                        # Pobierz ostatnie aktywności z bazy
-                        existing_activities = {
-                            act['id']: act['checksum'] 
-                            for act in db.Activities.find({}, {'id': 1, 'checksum': 1})
+                        # Pobierz wszystkie checksums z bazy
+                        existing_checksums = {
+                            act['checksum'] 
+                            for act in db.Activities.find({}, {'checksum': 1})
                         }
                         
-                        # Sprawdź które aktywności są nowe lub zmienione
+                        # Sprawdź które aktywności mają nowe checksums
                         activities_to_update = []
                         for activity in new_activities:
-                            if (activity.id not in existing_activities or 
-                                existing_activities[activity.id] != activity.checksum):
+                            if activity.checksum not in existing_checksums:
                                 activities_to_update.append(activity)
                         
                         if activities_to_update:
