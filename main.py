@@ -524,23 +524,27 @@ def main():
                             mongodb_uri=mongo_uri
                         )
                         
-                        # Oblicz checksum dla nowego pliku
-                        with open(saved_file, 'rb') as f:
-                            new_content = f.read()
-                            new_checksum = hashlib.md5(new_content, usedforsecurity=False).hexdigest()
+                        # Parsuj aktywności z nowego pliku
+                        new_activities = parser.parse_activities()
                         
-                        # Sprawdź ostatnie 5 dokumentów w bazie
-                        activities = list(db.Activities.find().sort([("_id", -1)]).limit(5))
-                        if activities:
-                            last_checksums = [act.get('checksum') for act in activities]
-                            if all(cs == new_checksum for cs in last_checksums):
-                                print("Pomijanie przetwarzania - checksum zgodny z ostatnimi dokumentami")
-                            else:
-                                print("Wykryto zmiany - przetwarzanie i zapisywanie aktywności...")
-                                parser.process_and_save()
+                        # Pobierz ostatnie aktywności z bazy
+                        existing_activities = {
+                            act['id']: act['checksum'] 
+                            for act in db.Activities.find({}, {'id': 1, 'checksum': 1})
+                        }
+                        
+                        # Sprawdź które aktywności są nowe lub zmienione
+                        activities_to_update = []
+                        for activity in new_activities:
+                            if (activity.id not in existing_activities or 
+                                existing_activities[activity.id] != activity.checksum):
+                                activities_to_update.append(activity)
+                        
+                        if activities_to_update:
+                            print(f"Wykryto {len(activities_to_update)} nowych/zmienionych aktywności - aktualizacja bazy...")
+                            parser.save_to_mongodb()
                         else:
-                            print("Brak wcześniejszych dokumentów - przetwarzanie aktywności...")
-                            parser.process_and_save()
+                            print("Brak nowych lub zmienionych aktywności")
                         
                         # Usuń pobrany plik
                         try:
