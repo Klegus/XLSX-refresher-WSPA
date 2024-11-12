@@ -235,6 +235,7 @@ jobs:
   deploy:
     name: Deploy to server
     needs: [ build, test, check-env-vars, lint, type-check, style, security ]
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
