@@ -1,5 +1,4 @@
 #!/bin/bash
-# .github/workflows/templates/deploy-scripts/deploy.sh
 
 set -e
 set -o pipefail
