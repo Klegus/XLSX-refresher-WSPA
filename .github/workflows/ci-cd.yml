@@ -60,7 +60,6 @@ jobs:
           echo "✅ All required environment variables are properly set!"
   lint:
     name: Code Quality
-    needs: check-env-vars
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,9 +77,81 @@ jobs:
         run: |
           pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702,W1401,W0612,W3101,W0602,W0603 *.py
 
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy types-requests types-pytz types-colorama
+      - name: Run type checking
+        run: |
+          mypy --ignore-missing-imports \
+               --follow-imports=silent \
+               --allow-untyped-defs \
+               --allow-incomplete-defs \
+               --no-strict-optional \
+               --disable-error-code=no-untyped-def \
+               --disable-error-code=no-untyped-call \
+               --disable-error-code=var-annotated \
+               .
+
+  style:
+    name: Style Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+      - name: Run style checking
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --statistics
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+      - name: Run security checks
+        run: |
+          echo "Running Bandit security checks..."
+          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml || true
+          
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Production branch - enforcing strict security checks"
+            safety scan --output screen --policy-file .safety-policy.yml
+          else
+            echo "Development branch - running security checks in report-only mode"
+            safety scan --output screen || true
+          fi
+
   test:
-    name: Run Tests & Type Checks
-    needs: lint
+    name: Run Tests
     runs-on: ubuntu-latest
     services:
       mongodb:
@@ -98,31 +169,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov mypy types-requests types-pytz types-colorama flake8 bandit safety
-
-      - name: Run type checking
-        run: |
-          mypy --ignore-missing-imports \
-               --follow-imports=silent \
-               --allow-untyped-defs \
-               --allow-incomplete-defs \
-               --no-strict-optional \
-               --disable-error-code=no-untyped-def \
-               --disable-error-code=no-untyped-call \
-               --disable-error-code=var-annotated \
-               .
-
-      - name: Run style checking
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --statistics
-
-      - name: Run security checks
-        run: |
-          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml || true
-          safety scan --output screen || true
+          pip install pytest pytest-cov
           
+      - name: Check for test files
+        id: check_tests
+        run: |
+          if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+            echo "Tests found"
+            echo "has_tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "No test files found in the repository"
+            echo "has_tests=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run tests with coverage
+        if: steps.check_tests.outputs.has_tests == 'true'
         run: |
           pytest --cov=./ --cov-report=xml --cov-report=term-missing
         env:
@@ -132,18 +193,27 @@ jobs:
           SAVE_TO_FILE: "false"
           ENABLE_COMPARER: "false"
 
-      - name: Upload coverage
+      - name: Generate empty coverage report
+        if: steps.check_tests.outputs.has_tests == 'false'
+        run: |
+          echo "Generating coverage report without tests"
+          python -m coverage run --source=./ -m pytest || true
+          python -m coverage xml
+          python -m coverage report || true
+          echo "Note: No tests were found. Consider adding tests to improve code quality."
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
-          fail_ci_if_error: false
+          fail_ci_if_error: false  
           flags: unittests
           name: codecov-umbrella
           verbose: true
 
   build:
     name: Build Docker Image
-    needs: [lint, test]
+    needs: [check-env-vars , lint, test]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     steps:
