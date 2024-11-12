@@ -284,5 +284,5 @@ jobs:
             BRANCH_NAME=${{ github.event.inputs.branch || github.ref_name }}
             IMAGE_NAME=${{ secrets.IMAGE_NAME }}
           script: |
-            chmod +x /tmp/deploy-scripts/deploy.sh
-            /tmp/deploy-scripts/deploy.sh
+            chmod +x /tmp/deploy.sh
+            /tmp/deploy.sh
