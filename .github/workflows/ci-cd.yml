@@ -371,22 +371,24 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           password: ${{ secrets.DEPLOY_PASSWORD }}
           script_stop: true
-          envs: |
-            EMAIL=${{ secrets.EMAIL }}
-            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-            PASSWORD=${{ secrets.PASSWORD }}
-            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
-            SELECTED_MODEL=${{ secrets.SELECTED_MODEL }}
-            DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
-            MONGO_URI=${{ secrets.MONGO_URI }}
-            WERKZEUG_RUN_MAIN=${{ secrets.WERKZEUG_RUN_MAIN }}
-            ENABLE_COMPARER=${{ secrets.ENABLE_COMPARER }}
-            MONGO_DB=${{ secrets.MONGO_DB }}
-            REGISTRY_URL=${{ secrets.REGISTRY_URL }}
-            REGISTRY_USERNAME=${{ secrets.REGISTRY_USERNAME }}
-            REGISTRY_PASSWORD=${{ secrets.REGISTRY_PASSWORD }}
-            BRANCH_NAME=${{ github.event.inputs.branch || github.ref_name }}
-            IMAGE_NAME=${{ secrets.IMAGE_NAME }}
+          envs: REGISTRY_URL,REGISTRY_USERNAME,REGISTRY_PASSWORD,BRANCH_NAME,IMAGE_NAME,EMAIL,SENTRY_DSN,PASSWORD,MONGO_DB,OPENROUTER_API_KEY,SELECTED_MODEL,DISCORD_WEBHOOK_URL,MONGO_URI,WERKZEUG_RUN_MAIN,ENABLE_COMPARER
+          environment: |
+            REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+            REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+            REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+            BRANCH_NAME: ${{ github.event.inputs.branch || github.ref_name }}
+            IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+            EMAIL: ${{ secrets.EMAIL }}
+            SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+            PASSWORD: ${{ secrets.PASSWORD }}
+            MONGO_DB: ${{ secrets.MONGO_DB }}
+            OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+            SELECTED_MODEL: ${{ secrets.SELECTED_MODEL }}
+            DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+            MONGO_URI: ${{ secrets.MONGO_URI }}
+            WERKZEUG_RUN_MAIN: ${{ secrets.WERKZEUG_RUN_MAIN }}
+            ENABLE_COMPARER: ${{ secrets.ENABLE_COMPARER }}
           script: |
+            echo "REGISTRY_URL=${REGISTRY_URL}"
             chmod +x ~/deploy-scripts/deploy.sh
             ~/deploy-scripts/deploy.sh
