@@ -229,8 +229,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/{{ secrets.IMAGE_NAME }}-dev:buildcache
-          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/{{ secrets.IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ secrets.IMAGE_NAME }}-dev:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ secrets.IMAGE_NAME }}:buildcache,mode=max
 
   deploy:
     name: Deploy to server
