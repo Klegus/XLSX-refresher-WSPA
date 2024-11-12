@@ -15,52 +15,45 @@ jobs:
   check-env-vars:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Check required environment variables
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          EMAIL: ${{ secrets.EMAIL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SELECTED_MODEL: ${{ secrets.SELECTED_MODEL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          WERKZEUG_RUN_MAIN: ${{ secrets.WERKZEUG_RUN_MAIN }}
+          ENABLE_COMPARER: ${{ secrets.ENABLE_COMPARER }}
         run: |
-          required_vars=(
-            "REGISTRY_URL"
-            "REGISTRY_USERNAME"
-            "REGISTRY_PASSWORD"
-            "EMAIL"
-            "SENTRY_DSN"
-            "PASSWORD"
-            "OPENROUTER_API_KEY"
-            "SELECTED_MODEL"
-            "DISCORD_WEBHOOK_URL"
-            "MONGO_URI"
-            "WERKZEUG_RUN_MAIN"
-            "ENABLE_COMPARER"
-            "MONGO_DB"
-          )
+          missing_or_empty=()
           
-          missing_vars=()
-          empty_vars=()
-          
-          for var in "${required_vars[@]}"; do
-            # Sprawdź czy zmienna istnieje w secrets
-            if [ -z "${{ secrets[var] }}" ]; then
-              if [ ! -z "${{ secrets[var] }}" ]; then
-                empty_vars+=("$var")
-              else
-                missing_vars+=("$var")
-              fi
+          check_var() {
+            if [ -z "${!1}" ]; then
+              missing_or_empty+=("$1")
             fi
-          done
+          }
           
-          # Wyświetl brakujące zmienne
-          if [ ${#missing_vars[@]} -ne 0 ]; then
-            echo "❌ Missing required secrets:"
-            printf '%s\n' "${missing_vars[@]}"
-            exit 1
-          fi
+          check_var "REGISTRY_URL"
+          check_var "REGISTRY_USERNAME"
+          check_var "REGISTRY_PASSWORD"
+          check_var "EMAIL"
+          check_var "SENTRY_DSN"
+          check_var "PASSWORD"
+          check_var "OPENROUTER_API_KEY"
+          check_var "SELECTED_MODEL"
+          check_var "DISCORD_WEBHOOK_URL"
+          check_var "MONGO_URI"
+          check_var "WERKZEUG_RUN_MAIN"
+          check_var "ENABLE_COMPARER"
           
-          # Wyświetl puste zmienne
-          if [ ${#empty_vars[@]} -ne 0 ]; then
-            echo "❌ Following secrets are empty:"
-            printf '%s\n' "${empty_vars[@]}"
+          if [ ${#missing_or_empty[@]} -ne 0 ]; then
+            echo "❌ Following environment variables are missing or empty:"
+            printf '%s\n' "${missing_or_empty[@]}"
             exit 1
           fi
           
