@@ -235,48 +235,50 @@ jobs:
   deploy:
     name: Deploy to server
     needs: [ build, test, check-env-vars, lint, type-check, style, security ]
-    uses: appleboy/ssh-action@v1.0.0
-    with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USERNAME }}
-        password: ${{ secrets.DEPLOY_PASSWORD }}
-        script: |
-          # Login to registry first
-          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-          
-          # Export variables for use in commands
-          export IMAGE_NAME="${{ env.IMAGE_NAME }}"
-          export CONTAINER_NAME="${IMAGE_NAME}-dev"  # or -staging or -secondyear depending on workflow
-          
-          # Stop and remove existing container
-          docker stop "${CONTAINER_NAME}" || true
-          docker rm "${CONTAINER_NAME}" || true
-          
-          # Pull the latest image
-          docker pull ${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:dev  # or :staging or :secondyear depending on workflow
-          
-          # Run new container
-          docker run -d \
-            --name "${CONTAINER_NAME}" \
-            --restart unless-stopped \
-            -p 8080:80 \
-            -e ENVIRONMENT="dev" \
-            -e EMAIL='${{ secrets.EMAIL }}' \
-            -e SENTRY_DSN='${{ secrets.SENTRY_DSN }}' \
-            -e PASSWORD='${{ secrets.PASSWORD }}' \
-            -e OPENROUTER_API_KEY='${{ secrets.OPENROUTER_API_KEY }}' \
-            -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
-            -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
-            -e MONGO_URI='${{ secrets.MONGO_URI }}' \
-            -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
-            -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
-            "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:dev"
-          
-          # Verify container is running
-          if docker ps | grep -q "${CONTAINER_NAME}"; then
-            echo "✅ Container deployed successfully"
-          else
-            echo "❌ Container failed to start"
-            docker logs "${CONTAINER_NAME}"
-            exit 1
-          fi
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+            host: ${{ secrets.DEPLOY_HOST }}
+            username: ${{ secrets.DEPLOY_USERNAME }}
+            password: ${{ secrets.DEPLOY_PASSWORD }}
+            script: |
+              # Login to registry first
+              echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+              
+              # Export variables for use in commands
+              export IMAGE_NAME="${{ env.IMAGE_NAME }}"
+              export CONTAINER_NAME="${IMAGE_NAME}-dev"  # or -staging or -secondyear depending on workflow
+              
+              # Stop and remove existing container
+              docker stop "${CONTAINER_NAME}" || true
+              docker rm "${CONTAINER_NAME}" || true
+              
+              # Pull the latest image
+              docker pull ${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:dev  # or :staging or :secondyear depending on workflow
+              
+              # Run new container
+              docker run -d \
+                --name "${CONTAINER_NAME}" \
+                --restart unless-stopped \
+                -p 8080:80 \
+                -e ENVIRONMENT="dev" \
+                -e EMAIL='${{ secrets.EMAIL }}' \
+                -e SENTRY_DSN='${{ secrets.SENTRY_DSN }}' \
+                -e PASSWORD='${{ secrets.PASSWORD }}' \
+                -e OPENROUTER_API_KEY='${{ secrets.OPENROUTER_API_KEY }}' \
+                -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
+                -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
+                -e MONGO_URI='${{ secrets.MONGO_URI }}' \
+                -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
+                -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
+                "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:dev"
+              
+              # Verify container is running
+              if docker ps | grep -q "${CONTAINER_NAME}"; then
+                echo "✅ Container deployed successfully"
+              else
+                echo "❌ Container failed to start"
+                docker logs "${CONTAINER_NAME}"
+                exit 1
+              fi
