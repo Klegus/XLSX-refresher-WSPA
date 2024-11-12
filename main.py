@@ -2,7 +2,9 @@ import time
 from datetime import datetime, timedelta
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
-import os, requests, json
+from ActivityDownloader import WebpageDownloader
+from MoodleParserComponent import MoodleFileParser
+import os, requests, json, hashlib
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import traceback
@@ -506,9 +508,51 @@ def main():
                             f"Error in manager for {plans_config[plan_id]['name']}: {str(e)}"
                         )
 
-                print(
-                    f"\nAll plans checked. Waiting {check_interval} seconds before next cycle..."
-                )
+                # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
+                try:
+                    print("\nSprawdzanie aktywności Moodle...")
+                    downloader = WebpageDownloader()
+                    moodle_url = os.getenv("MOODLE_URL")
+                    if not moodle_url:
+                        raise ValueError("MOODLE_URL not set in environment variables")
+                    
+                    saved_file = downloader.save_webpage(moodle_url)
+                    if saved_file:
+                        parser = MoodleFileParser(
+                            saved_file, 
+                            api_key=openrouter_api_key,
+                            mongodb_uri=mongo_uri
+                        )
+                        
+                        # Oblicz checksum dla nowego pliku
+                        with open(saved_file, 'rb') as f:
+                            new_content = f.read()
+                            new_checksum = hashlib.md5(new_content, usedforsecurity=False).hexdigest()
+                        
+                        # Sprawdź ostatnie 5 dokumentów w bazie
+                        activities = list(db.Activities.find().sort([("_id", -1)]).limit(5))
+                        if activities:
+                            last_checksums = [act.get('checksum') for act in activities]
+                            if all(cs == new_checksum for cs in last_checksums):
+                                print("Pomijanie przetwarzania - checksum zgodny z ostatnimi dokumentami")
+                            else:
+                                print("Wykryto zmiany - przetwarzanie i zapisywanie aktywności...")
+                                parser.process_and_save()
+                        else:
+                            print("Brak wcześniejszych dokumentów - przetwarzanie aktywności...")
+                            parser.process_and_save()
+                        
+                        # Usuń pobrany plik
+                        try:
+                            os.remove(saved_file)
+                            print(f"Usunięto plik tymczasowy: {saved_file}")
+                        except Exception as e:
+                            print(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
+                            
+                except Exception as e:
+                    print(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
+
+                print(f"\nWszystkie zadania zakończone. Oczekiwanie {check_interval} sekund przed następnym cyklem...")
                 time.sleep(check_interval)
 
         except KeyboardInterrupt:
