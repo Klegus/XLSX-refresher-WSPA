@@ -205,32 +205,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.REGISTRY_URL }}/{{ secrets.IMAGE_NAME }}-dev
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=long
-            type=ref,event=branch
+          
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ secrets.IMAGE_NAME }}-dev:buildcache
-          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ secrets.IMAGE_NAME }}:buildcache,mode=max
+          tags: |
+            ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:dev
+            ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=dev
+          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
   deploy:
     name: Deploy to server
@@ -247,20 +246,16 @@ jobs:
               # Login to registry first
               echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
               
-              # Export variables for use in commands
-              export IMAGE_NAME="${{ env.IMAGE_NAME }}"
-              export CONTAINER_NAME="${IMAGE_NAME}-dev"  # or -staging or -secondyear depending on workflow
-              
               # Stop and remove existing container
-              docker stop "${CONTAINER_NAME}" || true
-              docker rm "${CONTAINER_NAME}" || true
+              docker stop "xlsx-refresher-wspa-dev" || true
+              docker rm "xlsx-refresher-wspa-dev" || true
               
               # Pull the latest image
-              docker pull ${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:dev  # or :staging or :secondyear depending on workflow
+              docker pull ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:dev
               
               # Run new container
               docker run -d \
-                --name "${CONTAINER_NAME}" \
+                --name "xlsx-refresher-wspa-dev" \
                 --restart unless-stopped \
                 -p 8080:80 \
                 -e ENVIRONMENT="dev" \
@@ -273,13 +268,13 @@ jobs:
                 -e MONGO_URI='${{ secrets.MONGO_URI }}' \
                 -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
                 -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
-                "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:dev"
+                "${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:dev"
               
               # Verify container is running
-              if docker ps | grep -q "${CONTAINER_NAME}"; then
+              if docker ps | grep -q "xlsx-refresher-wspa-dev"; then
                 echo "✅ Container deployed successfully"
               else
                 echo "❌ Container failed to start"
-                docker logs "${CONTAINER_NAME}"
+                docker logs "xlsx-refresher-wspa-dev"
                 exit 1
               fi
