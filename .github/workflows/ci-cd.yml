@@ -1,18 +1,73 @@
-name: CI/CD Pipeline
+name: Universal CI/CD Pipeline
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "staging", "secondyear" ]
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "dev", "staging", "secondyear" ]
 
 env:
   PYTHON_VERSION: "3.12"
   MONGODB_VERSION: "4.4"
+  IMAGE_NAME: "xlsx-refresher-wspa"
 
 jobs:
+  check-env-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check required environment variables
+        run: |
+          required_vars=(
+            "REGISTRY_URL"
+            "REGISTRY_USERNAME"
+            "REGISTRY_PASSWORD"
+            "EMAIL"
+            "SENTRY_DSN"
+            "PASSWORD"
+            "OPENROUTER_API_KEY"
+            "SELECTED_MODEL"
+            "DISCORD_WEBHOOK_URL"
+            "MONGO_URI"
+            "WERKZEUG_RUN_MAIN"
+            "ENABLE_COMPARER"
+            "MONGO_DB"
+          )
+          
+          missing_vars=()
+          empty_vars=()
+          
+          for var in "${required_vars[@]}"; do
+            # Sprawdź czy zmienna istnieje w secrets
+            if [ -z "${{ secrets[var] }}" ]; then
+              if [ ! -z "${{ secrets[var] }}" ]; then
+                empty_vars+=("$var")
+              else
+                missing_vars+=("$var")
+              fi
+            fi
+          done
+          
+          # Wyświetl brakujące zmienne
+          if [ ${#missing_vars[@]} -ne 0 ]; then
+            echo "❌ Missing required secrets:"
+            printf '%s\n' "${missing_vars[@]}"
+            exit 1
+          fi
+          
+          # Wyświetl puste zmienne
+          if [ ${#empty_vars[@]} -ne 0 ]; then
+            echo "❌ Following secrets are empty:"
+            printf '%s\n' "${empty_vars[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All required environment variables are properly set!"
   lint:
     name: Code Quality
+    needs: check-env-vars
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,81 +85,9 @@ jobs:
         run: |
           pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702,W1401,W0612,W3101,W0602,W0603 *.py
 
-  type-check:
-    name: Type Checking
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install mypy types-requests types-pytz types-colorama
-      - name: Run type checking
-        run: |
-          mypy --ignore-missing-imports \
-               --follow-imports=silent \
-               --allow-untyped-defs \
-               --allow-incomplete-defs \
-               --no-strict-optional \
-               --disable-error-code=no-untyped-def \
-               --disable-error-code=no-untyped-call \
-               --disable-error-code=var-annotated \
-               .
-
-  style:
-    name: Style Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8
-      - name: Run style checking
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --statistics
-
-  security:
-    name: Security Checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install bandit safety
-      - name: Run security checks
-        run: |
-          echo "Running Bandit security checks..."
-          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml || true
-          
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "Production branch - enforcing strict security checks"
-            safety scan --output screen --policy-file .safety-policy.yml
-          else
-            echo "Development branch - running security checks in report-only mode"
-            safety scan --output screen || true
-          fi
-
   test:
-    name: Run Tests
+    name: Run Tests & Type Checks
+    needs: lint
     runs-on: ubuntu-latest
     services:
       mongodb:
@@ -122,21 +105,31 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov
-          
-      - name: Check for test files
-        id: check_tests
-        run: |
-          if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
-            echo "Tests found"
-            echo "has_tests=true" >> $GITHUB_OUTPUT
-          else
-            echo "No test files found in the repository"
-            echo "has_tests=false" >> $GITHUB_OUTPUT
-          fi
+          pip install pytest pytest-cov mypy types-requests types-pytz types-colorama flake8 bandit safety
 
+      - name: Run type checking
+        run: |
+          mypy --ignore-missing-imports \
+               --follow-imports=silent \
+               --allow-untyped-defs \
+               --allow-incomplete-defs \
+               --no-strict-optional \
+               --disable-error-code=no-untyped-def \
+               --disable-error-code=no-untyped-call \
+               --disable-error-code=var-annotated \
+               .
+
+      - name: Run style checking
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --statistics
+
+      - name: Run security checks
+        run: |
+          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml || true
+          safety scan --output screen || true
+          
       - name: Run tests with coverage
-        if: steps.check_tests.outputs.has_tests == 'true'
         run: |
           pytest --cov=./ --cov-report=xml --cov-report=term-missing
         env:
@@ -146,86 +139,83 @@ jobs:
           SAVE_TO_FILE: "false"
           ENABLE_COMPARER: "false"
 
-      - name: Generate empty coverage report
-        if: steps.check_tests.outputs.has_tests == 'false'
-        run: |
-          echo "Generating coverage report without tests"
-          python -m coverage run --source=./ -m pytest || true
-          python -m coverage xml
-          python -m coverage report || true
-          echo "Note: No tests were found. Consider adding tests to improve code quality."
-
-      - name: Upload coverage to Codecov
+      - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
-          fail_ci_if_error: false  
+          fail_ci_if_error: false
           flags: unittests
           name: codecov-umbrella
           verbose: true
 
   build:
     name: Build Docker Image
-    needs: [lint, type-check, style, security, test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Extract branch name
+        shell: bash
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=long
-            type=ref,event=branch
+          
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:buildcache
-          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:buildcache,mode=max
+          tags: |
+            ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.BRANCH_NAME }}
+            ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
   deploy:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    if: github.event_name == 'push'
+    environment: ${{ github.ref_name }}
+    
     steps:
-      - name: Deploy to Production
+      - uses: actions/checkout@v4
+      
+      - name: Make deploy script executable
+        run: chmod +x .github/workflows/templates/deploy-scripts/deploy.sh
+      
+      - name: Deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USERNAME }}
           password: ${{ secrets.DEPLOY_PASSWORD }}
+          script_stop: true
+          envs: |
+            REGISTRY_URL=${{ secrets.REGISTRY_URL }}
+            REGISTRY_USERNAME=${{ secrets.REGISTRY_USERNAME }}
+            REGISTRY_PASSWORD=${{ secrets.REGISTRY_PASSWORD }}
+            IMAGE_NAME=${{ env.IMAGE_NAME }}
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            BRANCH_NAME=${{ github.ref_name }}
+            EMAIL=${{ secrets.EMAIL }}
+            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+            PASSWORD=${{ secrets.PASSWORD }}
+            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+            SELECTED_MODEL=${{ secrets.SELECTED_MODEL }}
+            DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            WERKZEUG_RUN_MAIN=${{ secrets.WERKZEUG_RUN_MAIN }}
+            ENABLE_COMPARER=${{ secrets.ENABLE_COMPARER }}
           script: |
-            docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-            docker pull ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:latest
-            docker stop xlsx-refresher-wspa-dev || true
-            docker rm xlsx-refresher-wspa-dev || true
-            docker run -d \
-              --name xlsx-refresher-wspa-dev \
-              --restart unless-stopped \
-              -p 8080:80 \
-              -e EMAIL="${{ secrets.EMAIL }}" \
-              -e SENTRY_DSN="${{ secrets.SENTRY_DSN }}" \
-              -e PASSWORD="${{ secrets.PASSWORD }}" \
-              -e OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
-              -e SELECTED_MODEL="${{ secrets.SELECTED_MODEL }}" \
-              -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
-              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
-              -e WERKZEUG_RUN_MAIN="${{ secrets.WERKZEUG_RUN_MAIN }}" \
-              -e ENABLE_COMPARER="${{ secrets.ENABLE_COMPARER }}" \
-              ${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa-dev:latest
+            .github/workflows/templates/deploy-scripts/deploy.sh
