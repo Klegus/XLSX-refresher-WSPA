@@ -524,26 +524,9 @@ def main():
                             mongodb_uri=mongo_uri
                         )
                         
-                        # Parsuj aktywności z nowego pliku
-                        new_activities = parser.parse_activities()
-                        
-                        # Pobierz wszystkie checksums z bazy
-                        existing_checksums = {
-                            act['checksum'] 
-                            for act in db.Activities.find({}, {'checksum': 1})
-                        }
-                        
-                        # Sprawdź które aktywności mają nowe checksums
-                        activities_to_update = []
-                        for activity in new_activities:
-                            if activity.checksum not in existing_checksums:
-                                activities_to_update.append(activity)
-                        
-                        if activities_to_update:
-                            print(f"Wykryto {len(activities_to_update)} nowych/zmienionych aktywności - aktualizacja bazy...")
-                            parser.save_to_mongodb()
-                        else:
-                            print("Brak nowych lub zmienionych aktywności")
+                        # Parsuj i zapisz aktywności
+                        parser.parse_activities()
+                        parser.save_to_mongodb()
                         
                         # Usuń pobrany plik
                         try:

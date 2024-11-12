@@ -250,19 +250,42 @@ class MoodleFileParser:
 
     def save_to_mongodb(self):
         try:
-            self.collection.delete_many({})
+            # Pobierz istniejące checksumy
+            existing_checksums = {
+                act['checksum'] 
+                for act in self.collection.find({}, {'checksum': 1})
+            }
+            
+            # Filtruj tylko nowe aktywności
+            new_activities = [
+                activity for activity in self.activities_hierarchy 
+                if activity.checksum not in existing_checksums
+            ]
+            
+            if not new_activities:
+                print("Brak nowych aktywności do zapisania")
+                return True
+                
+            # Znajdź najwyższy sequence_number
+            last_seq = self.collection.find_one(
+                sort=[('sequence_number', -1)]
+            )
+            next_seq = (last_seq['sequence_number'] + 1) if last_seq else 1
+            
             timestamp = datetime.now().isoformat()
             
-            for idx, activity in enumerate(self.activities_hierarchy, 1):
+            # Dodaj nowe aktywności z kolejnymi numerami
+            for activity in new_activities:
                 activity_dict = activity.to_dict()
                 activity_dict.update({
-                    'sequence_number': idx,
+                    'sequence_number': next_seq,
                     'created_at': timestamp,
                     'checksum': activity_dict['checksum']
                 })
                 self.collection.insert_one(activity_dict)
+                next_seq += 1
             
-            print(f"Zapisano {len(self.activities_hierarchy)} aktywności do MongoDB")
+            print(f"Zapisano {len(new_activities)} nowych aktywności do MongoDB")
             return True
         except Exception as e:
             print(f"Błąd podczas zapisywania do MongoDB: {str(e)}")
