@@ -1,37 +1,36 @@
 # Build stage
-FROM python:3.12-alpine as builder
+FROM python:3.12-slim as builder
 
 WORKDIR /app
 
-# Instalacja tylko niezbędnych pakietów do budowania
-RUN apk add --no-cache gcc musl-dev
+# Install build dependencies
+RUN apt-get update && apt-get install -y gcc
 
-# Kopiowanie i instalacja zależności
+# Copy requirements and install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application files
+COPY . .
 
 # Final stage
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Kopiowanie zainstalowanych pakietów z builder stage
-COPY --from=builder /root/.local /root/.local
+# Copy installed packages and application files from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+COPY --from=builder /app /app
 
-# Ustawienie PATH dla zainstalowanych pakietów
-ENV PATH=/root/.local/bin:$PATH
+# Create non-root user
+RUN addgroup --system app && adduser --system --group app \
+    && chown -R app:app /app
 
-# Kopiowanie tylko niezbędnych plików aplikacji
-COPY plans.json .
-COPY *.py .
-COPY .bandit.yml .
-COPY .codecov.yml .
-COPY mypy.ini .
-COPY .safety-policy.yml .
+# Switch to non-root user
+USER app
 
-# Ustawienie użytkownika nieprivilegowanego
-RUN adduser -D appuser && \
-    chown -R appuser:appuser /app
-USER appuser
+# Expose port
+EXPOSE 80
 
+# Run the application
 CMD ["python", "main.py"]

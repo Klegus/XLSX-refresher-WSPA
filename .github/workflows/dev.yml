@@ -230,6 +230,7 @@ jobs:
             org.opencontainers.image.version=dev
           cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          no-cache: true
 
   deploy:
     name: Deploy to server
