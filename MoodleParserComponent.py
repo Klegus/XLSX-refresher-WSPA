@@ -250,22 +250,30 @@ class MoodleFileParser:
 
     def save_to_mongodb(self):
         try:
-            # Pobierz istniejące checksumy
+            # Najpierw zbierz wszystkie checksumy z aktualnych elementów
+            current_checksums = {activity.checksum for activity in self.activities_hierarchy}
+            
+            # Pobierz istniejące checksumy z bazy
             existing_checksums = {
                 act['checksum'] 
                 for act in self.collection.find({}, {'checksum': 1})
             }
             
-            # Filtruj tylko nowe aktywności
-            new_activities = [
+            # Znajdź checksumy których nie ma w bazie
+            new_checksums = current_checksums - existing_checksums
+            
+            if not new_checksums:
+                print("Wszystkie aktywności już istnieją w bazie")
+                return True
+            
+            # Filtruj aktywności które trzeba dodać
+            activities_to_add = [
                 activity for activity in self.activities_hierarchy 
-                if activity.checksum not in existing_checksums
+                if activity.checksum in new_checksums
             ]
             
-            if not new_activities:
-                print("Brak nowych aktywności do zapisania")
-                return True
-                
+            print(f"Znaleziono {len(activities_to_add)} nowych aktywności do dodania")
+            
             # Znajdź najwyższy sequence_number
             last_seq = self.collection.find_one(
                 sort=[('sequence_number', -1)]
@@ -274,16 +282,20 @@ class MoodleFileParser:
             
             timestamp = datetime.now().isoformat()
             
-            # Dodaj nowe aktywności z kolejnymi numerami
-            for activity in new_activities:
+            # Dodaj nowe aktywności z malejącymi numerami
+            for activity in activities_to_add:
+                # Formatuj treść przez OpenRouter tylko dla nowych aktywności
+                activity.content = self.format_with_openrouter(activity.content)
+                
                 activity_dict = activity.to_dict()
                 activity_dict.update({
                     'sequence_number': next_seq,
-                    'created_at': timestamp,
-                    'checksum': activity_dict['checksum']
+                    'created_at': timestamp
                 })
                 self.collection.insert_one(activity_dict)
                 next_seq += 1
+                
+            print(f"Pomyślnie dodano {len(activities_to_add)} nowych aktywności")
             
             print(f"Zapisano {len(new_activities)} nowych aktywności do MongoDB")
             return True
