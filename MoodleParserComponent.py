@@ -153,7 +153,7 @@ class MoodleFileParser:
         if activity_type == 'label':
             label_data = self._extract_label_content(element)
             if label_data:
-                content = str(label_content) if label_content else ''
+                content = label_data['content']
                 return MoodleActivity(
                     id=module_id,
                     type='label',
