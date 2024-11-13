@@ -145,7 +145,7 @@ class MoodleFileParser:
             print(f"Błąd formatowania OpenRouter: {str(e)}")
             return text
 
-    def _extract_activity_info(self, element, position: int) -> MoodleActivity:
+    def _extract_activity_info(self, element, position: int, format_content: bool = False) -> MoodleActivity:
         module_id = element.get('id', '').replace('module-', '')
         activity_type = ''
         classes = element.get('class', '').split()
@@ -225,10 +225,17 @@ class MoodleFileParser:
             print(f"Nie znaleziono elementu w ścieżce XPath: {xpath}")
             return []
         
-        position = 0
         activities = []
         
-        for element in main_region[0].findall('.//li[@class]'):
+        # Znajdź najwyższą pozycję w bazie
+        last_activity = self.collection.find_one(sort=[('position', -1)])
+        start_position = (last_activity['position'] + 1) if last_activity else 0
+        
+        elements = list(main_region[0].findall('.//li[@class]'))
+        elements.reverse()  # Odwracamy kolejność elementów
+        
+        current_position = start_position
+        for element in elements:
             classes = element.get('class', '').split()
             
             if 'activity' not in classes:
@@ -241,9 +248,10 @@ class MoodleFileParser:
                     break
             
             if activity_type in self.supported_types:
-                activity = self._extract_activity_info(element, position)
+                # Nie formatujemy contentu przez OpenRouter na tym etapie
+                activity = self._extract_activity_info(element, current_position)
                 activities.append(activity)
-                position += 1
+                current_position += 1
         
         self.activities_hierarchy = activities
         return activities
@@ -282,10 +290,14 @@ class MoodleFileParser:
             
             timestamp = datetime.now().isoformat()
             
-            # Dodaj nowe aktywności z malejącymi numerami
+            # Przetwarzaj tylko nowe aktywności przez OpenRouter
             for activity in activities_to_add:
                 # Formatuj treść przez OpenRouter tylko dla nowych aktywności
-                activity.content = self.format_with_openrouter(activity.content)
+                if isinstance(activity.content, dict):
+                    activity.content['html'] = self.format_with_openrouter(activity.content['html'])
+                    activity.content['text'] = self.format_with_openrouter(activity.content['text'])
+                else:
+                    activity.content = self.format_with_openrouter(activity.content)
                 
                 activity_dict = activity.to_dict()
                 activity_dict.update({
