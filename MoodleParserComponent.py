@@ -145,7 +145,7 @@ class MoodleFileParser:
             print(f"Błąd formatowania OpenRouter: {str(e)}")
             return text
 
-    def _extract_activity_info(self, element, position: int, format_content: bool = False) -> MoodleActivity:
+    def _extract_activity_info(self, element, position: int) -> MoodleActivity:
         module_id = element.get('id', '').replace('module-', '')
         activity_type = ''
         classes = element.get('class', '').split()
@@ -158,8 +158,8 @@ class MoodleFileParser:
         
         if activity_type == 'label':
             label_data = self._extract_label_content(element)
-            content = self.format_with_openrouter(label_data['content'])
             if label_data:
+                content = label_data['content']
                 return MoodleActivity(
                     id=module_id,
                     type='label',
@@ -202,7 +202,6 @@ class MoodleFileParser:
                     'height': img.get('height', '')
                 }
                 images.append(img_info)
-        content = self.format_with_openrouter(content)
         return MoodleActivity(
             id=module_id,
             type=activity_type,
@@ -227,14 +226,10 @@ class MoodleFileParser:
         
         activities = []
         
-        # Znajdź najwyższą pozycję w bazie
-        last_activity = self.collection.find_one(sort=[('position', -1)])
-        start_position = (last_activity['position'] + 1) if last_activity else 0
-        
         elements = list(main_region[0].findall('.//li[@class]'))
         elements.reverse()  # Odwracamy kolejność elementów
         
-        current_position = start_position
+        current_position = 0
         for element in elements:
             classes = element.get('class', '').split()
             
@@ -282,28 +277,33 @@ class MoodleFileParser:
             
             print(f"Znaleziono {len(activities_to_add)} nowych aktywności do dodania")
             
-            # Znajdź najwyższy sequence_number
-            last_seq = self.collection.find_one(
-                sort=[('sequence_number', -1)]
-            )
-            next_seq = (last_seq['sequence_number'] + 1) if last_seq else 1
+            # Znajdź najwyższy sequence_number i position
+            last_doc = self.collection.find_one(sort=[('sequence_number', -1)])
+            next_seq = (last_doc['sequence_number'] + 1) if last_doc else 1
+            next_pos = next_seq  # Używamy sequence_number jako position
             
             timestamp = datetime.now().isoformat()
             
-            # Przetwarzaj tylko nowe aktywności przez OpenRouter
+            # Przetwarzaj tylko nowe aktywności
             for activity in activities_to_add:
-                # Formatuj treść przez OpenRouter tylko dla nowych aktywności
+                # Formatuj treść przez OpenRouter
                 if isinstance(activity.content, dict):
                     activity.content['html'] = self.format_with_openrouter(activity.content['html'])
                     activity.content['text'] = self.format_with_openrouter(activity.content['text'])
                 else:
                     activity.content = self.format_with_openrouter(activity.content)
                 
+                # Aktualizuj position na podstawie sequence_number
+                activity.position = next_pos
+                
                 activity_dict = activity.to_dict()
                 activity_dict.update({
                     'sequence_number': next_seq,
                     'created_at': timestamp
                 })
+                
+                next_seq += 1
+                next_pos = next_seq
                 self.collection.insert_one(activity_dict)
                 next_seq += 1
                 
