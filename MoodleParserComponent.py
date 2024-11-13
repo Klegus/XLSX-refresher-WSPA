@@ -296,8 +296,6 @@ class MoodleFileParser:
                 next_seq += 1
                 
             print(f"Pomyślnie dodano {len(activities_to_add)} nowych aktywności")
-            
-            print(f"Zapisano {len(new_activities)} nowych aktywności do MongoDB")
             return True
         except Exception as e:
             print(f"Błąd podczas zapisywania do MongoDB: {str(e)}")
