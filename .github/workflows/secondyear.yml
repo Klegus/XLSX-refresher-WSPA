@@ -235,7 +235,7 @@ jobs:
             docker run -d \
               --name "${CONTAINER_NAME}" \
               --restart unless-stopped \
-              -p 8080:80 \
+              -p 8081:80 \
               -e ENVIRONMENT="secondyear" \
               -e EMAIL='${{ secrets.EMAIL }}' \
               -e SENTRY_DSN='${{ secrets.SENTRY_DSN }}' \
@@ -244,6 +244,7 @@ jobs:
               -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
               -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
               -e MONGO_URI='${{ secrets.MONGO_URI }}' \
+              -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
               -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
               -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
               "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:secondyear"
