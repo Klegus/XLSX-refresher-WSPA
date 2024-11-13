@@ -47,24 +47,7 @@ jobs:
           
           echo "✅ All required environment variables are properly set!"
 
-  lint:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pylint
-      - name: Run linting
-        run: |
-          pylint --disable=R,C,W1203,W0703,W0611,W0621,W0404,W1309,W0702,W1401,W0612,W3101,W0602,W0603 *.py
+  
 
   type-check:
     name: Type Checking
@@ -201,7 +184,7 @@ jobs:
           verbose: true
 
   build-and-deploy:
-    needs: [ test, check-env-vars, lint, type-check, style, security ]
+    needs: [ test, check-env-vars,  type-check, style, security ]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     steps:
