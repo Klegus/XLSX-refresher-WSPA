@@ -236,13 +236,14 @@ jobs:
             docker run -d \
               --name "${CONTAINER_NAME}" \
               --restart unless-stopped \
-              -p 8080:80 \
+              -p 8082:80 \
               -e ENVIRONMENT="staging" \
               -e EMAIL='${{ secrets.EMAIL }}' \
               -e SENTRY_DSN='${{ secrets.SENTRY_DSN }}' \
               -e PASSWORD='${{ secrets.PASSWORD }}' \
               -e OPENROUTER_API_KEY='${{ secrets.OPENROUTER_API_KEY }}' \
               -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
+              -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
               -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
               -e MONGO_URI='${{ secrets.MONGO_URI }}' \
               -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
