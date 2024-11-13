@@ -85,10 +85,7 @@ class MoodleFileParser:
                 
                 return {
                     'title': title,
-                    'content': {
-                        'html': html_content,
-                        'text': text_content
-                    },
+                    'content': html_content,
                     'images': images
                 }
             return None
@@ -97,9 +94,6 @@ class MoodleFileParser:
             return None
 
     def format_with_openrouter(self, text: str) -> str:
-        if isinstance(text, dict):
-            text = text.get('text', '')
-        
         if not text or not isinstance(text, str):
             return ""
             
@@ -159,7 +153,7 @@ class MoodleFileParser:
         if activity_type == 'label':
             label_data = self._extract_label_content(element)
             if label_data:
-                content = label_data['content']
+                content = str(label_content) if label_content else ''
                 return MoodleActivity(
                     id=module_id,
                     type='label',
@@ -190,10 +184,7 @@ class MoodleFileParser:
         images = []
         content_div = soup_element.select_one('.contentafterlink .no-overflow')
         if content_div:
-            content = {
-                'html': str(content_div),
-                'text': content_div.get_text(strip=True, separator='\n')
-            }
+            content = str(content_div)
             for img in content_div.find_all('img'):
                 img_info = {
                     'src': img.get('src', ''),
@@ -287,11 +278,7 @@ class MoodleFileParser:
             # Przetwarzaj tylko nowe aktywności
             for activity in activities_to_add:
                 # Formatuj treść przez OpenRouter
-                if isinstance(activity.content, dict):
-                    activity.content['html'] = self.format_with_openrouter(activity.content['html'])
-                    activity.content['text'] = self.format_with_openrouter(activity.content['text'])
-                else:
-                    activity.content = self.format_with_openrouter(activity.content)
+                activity.content = self.format_with_openrouter(activity.content)
                 
                 # Aktualizuj position na podstawie sequence_number
                 activity.position = next_pos
