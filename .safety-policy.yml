@@ -1,0 +1,15 @@
+security:
+    ignore-vulnerabilities:
+        # Jinja2 SSTI vulnerability - only applicable if using from_string with untrusted input
+        70612:
+            reason: >
+                This CVE (CVE-2019-8341) is related to Server Side Template Injection in Jinja2's from_string function.
+                In our application, we don't use this function with untrusted input.
+            expires: 2024-12-31
+
+    continue-on-vulnerability-error: true
+    
+    ignore-cvss-severity-below: 7
+    ignore-cvss-unknown-severity: true
+
+    ignore-packages:

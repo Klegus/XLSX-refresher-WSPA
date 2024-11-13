@@ -1,16 +1,5 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-import configparser, os, requests, urllib.request, time
-import pandas as pd
-import openpyxl
-import csv
-import os, re
-import pymongo
-from urllib.parse import quote_plus
-from datetime import datetime
+import os, requests
+import os
 import hashlib
 
 class LessonPlanDownloader:
@@ -25,7 +14,7 @@ class LessonPlanDownloader:
         return self.file_save_path
     
     def calculate_checksum(self, file_path):
-        hash_md5 = hashlib.md5()
+        hash_md5 = hashlib.new('md5', usedforsecurity=False)
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 hash_md5.update(chunk)
@@ -46,16 +35,16 @@ class LessonPlanDownloader:
         response_login = session.post(url_login, headers=headers, data=payload)
         
         if response_login.ok:
-            print(f"Login successful")
+            print("Login successful")
     
             try:
                 response_download = session.get(url_download)
-            except:
-                print(f"Error downloading the file")
+            except requests.exceptions.RequestException as e:
+                print("Error downloading the file")
                 return False
     
             if response_download.ok:
-                print(f"File downloaded successfully")
+                print("File downloaded successfully")
     
                 with open(file_save_path, 'wb') as file:
                     file.write(response_download.content)
@@ -68,7 +57,7 @@ class LessonPlanDownloader:
             else:
                 print("Error downloading the file")
         else:
-            print(f"Error logging in")
+            print("Error logging in")
     
         session.close()
         return None

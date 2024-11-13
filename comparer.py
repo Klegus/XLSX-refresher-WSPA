@@ -1,9 +1,8 @@
-import os
 from colorama import init, Fore, Style
-init(autoreset=True)  # Initialize colorama
-from pymongo import MongoClient
+init(autoreset=True)  
 import requests
 from datetime import datetime
+from pymongo import MongoClient
 
 class LessonPlanComparator:
     def __init__(self, mongo_uri, openrouter_api_key, selected_model):
