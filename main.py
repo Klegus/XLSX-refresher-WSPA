@@ -112,28 +112,43 @@ class LessonPlanManager:
                 except Exception as e:
                     print(f"Błąd podczas usuwania pliku {file}: {str(e)}")
 
-    def send_discord_webhook(self, message):
-        if self.discord_webhook_url:
-            payload = {
-                "embeds": [
-                    {
-                        "title": "Aktualizacja Planu Lekcji",
-                        "description": message,
-                        "color": 15158332,
-                        "timestamp": datetime.utcnow().isoformat(),
-                    }
-                ]
-            }
-            try:
-                response = requests.post(
-                    self.discord_webhook_url,
-                    data=json.dumps(payload),
-                    headers={"Content-Type": "application/json"},
-                )
-                response.raise_for_status()
-                print("Webhook Discord wysłany pomyślnie")
-            except requests.exceptions.RequestException as e:
-                print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
+    def should_send_webhook(self):
+        """Sprawdza czy należy wysyłać powiadomienia webhook dla tego planu"""
+        plan_config = self.lesson_plan.plan_config
+        # Domyślnie notify i compare są False
+        return plan_config.get('notify', False) or plan_config.get('compare', False)
+    
+    def send_discord_webhook(self, message, force_send=False):
+        """
+        Wysyła webhook jeśli jest skonfigurowany i dozwolony.
+        force_send wymusza wysłanie niezależnie od ustawień notify/compare
+        """
+        if not self.discord_webhook_url:
+            return
+
+        if not force_send and not self.should_send_webhook():
+            return
+
+        payload = {
+            "embeds": [
+                {
+                    "title": "Aktualizacja Planu Lekcji",
+                    "description": message,
+                    "color": 15158332,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
+        }
+        try:
+            response = requests.post(
+                self.discord_webhook_url,
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            print("Webhook Discord wysłany pomyślnie")
+        except requests.exceptions.RequestException as e:
+            print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
 
 
     def update_cached_plans(self):
@@ -149,7 +164,12 @@ class LessonPlanManager:
         current_hour = current_time.hour
 
         # Skip checks between 21:00 and 06:00
-        is_night_time = current_hour >= 21 or current_hour < 6
+        #if dev_mode is True
+        if os.getenv("DEV", "false").lower() == "true":
+            print("Dev mode is enabled. Skipping time check.")
+            is_night_time = False
+        else:
+            is_night_time = current_hour >= 21 or current_hour < 6
         if is_night_time:
             print(
                 f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
@@ -168,10 +188,11 @@ class LessonPlanManager:
             else:
                 if new_checksum:
                     print("Plan został zaktualizowany")
-                    webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
                     
-                    # Jeśli comparator jest włączony, dodaj szczegóły zmian
-                    if self.lesson_plan_comparator:
+                    # Sprawdź czy plan ma włączone porównywanie
+                    should_compare = self.lesson_plan.plan_config.get('compare', False)
+                    
+                    if should_compare and self.lesson_plan_comparator:
                         print("Porównywanie planów...")
                         collection_name = (
                             self.plan_name.lower().replace(" ", "_").replace("-", "_")
@@ -180,10 +201,13 @@ class LessonPlanManager:
                             collection_name
                         )
                         if comparison_result:
-                            webhook_message += f"\n\nZmiany:\n{comparison_result}"
+                            webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
+                            self.send_discord_webhook(webhook_message, force_send=True)
                             print("Wykryto i zapisano zmiany w planie.")
-                    
-                    self.send_discord_webhook(webhook_message)
+                    elif self.lesson_plan.plan_config.get('notify', False):
+                        # Jeśli nie porównujemy, ale notify jest true
+                        webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        self.send_discord_webhook(webhook_message)
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
                 else:
