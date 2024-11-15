@@ -249,6 +249,7 @@ jobs:
                 -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
                 -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
                 -e MONGO_URI='${{ secrets.MONGO_URI }}' \
+                -e DEV=${{ secrets.DEV }} \
                 -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
                 -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
                 "${{ secrets.REGISTRY_URL }}/xlsx-refresher-wspa:dev"

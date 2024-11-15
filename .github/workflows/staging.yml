@@ -245,6 +245,7 @@ jobs:
               -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
               -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
               -e MONGO_URI='${{ secrets.MONGO_URI }}' \
+              -e DEV=${{ secrets.DEV }} \
               -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
               "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:staging"
             
