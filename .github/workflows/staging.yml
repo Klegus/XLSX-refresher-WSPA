@@ -30,7 +30,6 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           WERKZEUG_RUN_MAIN: ${{ secrets.WERKZEUG_RUN_MAIN }}
-          ENABLE_COMPARER: ${{ secrets.ENABLE_COMPARER }}
         run: |
           missing_or_empty=()
           for var in REGISTRY_URL REGISTRY_USERNAME REGISTRY_PASSWORD EMAIL SENTRY_DSN PASSWORD OPENROUTER_API_KEY SELECTED_MODEL DISCORD_WEBHOOK_URL MONGO_URI WERKZEUG_RUN_MAIN ENABLE_COMPARER; do
@@ -247,7 +246,6 @@ jobs:
               -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
               -e MONGO_URI='${{ secrets.MONGO_URI }}' \
               -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
-              -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
               "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:staging"
             
             # Verify container is running
