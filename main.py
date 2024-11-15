@@ -112,28 +112,43 @@ class LessonPlanManager:
                 except Exception as e:
                     print(f"Błąd podczas usuwania pliku {file}: {str(e)}")
 
-    def send_discord_webhook(self, message):
-        if self.discord_webhook_url:
-            payload = {
-                "embeds": [
-                    {
-                        "title": "Aktualizacja Planu Lekcji",
-                        "description": message,
-                        "color": 15158332,
-                        "timestamp": datetime.utcnow().isoformat(),
-                    }
-                ]
-            }
-            try:
-                response = requests.post(
-                    self.discord_webhook_url,
-                    data=json.dumps(payload),
-                    headers={"Content-Type": "application/json"},
-                )
-                response.raise_for_status()
-                print("Webhook Discord wysłany pomyślnie")
-            except requests.exceptions.RequestException as e:
-                print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
+    def should_send_webhook(self):
+        """Sprawdza czy należy wysyłać powiadomienia webhook dla tego planu"""
+        plan_config = self.lesson_plan.plan_config
+        # Domyślnie notify i compare są False
+        return plan_config.get('notify', False) or plan_config.get('compare', False)
+    
+    def send_discord_webhook(self, message, force_send=False):
+        """
+        Wysyła webhook jeśli jest skonfigurowany i dozwolony.
+        force_send wymusza wysłanie niezależnie od ustawień notify/compare
+        """
+        if not self.discord_webhook_url:
+            return
+
+        if not force_send and not self.should_send_webhook():
+            return
+
+        payload = {
+            "embeds": [
+                {
+                    "title": "Aktualizacja Planu Lekcji",
+                    "description": message,
+                    "color": 15158332,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ]
+        }
+        try:
+            response = requests.post(
+                self.discord_webhook_url,
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            print("Webhook Discord wysłany pomyślnie")
+        except requests.exceptions.RequestException as e:
+            print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
 
 
     def update_cached_plans(self):
@@ -149,7 +164,11 @@ class LessonPlanManager:
         current_hour = current_time.hour
 
         # Skip checks between 21:00 and 06:00
-        is_night_time = current_hour >= 21 or current_hour < 6
+        if os.getenv("DEV", "false").lower() == "true":
+            print("Dev mode is enabled. Skipping time check.")
+            is_night_time = False
+        else:
+            is_night_time = current_hour >= 21 or current_hour < 6
         if is_night_time:
             print(
                 f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
@@ -168,22 +187,35 @@ class LessonPlanManager:
             else:
                 if new_checksum:
                     print("Plan został zaktualizowany")
-                    webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
                     
-                    # Jeśli comparator jest włączony, dodaj szczegóły zmian
-                    if self.lesson_plan_comparator:
-                        print("Porównywanie planów...")
-                        collection_name = (
-                            self.plan_name.lower().replace(" ", "_").replace("-", "_")
-                        )
-                        comparison_result = self.lesson_plan_comparator.compare_plans(
-                            collection_name
-                        )
-                        if comparison_result:
-                            webhook_message += f"\n\nZmiany:\n{comparison_result}"
-                            print("Wykryto i zapisano zmiany w planie.")
-                    
-                    self.send_discord_webhook(webhook_message)
+                    # Sprawdź czy plan ma włączone porównywanie
+                    # Check if plan has comparison enabled and comparator is available
+                    should_compare = self.lesson_plan.plan_config.get('compare', False) and self.lesson_plan_comparator is not None
+
+                    if should_compare:
+                        try:
+                            print("Comparing plans...")
+                            collection_name = (
+                                self.plan_name.lower().replace(" ", "_").replace("-", "_")
+                            )
+                            comparison_result = self.lesson_plan_comparator.compare_plans(
+                                collection_name
+                            )
+                            if comparison_result:
+                                webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
+                                self.send_discord_webhook(webhook_message, force_send=True)
+                                print("Wykryto i zapisano zmiany w planie.")
+                        except Exception as e:
+                            print(f"Error during plan comparison: {e}")
+                            # Fall back to simple notification if comparison fails
+                            if self.lesson_plan.plan_config.get('notify', False):
+                                webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                                self.send_discord_webhook(webhook_message)
+                    elif self.lesson_plan.plan_config.get('notify', False):
+                        # If not comparing but notify is true
+                        webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        self.send_discord_webhook(webhook_message)
+                        print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
                 else:
@@ -462,26 +494,37 @@ def main():
             )
             print(f"LessonPlan for {plan_config['name']} initialized successfully")
 
-            enable_comparer = os.getenv("ENABLE_COMPARER", "true").lower() == "true"
-            if enable_comparer:
+            comparator = None
+            
+            # Debug info about plan settings
+            compare_enabled = plan_config.get('compare', False)
+            notify_enabled = plan_config.get('notify', False)
+            print(f"\nPlan settings for {plan_config['name']}:")
+            print(f"- Compare enabled: {compare_enabled}")
+            print(f"- Notify enabled: {notify_enabled}")
+
+            if compare_enabled and openrouter_api_key and selected_model:
                 print(f"Initializing LessonPlanComparator for {plan_config['name']}")
-                lesson_plan_comparators[plan_id] = LessonPlanComparator(
-                    mongo_uri=mongo_uri,
-                    openrouter_api_key=openrouter_api_key,
-                    selected_model=selected_model,
-                )
-                print(
-                    f"LessonPlanComparator for {plan_config['name']} initialized successfully"
-                )
+                try:
+                    comparator = LessonPlanComparator(
+                        mongo_uri=mongo_uri,
+                        openrouter_api_key=openrouter_api_key,
+                        selected_model=selected_model,
+                    )
+                    lesson_plan_comparators[plan_id] = comparator
+                    print(f"LessonPlanComparator for {plan_config['name']} initialized successfully")
+                except Exception as e:
+                    print(f"Failed to initialize comparator for {plan_config['name']}: {e}")
+                    comparator = None
             else:
-                print(
-                    f"Skipping LessonPlanComparator initialization for {plan_config['name']} (disabled in config)"
-                )
+                if compare_enabled:
+                    print(f"Cannot initialize comparator for {plan_config['name']} - missing required settings:")
+                    print(f"- OpenRouter API key: {'Present' if openrouter_api_key else 'Missing'}")
+                    print(f"- Selected model: {'Present' if selected_model else 'Missing'}")
+                else:
+                    print(f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)")
 
             print(f"Initializing LessonPlanManager for {plan_config['name']}")
-            comparator = (
-                lesson_plan_comparators.get(plan_id) if enable_comparer else None
-            )
             lesson_plan_managers[plan_id] = LessonPlanManager(
                 lesson_plans[plan_id],
                 comparator,

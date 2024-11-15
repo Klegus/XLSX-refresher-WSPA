@@ -30,10 +30,9 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           WERKZEUG_RUN_MAIN: ${{ secrets.WERKZEUG_RUN_MAIN }}
-          ENABLE_COMPARER: ${{ secrets.ENABLE_COMPARER }}
         run: |
           missing_or_empty=()
-          for var in REGISTRY_URL REGISTRY_USERNAME REGISTRY_PASSWORD EMAIL SENTRY_DSN PASSWORD OPENROUTER_API_KEY SELECTED_MODEL DISCORD_WEBHOOK_URL MONGO_URI WERKZEUG_RUN_MAIN ENABLE_COMPARER; do
+          for var in REGISTRY_URL REGISTRY_USERNAME REGISTRY_PASSWORD EMAIL SENTRY_DSN PASSWORD OPENROUTER_API_KEY SELECTED_MODEL DISCORD_WEBHOOK_URL MONGO_URI WERKZEUG_RUN_MAIN; do
             if [ -z "${!var}" ]; then
               missing_or_empty+=("$var")
             fi
@@ -247,7 +246,6 @@ jobs:
               -e MONGO_DB='${{ secrets.MONGO_DB }}' \
               -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
               -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
-              -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
               "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:secondyear"
             
             # Verify container is running
