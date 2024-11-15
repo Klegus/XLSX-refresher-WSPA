@@ -12,6 +12,7 @@ env:
   IMAGE_NAME: "xlsx-refresher-wspa"
   PORT: "8081"
   CONTAINER_SUFFIX: "staging"
+  MONGO_DB: "Lesson_dev"
 
 jobs:
   check-env-vars:
