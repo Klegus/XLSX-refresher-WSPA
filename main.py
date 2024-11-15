@@ -190,24 +190,33 @@ class LessonPlanManager:
                     print("Plan został zaktualizowany")
                     
                     # Sprawdź czy plan ma włączone porównywanie
-                    should_compare = self.lesson_plan.plan_config.get('compare', False)
-                    
-                    if should_compare and self.lesson_plan_comparator:
-                        print("Porównywanie planów...")
-                        collection_name = (
-                            self.plan_name.lower().replace(" ", "_").replace("-", "_")
-                        )
-                        comparison_result = self.lesson_plan_comparator.compare_plans(
-                            collection_name
-                        )
-                        if comparison_result:
-                            webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
-                            self.send_discord_webhook(webhook_message, force_send=True)
-                            print("Wykryto i zapisano zmiany w planie.")
+                    # Check if plan has comparison enabled and comparator is available
+                    should_compare = self.lesson_plan.plan_config.get('compare', False) and self.lesson_plan_comparator is not None
+
+                    if should_compare:
+                        try:
+                            print("Comparing plans...")
+                            collection_name = (
+                                self.plan_name.lower().replace(" ", "_").replace("-", "_")
+                            )
+                            comparison_result = self.lesson_plan_comparator.compare_plans(
+                                collection_name
+                            )
+                            if comparison_result:
+                                webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
+                                self.send_discord_webhook(webhook_message, force_send=True)
+                                print("Wykryto i zapisano zmiany w planie.")
+                        except Exception as e:
+                            print(f"Error during plan comparison: {e}")
+                            # Fall back to simple notification if comparison fails
+                            if self.lesson_plan.plan_config.get('notify', False):
+                                webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                                self.send_discord_webhook(webhook_message)
                     elif self.lesson_plan.plan_config.get('notify', False):
-                        # Jeśli nie porównujemy, ale notify jest true
+                        # If not comparing but notify is true
                         webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
                         self.send_discord_webhook(webhook_message)
+                        print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
                 else:
@@ -488,7 +497,7 @@ def main():
 
             enable_comparer = os.getenv("ENABLE_COMPARER", "true").lower() == "true"
             comparator = None
-            
+
             if enable_comparer and openrouter_api_key and selected_model:
                 print(f"Initializing LessonPlanComparator for {plan_config['name']}")
                 try:
