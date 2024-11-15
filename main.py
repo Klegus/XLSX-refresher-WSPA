@@ -495,7 +495,6 @@ def main():
             )
             print(f"LessonPlan for {plan_config['name']} initialized successfully")
 
-            enable_comparer = os.getenv("ENABLE_COMPARER", "true").lower() == "true"
             comparator = None
             
             # Debug info about plan settings
@@ -505,30 +504,26 @@ def main():
             print(f"- Compare enabled: {compare_enabled}")
             print(f"- Notify enabled: {notify_enabled}")
 
-            if enable_comparer and openrouter_api_key and selected_model:
-                if compare_enabled:
-                    print(f"Initializing LessonPlanComparator for {plan_config['name']}")
-                    try:
-                        comparator = LessonPlanComparator(
-                            mongo_uri=mongo_uri,
-                            openrouter_api_key=openrouter_api_key,
-                            selected_model=selected_model,
-                        )
-                        lesson_plan_comparators[plan_id] = comparator
-                        print(f"LessonPlanComparator for {plan_config['name']} initialized successfully")
-                    except Exception as e:
-                        print(f"Failed to initialize comparator for {plan_config['name']}: {e}")
-                        comparator = None
-                else:
-                    print(f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)")
+            if compare_enabled and openrouter_api_key and selected_model:
+                print(f"Initializing LessonPlanComparator for {plan_config['name']}")
+                try:
+                    comparator = LessonPlanComparator(
+                        mongo_uri=mongo_uri,
+                        openrouter_api_key=openrouter_api_key,
+                        selected_model=selected_model,
+                    )
+                    lesson_plan_comparators[plan_id] = comparator
+                    print(f"LessonPlanComparator for {plan_config['name']} initialized successfully")
+                except Exception as e:
+                    print(f"Failed to initialize comparator for {plan_config['name']}: {e}")
+                    comparator = None
             else:
                 if compare_enabled:
                     print(f"Cannot initialize comparator for {plan_config['name']} - missing required settings:")
-                    print(f"- ENABLE_COMPARER env var: {enable_comparer}")
                     print(f"- OpenRouter API key: {'Present' if openrouter_api_key else 'Missing'}")
                     print(f"- Selected model: {'Present' if selected_model else 'Missing'}")
                 else:
-                    print(f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled)")
+                    print(f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)")
 
             print(f"Initializing LessonPlanManager for {plan_config['name']}")
             lesson_plan_managers[plan_id] = LessonPlanManager(
