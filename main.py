@@ -164,7 +164,6 @@ class LessonPlanManager:
         current_hour = current_time.hour
 
         # Skip checks between 21:00 and 06:00
-        #if dev_mode is True
         if os.getenv("DEV", "false").lower() == "true":
             print("Dev mode is enabled. Skipping time check.")
             is_night_time = False
