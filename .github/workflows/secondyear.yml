@@ -1,0 +1,259 @@
+name: Second Year Branch CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "secondyear" ]
+  pull_request:
+    branches: [ "secondyear" ]
+
+env:
+  PYTHON_VERSION: "3.12"
+  MONGODB_VERSION: "4.4"
+  IMAGE_NAME: "xlsx-refresher-wspa"
+  PORT: "8081"
+  CONTAINER_SUFFIX: "secondyear"
+
+jobs:
+  check-env-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required environment variables
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          EMAIL: ${{ secrets.EMAIL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SELECTED_MODEL: ${{ secrets.SELECTED_MODEL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          WERKZEUG_RUN_MAIN: ${{ secrets.WERKZEUG_RUN_MAIN }}
+          ENABLE_COMPARER: ${{ secrets.ENABLE_COMPARER }}
+        run: |
+          missing_or_empty=()
+          for var in REGISTRY_URL REGISTRY_USERNAME REGISTRY_PASSWORD EMAIL SENTRY_DSN PASSWORD OPENROUTER_API_KEY SELECTED_MODEL DISCORD_WEBHOOK_URL MONGO_URI WERKZEUG_RUN_MAIN ENABLE_COMPARER; do
+            if [ -z "${!var}" ]; then
+              missing_or_empty+=("$var")
+            fi
+          done
+          
+          if [ ${#missing_or_empty[@]} -ne 0 ]; then
+            echo "❌ Following environment variables are missing or empty:"
+            printf '%s\n' "${missing_or_empty[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All required environment variables are properly set!"
+
+
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy types-requests types-pytz types-colorama
+      - name: Run type checking
+        run: |
+          mypy --ignore-missing-imports \
+               --follow-imports=silent \
+               --allow-untyped-defs \
+               --allow-incomplete-defs \
+               --no-strict-optional \
+               --disable-error-code=no-untyped-def \
+               --disable-error-code=no-untyped-call \
+               --disable-error-code=var-annotated \
+               .
+
+  style:
+    name: Style Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+      - name: Run style checking
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --statistics
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+      - name: Run security checks
+        run: |
+          echo "Running Bandit security checks..."
+          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml || true
+          
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Production branch - enforcing strict security checks"
+            safety scan --output screen --policy-file .safety-policy.yml
+          else
+            echo "Development branch - running security checks in report-only mode"
+            safety scan --output screen || true
+          fi
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+          
+      - name: Check for test files
+        id: check_tests
+        run: |
+          if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+            echo "Tests found"
+            echo "has_tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "No test files found in the repository"
+            echo "has_tests=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests with coverage
+        if: steps.check_tests.outputs.has_tests == 'true'
+        run: |
+          pytest --cov=./ --cov-report=xml --cov-report=term-missing
+        env:
+          MONGO_URI: mongodb://localhost:27017/
+          PLANS_DIRECTORY: lesson_plans
+          SAVE_TO_MONGODB: "true"
+          SAVE_TO_FILE: "false"
+          ENABLE_COMPARER: "false"
+
+      - name: Generate empty coverage report
+        if: steps.check_tests.outputs.has_tests == 'false'
+        run: |
+          echo "Generating coverage report without tests"
+          python -m coverage run --source=./ -m pytest || true
+          python -m coverage xml
+          python -m coverage report || true
+          echo "Note: No tests were found. Consider adding tests to improve code quality."
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false  
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
+
+  build-and-deploy:
+    needs: [ test, check-env-vars, type-check, style, security ]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:secondyear
+            ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          script: |
+            # Login to registry first
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+            
+            # Export variables for use in commands
+            export IMAGE_NAME="${{ env.IMAGE_NAME }}"
+            export CONTAINER_NAME="${IMAGE_NAME}-secondyear"  # or -staging or -secondyear depending on workflow
+            
+            # Stop and remove existing container
+            docker stop "${CONTAINER_NAME}" || true
+            docker rm "${CONTAINER_NAME}" || true
+            
+            # Pull the latest image
+            docker pull ${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:secondyear  # or :staging or :secondyear depending on workflow
+            
+            # Run new container
+            docker run -d \
+              --name "${CONTAINER_NAME}" \
+              --restart unless-stopped \
+              -p 8081:80 \
+              -e ENVIRONMENT="secondyear" \
+              -e EMAIL='${{ secrets.EMAIL }}' \
+              -e SENTRY_DSN='${{ secrets.SENTRY_DSN }}' \
+              -e PASSWORD='${{ secrets.PASSWORD }}' \
+              -e OPENROUTER_API_KEY='${{ secrets.OPENROUTER_API_KEY }}' \
+              -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
+              -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
+              -e MONGO_URI='${{ secrets.MONGO_URI }}' \
+              -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
+              -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
+              -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
+              "${{ secrets.REGISTRY_URL }}/${IMAGE_NAME}:secondyear"
+            
+            # Verify container is running
+            if docker ps | grep -q "${CONTAINER_NAME}"; then
+              echo "✅ Container deployed successfully"
+            else
+              echo "❌ Container failed to start"
+              docker logs "${CONTAINER_NAME}"
+              exit 1
+            fi

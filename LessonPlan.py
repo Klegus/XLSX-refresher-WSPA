@@ -1,13 +1,13 @@
 from LessonPlanDownloader import LessonPlanDownloader
-import os, requests, time
-from colorama import init, Fore, Style
+import os, time
+from colorama import init, Style
 from difflib import SequenceMatcher
 
 
-init(autoreset=True)  # Initialize colorama
+init(autoreset=True)  
 import pandas as pd
 import openpyxl
-import os, re
+import re
 import pymongo
 from datetime import datetime
 
@@ -773,7 +773,7 @@ class LessonPlan(LessonPlanDownloader):
             html += "<tr>\n"
             for i, cell in enumerate(row):
                 formatted_cell = self.format_cell(
-                    cell, is_header=False, is_time_column=(i == 0)
+                    cell, is_time_column=(i == 0)
                 )
                 html += f"<td>{formatted_cell}</td>\n"
             html += "</tr>\n"
@@ -781,7 +781,7 @@ class LessonPlan(LessonPlanDownloader):
         html += "</table>"
         return html
 
-    def format_cell(self, cell, is_header, is_time_column):
+    def format_cell(self, cell,  is_time_column):
         if pd.isna(cell):
             return ""
         cell = str(cell)

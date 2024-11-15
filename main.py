@@ -2,21 +2,34 @@ import time
 from datetime import datetime, timedelta
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
-import os, shutil, requests, json
+from ActivityDownloader import WebpageDownloader
+from MoodleParserComponent import MoodleFileParser
+import os, requests, json, hashlib
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from bson import ObjectId
 import traceback
 from flask import Flask, jsonify, request, Response
 import threading
 import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
+import sentry_sdk
+load_dotenv()
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 app = Flask(__name__)
 
 # Load environment variables
-load_dotenv()
+
 USE_TEST_TIME = False
 TEST_TIME = None
 mongo_uri = os.getenv("MONGO_URI")
@@ -261,7 +274,7 @@ def parse_html_to_dataframe(html_content):
 
 @app.route("/api/whatnow/<int:group_number>")
 def whatnow(group_number):
-    global lesson_plan_manager, USE_TEST_TIME, TEST_TIME
+    global USE_TEST_TIME, TEST_TIME
 
     poland_tz = pytz.timezone("Europe/Warsaw")
 
@@ -366,21 +379,21 @@ def whatnow(group_number):
     message = f"Grupa: {group_key}\n\n"
 
     if current_lesson:
-        message += f"Aktualna lekcja:\n"
+        message += "Aktualna lekcja:\n"
         message += f"{current_lesson['subject']}\n"
         message += f"Koniec: {current_lesson['end']}\n"
         if next_lesson:
-            message += f"\nNastępna lekcja"
+            message += "\nNastępna lekcja"
             if days_ahead > 0:
                 message += f" ({next_lesson['day']})"
-            message += f":\n"
+            message += ":\n"
             message += f"{next_lesson['subject']}\n"
             message += f"Start: {next_lesson['start']}\n"
     elif next_lesson:
-        message += f"Następna lekcja"
+        message += "Następna lekcja"
         if days_ahead > 0:
             message += f" ({next_lesson['day']})"
-        message += f":\n"
+        message += ":\n"
         message += f"{next_lesson['subject']}\n"
         message += f"Start: {next_lesson['start']}\n"
     else:
@@ -495,9 +508,37 @@ def main():
                             f"Error in manager for {plans_config[plan_id]['name']}: {str(e)}"
                         )
 
-                print(
-                    f"\nAll plans checked. Waiting {check_interval} seconds before next cycle..."
-                )
+                # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
+                try:
+                    print("\nSprawdzanie aktywności Moodle...")
+                    downloader = WebpageDownloader()
+                    moodle_url = os.getenv("MOODLE_URL")
+                    if not moodle_url:
+                        raise ValueError("MOODLE_URL not set in environment variables")
+                    
+                    saved_file = downloader.save_webpage(moodle_url)
+                    if saved_file:
+                        parser = MoodleFileParser(
+                            saved_file, 
+                            api_key=openrouter_api_key,
+                            mongodb_uri=mongo_uri
+                        )
+                        
+                        # Parsuj i zapisz aktywności
+                        parser.parse_activities()
+                        parser.save_to_mongodb()
+                        
+                        # Usuń pobrany plik
+                        try:
+                            os.remove(saved_file)
+                            print(f"Usunięto plik tymczasowy: {saved_file}")
+                        except Exception as e:
+                            print(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
+                            
+                except Exception as e:
+                    print(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
+
+                print(f"\nWszystkie zadania zakończone. Oczekiwanie {check_interval} sekund przed następnym cyklem...")
                 time.sleep(check_interval)
 
         except KeyboardInterrupt:

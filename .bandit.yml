@@ -1,0 +1,20 @@
+skips: ['B101', 'B104', 'B311', 'B603']
+per_file_ignores:
+  'LessonPlanDownloader.py':
+    - B324
+# Severity level for all tests
+any_other_function_with_shell_equals_true: HIGH
+hardcoded_bind_all_interfaces: LOW
+hardcoded_password_string: LOW
+hardcoded_tmp_directory: LOW
+linux_commands_wildcard_injection: HIGH
+password_config_option_not_marked_secret: LOW
+request_with_no_cert_validation: HIGH
+ssh_no_host_key_verification: HIGH
+start_process_with_a_shell: HIGH
+start_process_with_no_shell: LOW
+start_process_with_partial_path: HIGH
+subprocess_popen_with_shell_equals_true: HIGH
+subprocess_without_shell_equals_true: LOW
+try_except_pass: LOW
+weak_cryptographic_key: HIGH
