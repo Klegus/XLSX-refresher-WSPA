@@ -12,7 +12,6 @@ env:
   IMAGE_NAME: "xlsx-refresher-wspa"
   PORT: "8081"
   CONTAINER_SUFFIX: "secondyear"
-  MONGO_DB: "Lesson"
 
 jobs:
   check-env-vars:
@@ -245,7 +244,7 @@ jobs:
               -e SELECTED_MODEL='${{ secrets.SELECTED_MODEL }}' \
               -e DISCORD_WEBHOOK_URL='${{ secrets.DISCORD_WEBHOOK_URL }}' \
               -e MONGO_URI='${{ secrets.MONGO_URI }}' \
-              -e MONGO_DB='${{ env.MONGO_DB }}' \
+              -e MONGO_DB='${{ secrets.MONGO_DB }}' \
               -e MOODLE_URL='${{ secrets.MOODLE_URL }}' \
               -e WERKZEUG_RUN_MAIN='${{ secrets.WERKZEUG_RUN_MAIN }}' \
               -e ENABLE_COMPARER='${{ secrets.ENABLE_COMPARER }}' \
