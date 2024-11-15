@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from typing import List, Dict
-import hashlib, requests
+import hashlib, requests, os
 from lxml import html, etree
 from datetime import datetime
 from pymongo import MongoClient
@@ -39,7 +39,7 @@ class MoodleFileParser:
         self.openrouter_api_key = api_key
         self.activities_hierarchy = []
         self.mongo_client = MongoClient(mongodb_uri)
-        self.db = self.mongo_client['Lesson_dev']
+        self.db = self.mongo_client[os.getenv("MONGO_DB", "Lesson")]
         self.collection = self.db['Activities']
         
     def load_file(self):
