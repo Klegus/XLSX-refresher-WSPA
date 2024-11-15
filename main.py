@@ -487,25 +487,25 @@ def main():
             print(f"LessonPlan for {plan_config['name']} initialized successfully")
 
             enable_comparer = os.getenv("ENABLE_COMPARER", "true").lower() == "true"
-            if enable_comparer:
+            comparator = None
+            
+            if enable_comparer and openrouter_api_key and selected_model:
                 print(f"Initializing LessonPlanComparator for {plan_config['name']}")
-                lesson_plan_comparators[plan_id] = LessonPlanComparator(
-                    mongo_uri=mongo_uri,
-                    openrouter_api_key=openrouter_api_key,
-                    selected_model=selected_model,
-                )
-                print(
-                    f"LessonPlanComparator for {plan_config['name']} initialized successfully"
-                )
+                try:
+                    comparator = LessonPlanComparator(
+                        mongo_uri=mongo_uri,
+                        openrouter_api_key=openrouter_api_key,
+                        selected_model=selected_model,
+                    )
+                    lesson_plan_comparators[plan_id] = comparator
+                    print(f"LessonPlanComparator for {plan_config['name']} initialized successfully")
+                except Exception as e:
+                    print(f"Failed to initialize comparator for {plan_config['name']}: {e}")
+                    comparator = None
             else:
-                print(
-                    f"Skipping LessonPlanComparator initialization for {plan_config['name']} (disabled in config)"
-                )
+                print(f"Skipping LessonPlanComparator initialization for {plan_config['name']} (disabled in config or missing API settings)")
 
             print(f"Initializing LessonPlanManager for {plan_config['name']}")
-            comparator = (
-                lesson_plan_comparators.get(plan_id) if enable_comparer else None
-            )
             lesson_plan_managers[plan_id] = LessonPlanManager(
                 lesson_plans[plan_id],
                 comparator,
