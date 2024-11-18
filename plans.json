@@ -10,6 +10,7 @@
             "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrupa 2\npodział wg nazwisk: L-Z"
         },
         "category": "st",
+        "compare": true,
         "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "INF st II"
     },
