@@ -307,6 +307,10 @@ def parse_html_to_dataframe(html_content):
 @app.route("/api/whatnow/<int:group_number>")
 def whatnow(group_number):
     global USE_TEST_TIME, TEST_TIME
+    
+    # Load plans configuration
+    with open("plans.json", "r", encoding="utf-8") as f:
+        plans_config = json.load(f)
 
     poland_tz = pytz.timezone("Europe/Warsaw")
 
