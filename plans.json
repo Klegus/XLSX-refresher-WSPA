@@ -1,6 +1,7 @@
 {
     "informatyka2": {
         "name": "Informatyka - studia I stopnia st II",
+        "faculty": "informatyka",
         "groups": {
             "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczy\ngrupa 1\npodział wg nazwisk: A-K",
             "Technologie Webowe i Internet rzeczy grupa 2": "Technologie Webowe i Internet rzeczy\ngrupa 2\npodział wg nazwisk: L-Z",
@@ -16,6 +17,7 @@
     },
     "informatyka1": {
         "name": "Informatyka - studia I stopnia st I",
+        "faculty": "informatyka",
         "groups": {
             "Grupa 1 - A-Ho": "grupa 1:\npodział wg nazwisk:\n A-Ho",
             "Grupa 2 - Hp-Med.": "grupa 2:\npodział wg nazwisk:\nHp-Med.",
@@ -28,6 +30,7 @@
     },
     "informatyka3": {
         "name": "Informatyka - studia I stopnia st III",
+        "faculty": "informatyka",
         "groups": {
             "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
             "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrrupa 1\npodział wg nazwisk: A-K",
@@ -41,6 +44,7 @@
     },
     "informatyka4": {
         "name": "Informatyka - studia I stopnia st IV",
+        "faculty": "informatyka",
         "groups": {
             "Grupa 1": "grupa 1\npodział wg nazwisk: A-Ka",
             "Grupa 2": "grupa 2\npodział wg nazwisk: Kb-P",
@@ -52,6 +56,7 @@
     },
     "informatyka5": {
         "name": "Informatyka - studia I stopnia nst I - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Grupa 1": "grupa 1 podział wg nazwisk: A-Mi",
             "Grupa 2": "grupa 2 podział wg nazwisk: Mj-Z"
@@ -62,6 +67,7 @@
     },
     "informatyka6": {
         "name": "Informatyka - studia I stopnia nst I - semestr zimowy - z. online",
+        "faculty": "informatyka",
         "groups": null,
         "category": "nst",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -69,6 +75,7 @@
     },
     "informatyka7": {
         "name": "Informatyka - studia I stopnia puw I - semestr zimowy z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Grupa 1": "grupa 1\nwg nazwisk:A-I",
             "Grupa 2": "grupa 2\nwg nazwisk: J-M",
@@ -81,6 +88,7 @@
     },
     "informatyka8": {
         "name": "Informatyka - studia I stopnia PUW I - semestr zimowy z. on-line",
+        "faculty": "informatyka",
         "groups": null,
         "category": "nst-online",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -88,6 +96,7 @@
     },
     "informatyka9": {
         "name": "Informatyka - studia I stopnia nst II - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Cyberbezpieczeństwo i informatyka śledcza - grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - grupa 1 podział wg nazwisk: A-Ko",
             "Cyberbezpieczeństwo i informatyka śledcza - grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - grupa 2 podział wg nazwisk: Kp-Z"
@@ -98,6 +107,7 @@
     },
     "informatyka10": {
         "name": "Informatyka - studia I stopnia nst II - semestr zimowy - z. on-line",
+        "faculty": "informatyka",
         "groups": {
             "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
         },
@@ -107,6 +117,7 @@
     },
     "informatyka11": {
         "name": "Informatyka - studia I stopnia nst III - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Technologie Webowe i Internet rzeczy": "Sp.:  Technologie Webowe i Internet rzeczy",
             "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
@@ -117,6 +128,7 @@
     },
     "informatyka12": {
         "name": "Informatyka - studia I stopnia nst III - semestr zimowy - z. on-line",
+        "faculty": "informatyka",
         "groups": {
             "Technologie Webowe i Internet rzeczy": "Sp.:  Technologie Webowe i Internet rzeczy",
             "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
@@ -127,6 +139,7 @@
     },
     "informatyka13": {
         "name": "Informatyka - studia I stopnia nst IV - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Grupa 1": "grupa 1",
             "Grupa 2": "grupa 2"
@@ -137,6 +150,7 @@
     },
     "informatyka14": {
         "name": "Informatyka - studia I stopnia nst IV - semestr zimowy - z. on-line",
+        "faculty": "informatyka",
         "groups": null,
         "category": "nst-online",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -144,6 +158,7 @@
     },
     "informatyka15": {
         "name": "Informatyka - studia I stopnia nst puw II - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Bazy danych - grupa 1": "Sp.: Bazy danych - gr.1 wg nazwisk: A-Pa",
             "Bazy danych - grupa 2": "Sp.: Bazy danych - gr.2 wg nazwisk: Py-Z",
@@ -157,6 +172,7 @@
     },
     "informatyka16": {
         "name": "Informatyka - studia I stopnia nst puw II - semestr zimowy - z. online",
+        "faculty": "informatyka",
         "groups": {
             "Bazy danych": "Sp.: Bazy danych",
             "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
@@ -168,6 +184,7 @@
     },
     "informatyka17": {
         "name": "Informatyka - studia I stopnia nst puw III - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Bazy danych": "Sp.: Bazy danych",
             "Technologie Webowe i Internet rzeczy grupa 1": "Sp.:  Technologie Webowe i Internet rzeczy gr.1: A-M",
@@ -180,6 +197,7 @@
     },
     "informatyka18": {
         "name": "Informatyka - studia I stopnia nst puw III - semestr zimowy - z. online",
+        "faculty": "informatyka",
         "groups": {
             "Bazy danych": "Sp.: Bazy danych",
             "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
@@ -191,6 +209,7 @@
     },
     "informatyka19": {
         "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. stacjonarne",
+        "faculty": "informatyka",
         "groups": {
             "Grupa 1": "grupa 1: podział wg nazwisk:",
             "Grupa 2": "grupa 2: podział wg nazwisk:"
@@ -201,6 +220,7 @@
     },
     "informatyka20": {
         "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. online",
+        "faculty": "informatyka",
         "groups": null,
         "category": "nst-online",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
