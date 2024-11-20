@@ -35,7 +35,7 @@ class LessonPlan(LessonPlanDownloader):
         if self.save_to_mongodb:
             try:
                 self.mongo_client = pymongo.MongoClient(mongo_uri)
-                self.db = self.mongo_client[os.getenv("MONGO_DB", "Lesson")]
+                self.db = self.mongo_client[os.getenv("MONGO_DB", "Lesson_dev")]
                 print("Successfully connected to MongoDB")
             except pymongo.errors.ConnectionFailure as e:
                 print(f"Could not connect to MongoDB: {e}")
@@ -79,7 +79,7 @@ class LessonPlan(LessonPlanDownloader):
 
         if self.save_to_mongodb:
             # Use plan-specific collection
-            collection_name = f"plans_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+            collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '_')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
             collection = self.db[collection_name]
             # Check MongoDB for changes
             latest_plan = collection.find_one(
@@ -708,7 +708,7 @@ class LessonPlan(LessonPlanDownloader):
             if self.save_to_mongodb:
                 try:
                     # Use plan-specific collection
-                    collection_name = f"plans_{self.plan_config['name'].lower().replace(' ','_').replace('-', '_')}"
+                    collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '_')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
                     collection = self.db[collection_name]
 
                     # Check if this checksum already exists
