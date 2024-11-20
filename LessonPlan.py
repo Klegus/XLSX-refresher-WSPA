@@ -542,7 +542,7 @@ class LessonPlan(LessonPlanDownloader):
             df_filtered = df_filtered[
                 ~df_filtered[0]
                 .astype(str)
-                .str.contains("godz\.|GODZ\.", case=False, regex=True)
+                .str.contains(r"godz\.|GODZ\.", case=False, regex=True)
             ]
 
             # Improved empty row removal
