@@ -78,7 +78,7 @@ class LessonPlan(LessonPlanDownloader):
         # Check if category is None - if so, only check checksum and save basic info
         if self.schedule_type is None:
             if self.save_to_mongodb:
-                collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '_')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+                collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
                 collection = self.db[collection_name]
                 
                 # Check if this checksum already exists

@@ -325,7 +325,7 @@ def whatnow(group_number):
         now = datetime.now(poland_tz)
 
     # Pobierz najnowszy plan z odpowiedniej kolekcji
-    collection = db[f"plans_{plans_config['informatyka2']['faculty']}_{plans_config['informatyka2']['name'].lower().replace(' ', '_').replace('-', '_')}"]
+    collection = db[f"plans_{plans_config['informatyka2']['faculty'].replace(' ', '-')}_{plans_config['informatyka2']['name'].lower().replace(' ', '_').replace('-', '_')}"]
     latest_plan = collection.find_one(sort=[("timestamp", -1)])
 
     if not latest_plan:
