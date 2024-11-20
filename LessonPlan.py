@@ -75,6 +75,32 @@ class LessonPlan(LessonPlanDownloader):
             print("Failed to download file.")
             return None
 
+        # Check if category is None - if so, only check checksum and save basic info
+        if self.schedule_type is None:
+            if self.save_to_mongodb:
+                collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '_')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+                collection = self.db[collection_name]
+                
+                # Check if this checksum already exists
+                existing_plan = collection.find_one({"checksum": new_checksum})
+                if existing_plan:
+                    print(f"Plan with checksum {new_checksum} already exists in {collection_name}. Skipping save.")
+                    return False
+                
+                # Save basic plan info without groups
+                current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                plans_data = {
+                    "timestamp": current_datetime,
+                    "checksum": new_checksum,
+                    "plan_name": self.plan_config["name"],
+                    "category": None,
+                    "groups": {}
+                }
+                
+                result = collection.insert_one(plans_data)
+                print(f"Saved basic plan info to MongoDB collection {collection_name} with id: {result.inserted_id}")
+            return new_checksum
+
         should_process = True
 
         if self.save_to_mongodb:
