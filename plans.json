@@ -196,8 +196,6 @@
             "Grupa 2": "grupa 2: podział wg nazwisk:"
         },
         "category": "nst-online",
-        "notify": true,
-        "compare": true,
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "INF IV PUW - z. stacjonarne"
     },
