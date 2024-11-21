@@ -89,12 +89,22 @@ class LessonPlan(LessonPlanDownloader):
                 
                 # Save basic plan info without groups
                 current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                message_html = f"""
+                <div class="plan-message">
+                    <p>Przepraszamy, ale ten plan nie jest obecnie możliwy do przetworzenia.</p>
+                    <p>Możemy jedynie sprawdzić jego ostatnią aktualizację. Jeśli coś się zmieni w przyszłości, poinformujemy o tym.</p>
+                    <p><a href="{self.plan_config['download_url']}" class="download-btn" target="_blank">Pobierz oryginalny plan</a></p>
+                </div>
+                """
+                
                 plans_data = {
                     "timestamp": current_datetime,
                     "checksum": new_checksum,
                     "plan_name": self.plan_config["name"],
                     "category": None,
-                    "groups": None,
+                    "groups": {
+                        "cały kierunek": message_html
+                    },
                     "url": self.plan_config["download_url"]
                 }
                 
