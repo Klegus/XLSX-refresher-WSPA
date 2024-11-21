@@ -94,7 +94,8 @@ class LessonPlan(LessonPlanDownloader):
                     "checksum": new_checksum,
                     "plan_name": self.plan_config["name"],
                     "category": None,
-                    "groups": None
+                    "groups": None,
+                    "url": self.plan_config["download_url"]
                 }
                 
                 result = collection.insert_one(plans_data)
