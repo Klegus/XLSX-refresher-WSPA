@@ -31,7 +31,7 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
 )
 
-from frontend-serve import app
+from frontend_serve import app
 
 # Load environment variables
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from typing import Optional
 from datetime import datetime
 from pymongo import MongoClient
-from frontend-serve import app
+from frontend_serve import app
 from main import db
 from flask import jsonify, request
 

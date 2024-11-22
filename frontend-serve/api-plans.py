@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from addons.helper import get_semester_collections
-from frontend-serve import app
+from frontend_serve import app
 from main import db
 from typing import Optional
 from werkzeug.exceptions import NotFound, InternalServerError

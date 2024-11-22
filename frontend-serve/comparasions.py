@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from frontend-serve import app
+from frontend_serve import app
 from main import db
 from werkzeug.exceptions import InternalServerError
 
