@@ -261,7 +261,7 @@ def log_check_result(total_plans, plans_checked, changes_detected):
 
 # Initialize routes
 init_status_routes(app, status_checker, get_system_config)
-init_config_routes(app, get_system_config, get_plans_config, update_system_config, update_plans_config)
+init_config_routes(app, get_system_config, get_plans_config, update_system_config, update_plans_config, db)
 init_plan_routes(app, get_semester_collections, db)
 init_log_routes(app, db)
 init_activity_routes(app, db)
