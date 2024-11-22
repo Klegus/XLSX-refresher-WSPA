@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
-from main import db, app
+from frontend-serve import app
+from main import db
 from werkzeug.exceptions import InternalServerError
 
 @app.route('/panel/api/comparisons/<collection_name>/<group_name>', methods=['GET'])

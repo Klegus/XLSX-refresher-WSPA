@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException
 from typing import Optional
 from datetime import datetime
 from pymongo import MongoClient
+from frontend-serve import app
 from main import db
-from main import app
 from flask import jsonify, request
 
 @app.route('/api/activities', methods=['GET'])

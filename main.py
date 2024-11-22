@@ -31,7 +31,7 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
 )
 
-app = Flask(__name__)
+from frontend-serve import app
 
 # Load environment variables
 
