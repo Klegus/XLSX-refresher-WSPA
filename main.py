@@ -810,8 +810,9 @@ def parse_html_to_dataframe(html_content):
     return pd.DataFrame(data, columns=headers)
 
 @app.route("/panel")
-def panel():
+def show_panel():
     return Response(open("templates/panel.html").read(), mimetype="text/html")
+
 def main():
     print("Starting main.py")
     check_interval = 600
