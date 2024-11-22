@@ -156,10 +156,29 @@ def manage_config():
             return jsonify({"error": "No data provided"}), 400
             
         if "system_config" in data:
-            update_system_config(data["system_config"])
+            try:
+                update_system_config(data["system_config"])
+            except Exception as e:
+                return jsonify({"error": f"Failed to update system config: {str(e)}"}), 500
             
         if "plans_config" in data:
-            update_plans_config(data["plans_config"])
+            try:
+                # Handle plan deletion
+                if isinstance(data["plans_config"], dict):
+                    for plan_name, plan_data in data["plans_config"].items():
+                        if plan_data is None:
+                            # Delete plan
+                            db.plans_config.update_one(
+                                {"_id": "plans_json"},
+                                {"$unset": {f"plans.{plan_name}": ""}}
+                            )
+                        else:
+                            # Update or add plan
+                            update_plans_config(data["plans_config"])
+                else:
+                    update_plans_config(data["plans_config"])
+            except Exception as e:
+                return jsonify({"error": f"Failed to update plans config: {str(e)}"}), 500
             
         return jsonify({"message": "Configuration updated successfully"})
 
