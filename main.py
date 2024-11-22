@@ -7,6 +7,7 @@ from MoodleParserComponent import MoodleFileParser
 import os, requests, json, hashlib
 from dotenv import load_dotenv
 from pymongo import MongoClient
+import pymongo
 import traceback
 from flask import Flask, jsonify, request, Response
 import threading
@@ -205,16 +206,39 @@ def log_check_result(total_plans, plans_checked, changes_detected):
     )
     
     # Add to logs collection
-    db.check_logs.insert_one(log_entry)
+    db.check_cycles.insert_one(log_entry)
 
 @app.route("/api/logs", methods=["GET"])
 def get_logs():
     """Get check logs from MongoDB"""
     try:
-        logs = list(db.check_logs.find({}, {'_id': 0}).sort("timestamp", -1).limit(100))
+        # Pobierz 100 najnowszych logów, posortowanych po timestamp malejąco
+        logs = list(db.check_cycles.find(
+            {},
+            {
+                'timestamp': 1,
+                'successful_checks': 1,
+                'new_plans': 1,
+                'has_errors': 1,
+                'execution_time': 1,
+                'errors': 1,
+                '_id': 0  # Wykluczamy _id, żeby uniknąć problemów z serializacją ObjectId
+            }
+        ).sort("timestamp", pymongo.DESCENDING).limit(100))
+        
+        # Konwertuj daty na format ISO string dla JSONa
+        for log in logs:
+            if 'timestamp' in log:
+                log['timestamp'] = log['timestamp'].isoformat()
+        
         return jsonify(logs)
+    
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error fetching logs: {str(e)}")  # Logowanie błędu
+        return jsonify({
+            "error": "Failed to fetch logs",
+            "details": str(e)
+        }), 500
 
 @app.route("/api/config", methods=["GET", "POST", "PUT"])
 def manage_config():
@@ -406,6 +430,7 @@ class LessonPlanManager:
                                 webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
                                 self.send_discord_webhook(webhook_message, force_send=True)
                                 print("Wykryto i zapisano zmiany w planie.")
+                                return True
                         except Exception as e:
                             print(f"Error during plan comparison: {e}")
                             # Fall back to simple notification if comparison fails
@@ -599,10 +624,9 @@ def main():
                     print(f"\nStarting check cycle for {plan_name}")
                     try:
                         result = manager.check_once()
+                        successful_checks += 1
                         if result:
-                            successful_checks += 1
-                            if result is True:  # New plan was added
-                                new_plans += 1
+                            new_plans += 1
                     except Exception as e:
                         error_info = {
                             "error": e,
