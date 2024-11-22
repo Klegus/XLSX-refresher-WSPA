@@ -190,23 +190,13 @@ class StatusChecker:
 status_checker = StatusChecker()
 
 
-@app.route("/api/status")
-def status():
-    is_active = status_checker.is_active()
-    last_check = status_checker.get_last_activity_datetime()
-    config = get_system_config()
-    
-    response = {
-        "status": "active" if is_active else "inactive",
-        "last_check": last_check,
-        "maintenance_mode": config.get("maintenance_mode", False),
-        "check_interval": config.get("check_interval", 900)
-    }
-    
-    if is_active:
-        return jsonify(response), 200
-    else:
-        return jsonify(response), 503
+# Import route modules
+from routes.status import init_status_routes
+from routes.config import init_config_routes
+from routes.plans import init_plan_routes
+from routes.logs import init_log_routes
+from routes.activities import init_activity_routes
+from routes.comparisons import init_comparison_routes
 
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
     """Log check cycle results to MongoDB"""
@@ -269,39 +259,15 @@ def log_check_result(total_plans, plans_checked, changes_detected):
     # Add to logs collection
     db.check_cycles.insert_one(log_entry)
 
-@app.route("/api/logs", methods=["GET"])
-def get_logs():
-    """Get check logs from MongoDB"""
-    try:
-        # Pobierz 100 najnowszych logów, posortowanych po timestamp malejąco
-        logs = list(db.check_cycles.find(
-            {},
-            {
-                'timestamp': 1,
-                'successful_checks': 1,
-                'new_plans': 1,
-                'has_errors': 1,
-                'execution_time': 1,
-                'errors': 1,
-                '_id': 0  # Wykluczamy _id, żeby uniknąć problemów z serializacją ObjectId
-            }
-        ).sort("timestamp", pymongo.DESCENDING).limit(100))
-        
-        # Konwertuj daty na format ISO string dla JSONa
-        for log in logs:
-            if 'timestamp' in log:
-                log['timestamp'] = log['timestamp'].isoformat()
-        
-        return jsonify(logs)
-    
-    except Exception as e:
-        print(f"Error fetching logs: {str(e)}")  # Logowanie błędu
-        return jsonify({
-            "error": "Failed to fetch logs",
-            "details": str(e)
-        }), 500
+# Initialize routes
+init_status_routes(app, status_checker, get_system_config)
+init_config_routes(app, get_system_config, get_plans_config, update_system_config, update_plans_config)
+init_plan_routes(app, get_semester_collections, db)
+init_log_routes(app, db)
+init_activity_routes(app, db)
+init_comparison_routes(app, db)
 
-@app.route("/api/config", methods=["GET", "POST", "PUT"])
+@app.route("/panel")
 def manage_config():
     # Check maintenance mode for POST/PUT requests
     if request.method in ['POST', 'PUT'] and get_system_config().get("maintenance_mode", False):
