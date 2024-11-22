@@ -44,7 +44,13 @@ def get_system_config():
         config = {
             "_id": "config",
             "check_interval": 900,
-            "maintenance_mode": False
+            "maintenance_mode": False,
+            "last_check_stats": {
+                "total_plans": 0,
+                "plans_checked": 0,
+                "changes_detected": 0,
+                "timestamp": datetime.now().isoformat()
+            }
         }
         db.system_config.insert_one(config)
     return config
@@ -140,8 +146,42 @@ def status():
     else:
         return jsonify(response), 503
 
-@app.route("/api/config", methods=["GET", "POST"])
+def log_check_result(total_plans, plans_checked, changes_detected):
+    """Log check results to MongoDB"""
+    timestamp = datetime.now()
+    log_entry = {
+        "timestamp": timestamp,
+        "total_plans": total_plans,
+        "plans_checked": plans_checked,
+        "changes_detected": changes_detected
+    }
+    
+    # Update last check stats in system config
+    db.system_config.update_one(
+        {"_id": "config"},
+        {"$set": {"last_check_stats": log_entry}}
+    )
+    
+    # Add to logs collection
+    db.check_logs.insert_one(log_entry)
+
+@app.route("/api/logs", methods=["GET"])
+def get_logs():
+    """Get check logs from MongoDB"""
+    try:
+        logs = list(db.check_logs.find({}, {'_id': 0}).sort("timestamp", -1).limit(100))
+        return jsonify(logs)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["GET", "POST", "PUT"])
 def manage_config():
+    # Check maintenance mode for POST/PUT requests
+    if request.method in ['POST', 'PUT'] and get_system_config().get("maintenance_mode", False):
+        # Allow only maintenance mode toggle
+        data = request.json
+        if not (len(data.get("system_config", {})) == 1 and "maintenance_mode" in data.get("system_config", {})):
+            return jsonify({"error": "System is in maintenance mode"}), 403
     if request.method == "GET":
         config = get_system_config()
         plans = get_plans_config()

@@ -13,7 +13,11 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5" id="mainContainer">
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <input type="text" class="form-control" id="planSearch" placeholder="Search plans...">
+        </div>
         <h1 class="mb-4">System Administration Panel</h1>
         
         <!-- Status Section -->
@@ -49,8 +53,32 @@
             </div>
         </div>
 
-        <!-- Plans Management Section -->
+        <!-- Logs Section -->
         <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">System Logs</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Total Plans</th>
+                                <th>Plans Checked</th>
+                                <th>Changes Detected</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTable">
+                            <!-- Logs will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plans Management Section -->
+        <div class="card mb-4" id="plansSection">
             <div class="card-header">
                 <h2 class="h4 mb-0">Plans Management</h2>
             </div>
@@ -73,12 +101,111 @@
         </div>
     </div>
 
+    <!-- Edit Plan Modal -->
+    <div class="modal fade" id="editPlanModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Plan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="editPlanJson" rows="15"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="savePlanEdit()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let currentEditPlanName = null;
+        // Search functionality
+        document.getElementById('planSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const plans = document.querySelectorAll('#currentPlans .list-group-item');
+            plans.forEach(plan => {
+                const planName = plan.querySelector('h5').textContent.toLowerCase();
+                plan.style.display = planName.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        function checkMaintenanceMode() {
+            const isMaintenanceMode = document.getElementById('maintenanceMode').checked;
+            const plansSection = document.getElementById('plansSection');
+            const checkIntervalCard = document.querySelector('.card:nth-child(2)');
+            
+            if (isMaintenanceMode) {
+                plansSection.style.display = 'none';
+                checkIntervalCard.style.display = 'none';
+            } else {
+                plansSection.style.display = 'block';
+                checkIntervalCard.style.display = 'block';
+            }
+        }
+
+        function loadLogs() {
+            fetch('/api/logs')
+                .then(response => response.json())
+                .then(logs => {
+                    const logsTable = document.getElementById('logsTable');
+                    logsTable.innerHTML = '';
+                    logs.forEach(log => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td>${log.total_plans}</td>
+                            <td>${log.plans_checked}</td>
+                            <td>${log.changes_detected}</td>
+                        `;
+                        logsTable.appendChild(row);
+                    });
+                });
+        }
+
+        function editPlan(name, plan) {
+            currentEditPlanName = name;
+            document.getElementById('editPlanJson').value = JSON.stringify(plan, null, 2);
+            new bootstrap.Modal(document.getElementById('editPlanModal')).show();
+        }
+
+        function savePlanEdit() {
+            const planJson = document.getElementById('editPlanJson').value;
+            try {
+                const planData = JSON.parse(planJson);
+                fetch('/api/config', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plans_config: {
+                            [currentEditPlanName]: planData
+                        }
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    bootstrap.Modal.getInstance(document.getElementById('editPlanModal')).hide();
+                    alert('Plan updated successfully');
+                    loadPlans();
+                })
+                .catch(error => alert('Error updating plan'));
+            } catch (e) {
+                alert('Invalid JSON format');
+            }
+        }
+
         // Initial load
         document.addEventListener('DOMContentLoaded', function() {
             loadStatus();
             loadConfig();
             loadPlans();
+            loadLogs();
+            checkMaintenanceMode();
         });
 
         // Refresh status every 30 seconds
@@ -121,7 +248,10 @@
                                     <h5 class="mb-1">${name}</h5>
                                     <small class="text-muted">URL: ${plan.download_url || 'N/A'}</small>
                                 </div>
-                                <button class="btn btn-danger btn-sm" onclick="deletePlan('${name}')">Delete</button>
+                                <div>
+                                    <button class="btn btn-primary btn-sm me-2" onclick="editPlan('${name}', ${JSON.stringify(plan).replace(/"/g, '&quot;')})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deletePlan('${name}')">Delete</button>
+                                </div>
                             `;
                             plansContainer.appendChild(planElement);
                         });
@@ -150,7 +280,11 @@
             .catch(error => alert('Error updating check interval'));
         }
 
+        // Refresh logs every minute
+        setInterval(loadLogs, 60000);
+
         document.getElementById('maintenanceMode').addEventListener('change', function(e) {
+            checkMaintenanceMode();
             fetch('/api/config', {
                 method: 'POST',
                 headers: {
