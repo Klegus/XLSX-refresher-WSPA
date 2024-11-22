@@ -289,6 +289,31 @@ def manage_config():
         return jsonify({"message": "Configuration updated successfully"})
 
 
+@app.route("/api/plans/<plan_name>", methods=["DELETE"])
+def delete_plan(plan_name):
+    """Delete a specific plan"""
+    if get_system_config().get("maintenance_mode", False):
+        return jsonify({"error": "System is in maintenance mode"}), 403
+
+    try:
+        # Get current plans
+        current_plans = get_plans_config()
+        if not current_plans:
+            return jsonify({"error": "Could not retrieve plans"}), 500
+
+        # Check if plan exists
+        if plan_name not in current_plans:
+            return jsonify({"error": f"Plan {plan_name} not found"}), 404
+
+        # Delete plan
+        del current_plans[plan_name]
+        update_plans_config(current_plans)
+
+        return jsonify({"message": f"Plan {plan_name} deleted successfully"})
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete plan: {str(e)}"}), 500
+
 def run_flask_app():
     app.run(host="0.0.0.0", port=80)
 

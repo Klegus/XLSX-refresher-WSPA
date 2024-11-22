@@ -373,16 +373,11 @@
 
         function deletePlan(planName) {
             if (confirm(`Are you sure you want to delete plan "${planName}"?`)) {
-                fetch('/api/config', {
-                    method: 'POST',
+                fetch(`/api/plans/${planName}`, {
+                    method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        plans_config: {
-                            [planName]: null
-                        }
-                    })
+                        'Content-Type': 'application/json'
+                    }
                 })
                 .then(response => response.json())
                 .then(data => {
