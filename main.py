@@ -73,7 +73,7 @@ class LessonPlanManager:
         self,
         lesson_plan,
         lesson_plan_comparator,
-        check_interval=600,
+        check_interval=900,
         working_directory=".",
         discord_webhook_url=None,
     ):
@@ -303,167 +303,9 @@ def parse_html_to_dataframe(html_content):
 
     return pd.DataFrame(data, columns=headers)
 
-
-@app.route("/api/whatnow/<int:group_number>")
-def whatnow(group_number):
-    global USE_TEST_TIME, TEST_TIME
-    
-    # Load plans configuration
-    with open("plans.json", "r", encoding="utf-8") as f:
-        plans_config = json.load(f)
-
-    poland_tz = pytz.timezone("Europe/Warsaw")
-
-    if USE_TEST_TIME and TEST_TIME:
-        if isinstance(TEST_TIME, str):
-            now = datetime.strptime(TEST_TIME, "%Y-%m-%d %H:%M:%S").replace(
-                tzinfo=poland_tz
-            )
-        else:
-            now = TEST_TIME.replace(tzinfo=poland_tz)
-    else:
-        now = datetime.now(poland_tz)
-
-    # Pobierz najnowszy plan z odpowiedniej kolekcji
-    collection = db[f"plans_{plans_config['informatyka2']['faculty'].replace(' ', '-')}_{plans_config['informatyka2']['name'].lower().replace(' ', '_').replace('-', '_')}"]
-    latest_plan = collection.find_one(sort=[("timestamp", -1)])
-
-    if not latest_plan:
-        return jsonify({"message": "Brak dostępnego planu lekcji"}), 404
-
-    group_key = get_group_key(group_number)
-    if group_key is None:
-        return jsonify({"message": "Nieprawidłowy numer grupy"}), 400
-
-    if group_key not in latest_plan["groups"]:
-        return jsonify({"message": f"Brak planu dla grupy {group_key}"}), 404
-
-    # Konwertuj HTML na DataFrame
-    html_content = latest_plan["groups"][group_key]
-    from io import StringIO
-
-    df_group = pd.read_html(StringIO(html_content))[0]
-    if df_group is None or df_group.empty:
-        return jsonify({"message": "Brak planu lekcji dla tej grupy"}), 404
-
-    day_names = [
-        "Poniedziałek",
-        "Wtorek",
-        "Środa",
-        "Czwartek",
-        "Piątek",
-        "Sobota",
-        "Niedziela",
-    ]
-    current_day = now.weekday()
-
-    current_lesson = None
-    next_lesson = None
-    days_ahead = 0
-
-    # Sprawdź lekcje na najbliższe 7 dni
-    for day_offset in range(7):
-        check_day = (current_day + day_offset) % 7
-        check_date = now.date() + timedelta(days=day_offset)
-        day_name = day_names[check_day]
-
-        for _, row in df_group.iterrows():
-            if (
-                day_name in row
-                and pd.notna(row[day_name])
-                and str(row[day_name]).strip()
-            ):  # Sprawdź, czy jest lekcja w danym dniu
-                time_range = row["Godziny"].split("-")
-                start_time = datetime.strptime(
-                    parse_custom_time(time_range[0].strip()), "%H:%M"
-                ).replace(
-                    year=check_date.year,
-                    month=check_date.month,
-                    day=check_date.day,
-                    tzinfo=poland_tz,
-                )
-                end_time = datetime.strptime(
-                    parse_custom_time(time_range[1].strip()), "%H:%M"
-                ).replace(
-                    year=check_date.year,
-                    month=check_date.month,
-                    day=check_date.day,
-                    tzinfo=poland_tz,
-                )
-
-                if day_offset == 0 and start_time <= now < end_time:
-                    current_lesson = {
-                        "subject": format_subject(row[day_name]),
-                        "start": start_time.strftime("%H:%M"),
-                        "end": end_time.strftime("%H:%M"),
-                        "time_left": int((end_time - now).total_seconds() // 60),
-                    }
-                elif now < start_time and not next_lesson:
-                    next_lesson = {
-                        "subject": format_subject(row[day_name]),
-                        "start": start_time.strftime("%H:%M"),
-                        "end": end_time.strftime("%H:%M"),
-                        "time_to_start": int((start_time - now).total_seconds() // 60),
-                        "day": day_name,
-                    }
-                    days_ahead = day_offset
-                    break
-
-        if next_lesson:
-            break
-
-    message = f"Grupa: {group_key}\n\n"
-
-    if current_lesson:
-        message += "Aktualna lekcja:\n"
-        message += f"{current_lesson['subject']}\n"
-        message += f"Koniec: {current_lesson['end']}\n"
-        if next_lesson:
-            message += "\nNastępna lekcja"
-            if days_ahead > 0:
-                message += f" ({next_lesson['day']})"
-            message += ":\n"
-            message += f"{next_lesson['subject']}\n"
-            message += f"Start: {next_lesson['start']}\n"
-    elif next_lesson:
-        message += "Następna lekcja"
-        if days_ahead > 0:
-            message += f" ({next_lesson['day']})"
-        message += ":\n"
-        message += f"{next_lesson['subject']}\n"
-        message += f"Start: {next_lesson['start']}\n"
-    else:
-        message += "Brak zaplanowanych lekcji w ciągu najbliższych 7 dni.\n"
-
-    # Usuń ewentualne podwójne nowe linie i końcowe białe znaki
-    message = "\n".join(line for line in message.split("\n") if line.strip())
-    json_response = json.dumps({"message": message}, ensure_ascii=False, indent=2)
-    return Response(json_response, content_type="application/json; charset=utf-8")
-
-
-@app.route("/api/set_test_time", methods=["POST"])
-def set_test_time():
-    global USE_TEST_TIME, TEST_TIME
-    data = request.json
-    if "use_test_time" in data:
-        USE_TEST_TIME = data["use_test_time"]
-    if "test_time" in data:
-        try:
-            TEST_TIME = datetime.strptime(data["test_time"], "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            return (
-                jsonify({"error": "Invalid time format. Use YYYY-MM-DD HH:MM:SS"}),
-                400,
-            )
-    return jsonify(
-        {
-            "message": "Test time settings updated",
-            "use_test_time": USE_TEST_TIME,
-            "test_time": TEST_TIME.strftime("%Y-%m-%d %H:%M:%S") if TEST_TIME else None,
-        }
-    )
-
-
+@app.route("/panel")
+def panel():
+    return Response(open("templates/panel.html").read(), mimetype="text/html")
 def main():
     print("Starting main.py")
     check_interval = 600
