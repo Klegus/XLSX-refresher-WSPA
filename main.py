@@ -146,6 +146,47 @@ def status():
     else:
         return jsonify(response), 503
 
+def log_check_cycle(successful_checks=0, new_plans=0, errors=None):
+    """Log check cycle results to MongoDB"""
+    timestamp = datetime.now()
+    
+    # Create cycle log entry
+    cycle_log = {
+        "timestamp": timestamp,
+        "successful_checks": successful_checks,
+        "new_plans": new_plans,
+        "has_errors": bool(errors),
+        "errors": []
+    }
+    
+    # Add error details if any
+    if errors:
+        for error in errors:
+            error_detail = {
+                "error_message": str(error.get("error")),
+                "traceback": error.get("traceback"),
+                "plan_name": error.get("plan_name", "Unknown")
+            }
+            cycle_log["errors"].append(error_detail)
+    
+    # Add to check cycles collection
+    db.check_cycles.insert_one(cycle_log)
+    
+    # Update system stats
+    stats_update = {
+        "last_check": {
+            "timestamp": timestamp,
+            "successful_checks": successful_checks,
+            "new_plans": new_plans,
+            "has_errors": bool(errors)
+        }
+    }
+    
+    db.system_config.update_one(
+        {"_id": "config"},
+        {"$set": stats_update}
+    )
+
 def log_check_result(total_plans, plans_checked, changes_detected):
     """Log check results to MongoDB"""
     timestamp = datetime.now()
@@ -547,14 +588,30 @@ def main():
         # Run managers sequentially in the main thread
         try:
             while True:
+                successful_checks = 0
+                new_plans = 0
+                errors = []
+
                 for plan_id, manager in lesson_plan_managers.items():
-                    print(f"\nStarting check cycle for {plans_config[plan_id]['name']}")
+                    plan_name = plans_config[plan_id]['name']
+                    print(f"\nStarting check cycle for {plan_name}")
                     try:
-                        manager.check_once()
+                        result = manager.check_once()
+                        if result:
+                            successful_checks += 1
+                            if result is True:  # New plan was added
+                                new_plans += 1
                     except Exception as e:
-                        print(
-                            f"Error in manager for {plans_config[plan_id]['name']}: {str(e)}"
-                        )
+                        error_info = {
+                            "error": e,
+                            "traceback": traceback.format_exc(),
+                            "plan_name": plan_name
+                        }
+                        errors.append(error_info)
+                        print(f"Error in manager for {plan_name}: {str(e)}")
+
+                # Log the check cycle results
+                log_check_cycle(successful_checks, new_plans, errors if errors else None)
 
                 # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
                 try:
