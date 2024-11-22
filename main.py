@@ -19,6 +19,7 @@ import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
 import sentry_sdk
+
 load_dotenv()
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
@@ -41,6 +42,7 @@ mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client[os.getenv("MONGO_DB")]
 
+
 def get_system_config():
     """Get system configuration from MongoDB"""
     config = db.system_config.find_one({"_id": "config"})
@@ -54,47 +56,52 @@ def get_system_config():
                 "total_plans": 0,
                 "plans_checked": 0,
                 "changes_detected": 0,
-                "timestamp": datetime.now().isoformat()
-            }
+                "timestamp": datetime.now().isoformat(),
+            },
         }
         db.system_config.insert_one(config)
     return config
+
+
 def extract_faculty_from_collection(collection_name: str) -> str:
     """
     Extracts faculty name from collection name following the pattern:
     plans_faculty_rest_of_name or plans_faculty-name_rest_of_name
     """
-    if collection_name.startswith('plans_'):
+    if collection_name.startswith("plans_"):
         # Remove 'plans_' prefix
         name_without_prefix = collection_name[6:]
         # Find the next underscore after the faculty name
-        next_underscore = name_without_prefix.find('_')
+        next_underscore = name_without_prefix.find("_")
         if next_underscore != -1:
             # Extract faculty name up to the underscore
             faculty = name_without_prefix[:next_underscore]
         else:
             # If no underscore, take the whole remaining string
             faculty = name_without_prefix
-            
+
         # Handle both hyphenated and non-hyphenated names
-        if '-' in faculty:
+        if "-" in faculty:
             # For hyphenated names, replace hyphens with spaces
-            faculty = faculty.replace('-', ' ')
-        
+            faculty = faculty.replace("-", " ")
+
         # Capitalize each word
         return faculty.title()
     return "Unknown"
+
 
 def determine_category(collection_name: str) -> str:
     """
     Determines the study mode category based on collection name.
     Returns: 'nst_puw', 'nst', or 'st'
     """
-    if '_nst_puw' in collection_name:
-        return 'nst_puw'
-    elif '_nst' in collection_name:
-        return 'nst'
-    return 'st'
+    if "_nst_puw" in collection_name:
+        return "nst_puw"
+    elif "_nst" in collection_name:
+        return "nst"
+    return "st"
+
+
 def get_semester_collections() -> Dict[str, Dict]:
     """
     Pobiera listę wszystkich kolekcji planów i ich najnowsze dokumenty.
@@ -102,7 +109,7 @@ def get_semester_collections() -> Dict[str, Dict]:
     """
     collections_data = {}
     for collection_name in db.list_collection_names():
-        if collection_name.startswith('plans_'):
+        if collection_name.startswith("plans_"):
             # Pobierz najnowszy dokument z kolekcji
             latest_plan = db[collection_name].find_one(sort=[("timestamp", -1)])
             if latest_plan and "plan_name" in latest_plan and "groups" in latest_plan:
@@ -113,15 +120,16 @@ def get_semester_collections() -> Dict[str, Dict]:
                     "groups": latest_plan["groups"],
                     "timestamp": latest_plan["timestamp"],
                     "category": category,
-                    "faculty": faculty
+                    "faculty": faculty,
                 }
     return collections_data
+
 
 def get_plans_config():
     """Get plans configuration from MongoDB"""
     print("\nAttempting to load plans configuration from MongoDB...")
     config = db.plans_config.find_one({"_id": "plans_json"})
-    
+
     if not config:
         print("No plans found in MongoDB. Attempting to import from plans.json...")
         try:
@@ -130,38 +138,37 @@ def get_plans_config():
                 config = {
                     "_id": "plans_json",
                     "plans": plans_data,
-                    "last_updated": datetime.now().isoformat()
+                    "last_updated": datetime.now().isoformat(),
                 }
                 print("Successfully loaded plans from plans.json")
                 result = db.plans_config.insert_one(config)
-                print(f"Successfully inserted plans into MongoDB with ID: {result.inserted_id}")
+                print(
+                    f"Successfully inserted plans into MongoDB with ID: {result.inserted_id}"
+                )
         except Exception as e:
             print(f"Error loading plans.json: {e}")
             return None
     else:
-        print(f"Found existing plans configuration in MongoDB, last updated: {config.get('last_updated')}")
-    
+        print(
+            f"Found existing plans configuration in MongoDB, last updated: {config.get('last_updated')}"
+        )
+
     return config.get("plans") if config else None
+
 
 def update_system_config(updates):
     """Update system configuration in MongoDB"""
     return db.system_config.update_one(
-        {"_id": "config"},
-        {"$set": updates},
-        upsert=True
+        {"_id": "config"}, {"$set": updates}, upsert=True
     )
+
 
 def update_plans_config(plans_data):
     """Update plans configuration in MongoDB"""
     return db.plans_config.update_one(
         {"_id": "plans_json"},
-        {
-            "$set": {
-                "plans": plans_data,
-                "last_updated": datetime.now().isoformat()
-            }
-        },
-        upsert=True
+        {"$set": {"plans": plans_data, "last_updated": datetime.now().isoformat()}},
+        upsert=True,
     )
 
 
@@ -172,7 +179,7 @@ class StatusChecker:
 
     def update_activity(self):
         self.last_activity = time.time()
-        
+
     def is_active(self):
         self.config = get_system_config()  # Refresh config
         if self.config.get("maintenance_mode", False):
@@ -181,7 +188,7 @@ class StatusChecker:
 
     def get_last_activity_datetime(self):
         return datetime.fromtimestamp(self.last_activity).isoformat()
-        
+
     def get_check_interval(self):
         self.config = get_system_config()  # Refresh config
         return self.config.get("check_interval", 900)
@@ -198,10 +205,11 @@ from routes.logs import init_log_routes
 from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
 
+
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
     """Log check cycle results to MongoDB"""
     timestamp = datetime.now()
-    
+
     # Create cycle log entry
     cycle_log = {
         "timestamp": timestamp,
@@ -209,36 +217,34 @@ def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_tim
         "new_plans": new_plans,
         "has_errors": bool(errors),
         "execution_time": execution_time,  # Time in seconds
-        "errors": []
+        "errors": [],
     }
-    
+
     # Add error details if any
     if errors:
         for error in errors:
             error_detail = {
                 "error_message": str(error.get("error")),
                 "traceback": error.get("traceback"),
-                "plan_name": error.get("plan_name", "Unknown")
+                "plan_name": error.get("plan_name", "Unknown"),
             }
             cycle_log["errors"].append(error_detail)
-    
+
     # Add to check cycles collection
     db.check_cycles.insert_one(cycle_log)
-    
+
     # Update system stats
     stats_update = {
         "last_check": {
             "timestamp": timestamp,
             "successful_checks": successful_checks,
             "new_plans": new_plans,
-            "has_errors": bool(errors)
+            "has_errors": bool(errors),
         }
     }
-    
-    db.system_config.update_one(
-        {"_id": "config"},
-        {"$set": stats_update}
-    )
+
+    db.system_config.update_one({"_id": "config"}, {"$set": stats_update})
+
 
 def log_check_result(total_plans, plans_checked, changes_detected):
     """Log check results to MongoDB"""
@@ -247,29 +253,32 @@ def log_check_result(total_plans, plans_checked, changes_detected):
         "timestamp": timestamp,
         "total_plans": total_plans,
         "plans_checked": plans_checked,
-        "changes_detected": changes_detected
+        "changes_detected": changes_detected,
     }
-    
+
     # Update last check stats in system config
     db.system_config.update_one(
-        {"_id": "config"},
-        {"$set": {"last_check_stats": log_entry}}
+        {"_id": "config"}, {"$set": {"last_check_stats": log_entry}}
     )
-    
+
     # Add to logs collection
     db.check_cycles.insert_one(log_entry)
 
+
 # Initialize routes
 init_status_routes(app, status_checker, get_system_config)
-init_config_routes(app, get_system_config, get_plans_config, update_system_config, update_plans_config, db)
+init_config_routes(
+    app,
+    get_system_config,
+    get_plans_config,
+    update_system_config,
+    update_plans_config,
+    db,
+)
 init_plan_routes(app, get_semester_collections, db)
 init_log_routes(app, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
-
-
-
-
 
 
 def run_flask_app():
@@ -324,8 +333,8 @@ class LessonPlanManager:
         """Sprawdza czy należy wysyłać powiadomienia webhook dla tego planu"""
         plan_config = self.lesson_plan.plan_config
         # Domyślnie notify i compare są False
-        return plan_config.get('notify', False) or plan_config.get('compare', False)
-    
+        return plan_config.get("notify", False) or plan_config.get("compare", False)
+
     def send_discord_webhook(self, message, force_send=False):
         """
         Wysyła webhook jeśli jest skonfigurowany i dozwolony.
@@ -357,7 +366,6 @@ class LessonPlanManager:
             print("Webhook Discord wysłany pomyślnie")
         except requests.exceptions.RequestException as e:
             print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
-
 
     def update_cached_plans(self):
         latest_plan = get_latest_lesson_plan()
@@ -395,34 +403,45 @@ class LessonPlanManager:
             else:
                 if new_checksum:
                     print("Plan został zaktualizowany")
-                    
+
                     # Sprawdź czy plan ma włączone porównywanie
                     # Check if plan has comparison enabled and comparator is available
-                    should_compare = self.lesson_plan.plan_config.get('compare', False) and self.lesson_plan_comparator is not None
+                    should_compare = (
+                        self.lesson_plan.plan_config.get("compare", False)
+                        and self.lesson_plan_comparator is not None
+                    )
 
                     if should_compare:
                         try:
                             print("Comparing plans...")
                             collection_name = (
-                                self.plan_name.lower().replace(" ", "_").replace("-", "_")
+                                self.plan_name.lower()
+                                .replace(" ", "_")
+                                .replace("-", "_")
                             )
-                            comparison_result = self.lesson_plan_comparator.compare_plans(
-                                collection_name
+                            comparison_result = (
+                                self.lesson_plan_comparator.compare_plans(
+                                    collection_name
+                                )
                             )
                             if comparison_result:
                                 webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
-                                self.send_discord_webhook(webhook_message, force_send=True)
+                                self.send_discord_webhook(
+                                    webhook_message, force_send=True
+                                )
                                 print("Wykryto i zapisano zmiany w planie.")
                                 return True
                         except Exception as e:
                             print(f"Error during plan comparison: {e}")
                             # Fall back to simple notification if comparison fails
-                            if self.lesson_plan.plan_config.get('notify', False):
+                            if self.lesson_plan.plan_config.get("notify", False):
                                 webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
                                 self.send_discord_webhook(webhook_message)
-                    elif self.lesson_plan.plan_config.get('notify', False):
+                    elif self.lesson_plan.plan_config.get("notify", False):
                         # If not comparing but notify is true
-                        webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        webhook_message = (
+                            f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        )
                         self.send_discord_webhook(webhook_message)
                         print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
@@ -512,9 +531,11 @@ def parse_html_to_dataframe(html_content):
 
     return pd.DataFrame(data, columns=headers)
 
+
 @app.route("/panel")
 def show_panel():
     return Response(open("templates/panel.html").read(), mimetype="text/html")
+
 
 def main():
     print("Starting main.py")
@@ -551,10 +572,10 @@ def main():
             print(f"LessonPlan for {plan_config['name']} initialized successfully")
 
             comparator = None
-            
+
             # Debug info about plan settings
-            compare_enabled = plan_config.get('compare', False)
-            notify_enabled = plan_config.get('notify', False)
+            compare_enabled = plan_config.get("compare", False)
+            notify_enabled = plan_config.get("notify", False)
             print(f"\nPlan settings for {plan_config['name']}:")
             print(f"- Compare enabled: {compare_enabled}")
             print(f"- Notify enabled: {notify_enabled}")
@@ -568,17 +589,29 @@ def main():
                         selected_model=selected_model,
                     )
                     lesson_plan_comparators[plan_id] = comparator
-                    print(f"LessonPlanComparator for {plan_config['name']} initialized successfully")
+                    print(
+                        f"LessonPlanComparator for {plan_config['name']} initialized successfully"
+                    )
                 except Exception as e:
-                    print(f"Failed to initialize comparator for {plan_config['name']}: {e}")
+                    print(
+                        f"Failed to initialize comparator for {plan_config['name']}: {e}"
+                    )
                     comparator = None
             else:
                 if compare_enabled:
-                    print(f"Cannot initialize comparator for {plan_config['name']} - missing required settings:")
-                    print(f"- OpenRouter API key: {'Present' if openrouter_api_key else 'Missing'}")
-                    print(f"- Selected model: {'Present' if selected_model else 'Missing'}")
+                    print(
+                        f"Cannot initialize comparator for {plan_config['name']} - missing required settings:"
+                    )
+                    print(
+                        f"- OpenRouter API key: {'Present' if openrouter_api_key else 'Missing'}"
+                    )
+                    print(
+                        f"- Selected model: {'Present' if selected_model else 'Missing'}"
+                    )
                 else:
-                    print(f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)")
+                    print(
+                        f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)"
+                    )
 
             print(f"Initializing LessonPlanManager for {plan_config['name']}")
             lesson_plan_managers[plan_id] = LessonPlanManager(
@@ -604,7 +637,7 @@ def main():
                 cycle_start_time = time.time()
 
                 for plan_id, manager in lesson_plan_managers.items():
-                    plan_name = plans_config[plan_id]['name']
+                    plan_name = plans_config[plan_id]["name"]
                     print(f"\nStarting check cycle for {plan_name}")
                     try:
                         result = manager.check_once()
@@ -615,7 +648,7 @@ def main():
                         error_info = {
                             "error": e,
                             "traceback": traceback.format_exc(),
-                            "plan_name": plan_name
+                            "plan_name": plan_name,
                         }
                         errors.append(error_info)
                         print(f"Error in manager for {plan_name}: {str(e)}")
@@ -627,9 +660,9 @@ def main():
                 # Log the check cycle results
                 log_check_cycle(
                     successful_checks=successful_checks,
-                    new_plans=new_plans, 
+                    new_plans=new_plans,
                     errors=errors if errors else None,
-                    execution_time=cycle_execution_time
+                    execution_time=cycle_execution_time,
                 )
 
                 # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
@@ -639,30 +672,32 @@ def main():
                     moodle_url = os.getenv("MOODLE_URL")
                     if not moodle_url:
                         raise ValueError("MOODLE_URL not set in environment variables")
-                    
+
                     saved_file = downloader.save_webpage(moodle_url)
                     if saved_file:
                         parser = MoodleFileParser(
-                            saved_file, 
+                            saved_file,
                             api_key=openrouter_api_key,
-                            mongodb_uri=mongo_uri
+                            mongodb_uri=mongo_uri,
                         )
-                        
+
                         # Parsuj i zapisz aktywności
                         parser.parse_activities()
                         parser.save_to_mongodb()
-                        
+
                         # Usuń pobrany plik
                         try:
                             os.remove(saved_file)
                             print(f"Usunięto plik tymczasowy: {saved_file}")
                         except Exception as e:
                             print(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
-                            
+
                 except Exception as e:
                     print(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
 
-                print(f"\nWszystkie zadania zakończone. Oczekiwanie {check_interval} sekund przed następnym cyklem...")
+                print(
+                    f"\nWszystkie zadania zakończone. Oczekiwanie {check_interval} sekund przed następnym cyklem..."
+                )
                 time.sleep(check_interval)
 
         except KeyboardInterrupt:
