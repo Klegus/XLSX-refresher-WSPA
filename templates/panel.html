@@ -64,10 +64,11 @@
                         <thead>
                             <tr>
                                 <th>Timestamp</th>
-                                <th>Total Plans</th>
-                                <th>Plans Checked</th>
-                                <th>Changes Detected</th>
+                                <th>Successful Checks</th>
+                                <th>New Plans</th>
+                                <th>Has Errors</th>
                                 <th>Execution Time (s)</th>
+                                <th>Details</th>
                             </tr>
                         </thead>
                         <tbody id="logsTable">
@@ -124,13 +125,45 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentEditPlanName = null;
+        // Error display function
+        function showErrors(errors) {
+            const errorMessages = errors.map(error => 
+                `Plan: ${error.plan_name}\nError: ${error.error_message}\n\nStacktrace:\n${error.traceback}`
+            ).join('\n\n-------------------\n\n');
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Error Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <pre class="text-danger" style="white-space: pre-wrap;">${errorMessages}</pre>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            modal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
         // Search functionality
         document.getElementById('planSearch').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const plans = document.querySelectorAll('#currentPlans .list-group-item');
+            
             plans.forEach(plan => {
                 const planName = plan.querySelector('h5').textContent.toLowerCase();
-                plan.style.display = planName.includes(searchTerm) ? '' : 'none';
+                const planUrl = plan.querySelector('small').textContent.toLowerCase();
+                const matches = planName.includes(searchTerm) || planUrl.includes(searchTerm);
+                plan.style.display = matches ? '' : 'none';
             });
         });
 
@@ -156,12 +189,20 @@
                     logsTable.innerHTML = '';
                     logs.forEach(log => {
                         const row = document.createElement('tr');
+                        const hasErrors = log.has_errors;
                         row.innerHTML = `
                             <td>${new Date(log.timestamp).toLocaleString()}</td>
-                            <td>${log.total_plans}</td>
-                            <td>${log.plans_checked}</td>
-                            <td>${log.changes_detected}</td>
+                            <td>${log.successful_checks}</td>
+                            <td>${log.new_plans}</td>
+                            <td><span class="badge ${hasErrors ? 'bg-danger' : 'bg-success'}">${hasErrors ? 'Yes' : 'No'}</span></td>
                             <td>${log.execution_time || 'N/A'}</td>
+                            <td>
+                                ${hasErrors ? `
+                                    <button class="btn btn-sm btn-outline-danger" onclick='showErrors(${JSON.stringify(log.errors)})'>
+                                        Show Errors
+                                    </button>
+                                ` : '-'}
+                            </td>
                         `;
                         logsTable.appendChild(row);
                     });
