@@ -34,7 +34,7 @@ USE_TEST_TIME = False
 TEST_TIME = None
 mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
-db = client.Lesson
+db = client[os.getenv("MONGO_DB")]
 
 
 class StatusChecker:
