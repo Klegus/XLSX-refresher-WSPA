@@ -288,6 +288,31 @@ def manage_config():
             
         return jsonify({"message": "Configuration updated successfully"})
 
+    elif request.method == "PUT":
+        data = request.json
+        if not data or "plans_config" not in data:
+            return jsonify({"error": "No plan data provided"}), 400
+
+        try:
+            # Get current plans
+            current_plans = get_plans_config()
+            if not current_plans:
+                return jsonify({"error": "Could not retrieve current plans"}), 500
+
+            # Update specific plan
+            for plan_name, plan_data in data["plans_config"].items():
+                if plan_name in current_plans:
+                    current_plans[plan_name].update(plan_data)
+                else:
+                    return jsonify({"error": f"Plan {plan_name} not found"}), 404
+
+            # Save updated plans
+            update_plans_config(current_plans)
+            return jsonify({"message": f"Plan {plan_name} updated successfully"})
+
+        except Exception as e:
+            return jsonify({"error": f"Failed to update plan: {str(e)}"}), 500
+
 
 @app.route("/api/plans/<plan_name>", methods=["DELETE"])
 def delete_plan(plan_name):
