@@ -255,7 +255,7 @@
         setInterval(loadStatus, 30000);
 
         function loadStatus() {
-            fetch('/status')
+            fetch('/api/status')
                 .then(response => response.json())
                 .then(data => {
                     const statusBadge = document.getElementById('statusBadge');
@@ -373,7 +373,7 @@
 
         function deletePlan(planName) {
             if (confirm(`Are you sure you want to delete plan "${planName}"?`)) {
-                fetch(`/api/plans/${planName}`, {
+                fetch(`/api/plan/${planName}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
