@@ -51,9 +51,11 @@ def get_system_config():
 
 def get_plans_config():
     """Get plans configuration from MongoDB"""
+    print("\nAttempting to load plans configuration from MongoDB...")
     config = db.plans_config.find_one({"_id": "plans_json"})
+    
     if not config:
-        # Initialize from plans.json file
+        print("No plans found in MongoDB. Attempting to import from plans.json...")
         try:
             with open("plans.json", "r", encoding="utf-8") as f:
                 plans_data = json.load(f)
@@ -62,10 +64,15 @@ def get_plans_config():
                     "plans": plans_data,
                     "last_updated": datetime.now().isoformat()
                 }
-                db.plans_config.insert_one(config)
+                print("Successfully loaded plans from plans.json")
+                result = db.plans_config.insert_one(config)
+                print(f"Successfully inserted plans into MongoDB with ID: {result.inserted_id}")
         except Exception as e:
             print(f"Error loading plans.json: {e}")
             return None
+    else:
+        print(f"Found existing plans configuration in MongoDB, last updated: {config.get('last_updated')}")
+    
     return config.get("plans") if config else None
 
 def update_system_config(updates):
