@@ -36,19 +36,80 @@ mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client[os.getenv("MONGO_DB")]
 
+def get_system_config():
+    """Get system configuration from MongoDB"""
+    config = db.system_config.find_one({"_id": "config"})
+    if not config:
+        # Initialize default configuration
+        config = {
+            "_id": "config",
+            "check_interval": 900,
+            "maintenance_mode": False
+        }
+        db.system_config.insert_one(config)
+    return config
+
+def get_plans_config():
+    """Get plans configuration from MongoDB"""
+    config = db.plans_config.find_one({"_id": "plans_json"})
+    if not config:
+        # Initialize from plans.json file
+        try:
+            with open("plans.json", "r", encoding="utf-8") as f:
+                plans_data = json.load(f)
+                config = {
+                    "_id": "plans_json",
+                    "plans": plans_data,
+                    "last_updated": datetime.now().isoformat()
+                }
+                db.plans_config.insert_one(config)
+        except Exception as e:
+            print(f"Error loading plans.json: {e}")
+            return None
+    return config.get("plans") if config else None
+
+def update_system_config(updates):
+    """Update system configuration in MongoDB"""
+    return db.system_config.update_one(
+        {"_id": "config"},
+        {"$set": updates},
+        upsert=True
+    )
+
+def update_plans_config(plans_data):
+    """Update plans configuration in MongoDB"""
+    return db.plans_config.update_one(
+        {"_id": "plans_json"},
+        {
+            "$set": {
+                "plans": plans_data,
+                "last_updated": datetime.now().isoformat()
+            }
+        },
+        upsert=True
+    )
+
 
 class StatusChecker:
     def __init__(self):
         self.last_activity = time.time()
+        self.config = get_system_config()
 
     def update_activity(self):
         self.last_activity = time.time()
-
+        
     def is_active(self):
+        self.config = get_system_config()  # Refresh config
+        if self.config.get("maintenance_mode", False):
+            return False
         return True
 
     def get_last_activity_datetime(self):
         return datetime.fromtimestamp(self.last_activity).isoformat()
+        
+    def get_check_interval(self):
+        self.config = get_system_config()  # Refresh config
+        return self.config.get("check_interval", 900)
 
 
 status_checker = StatusChecker()
@@ -58,10 +119,42 @@ status_checker = StatusChecker()
 def status():
     is_active = status_checker.is_active()
     last_check = status_checker.get_last_activity_datetime()
+    config = get_system_config()
+    
+    response = {
+        "status": "active" if is_active else "inactive",
+        "last_check": last_check,
+        "maintenance_mode": config.get("maintenance_mode", False),
+        "check_interval": config.get("check_interval", 900)
+    }
+    
     if is_active:
-        return jsonify({"status": "active", "last_check": last_check}), 200
+        return jsonify(response), 200
     else:
-        return jsonify({"status": "inactive", "last_check": last_check}), 503
+        return jsonify(response), 503
+
+@app.route("/api/config", methods=["GET", "POST"])
+def manage_config():
+    if request.method == "GET":
+        config = get_system_config()
+        plans = get_plans_config()
+        return jsonify({
+            "system_config": config,
+            "plans_config": plans
+        })
+    
+    elif request.method == "POST":
+        data = request.json
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+            
+        if "system_config" in data:
+            update_system_config(data["system_config"])
+            
+        if "plans_config" in data:
+            update_plans_config(data["plans_config"])
+            
+        return jsonify({"message": "Configuration updated successfully"})
 
 
 def run_flask_app():
