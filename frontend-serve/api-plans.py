@@ -4,7 +4,7 @@ from main import db, app
 from typing import Optional
 from werkzeug.exceptions import NotFound, InternalServerError
 
-@app.route('/api/plans/<category>/<faculty>', methods=['GET'])
+@app.route('/panel/api/plans/<category>/<faculty>', methods=['GET'])
 def get_plans(category: str, faculty: str):
     """
     Returns a list of plans for a given category and faculty
@@ -24,7 +24,7 @@ def get_plans(category: str, faculty: str):
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
 
-@app.route('/api/faculties/<category>', methods=['GET'])
+@app.route('/panel/api/faculties/<category>', methods=['GET'])
 def get_faculties(category: str):
     """
     Returns a list of unique faculties for a given category
@@ -40,8 +40,8 @@ def get_faculties(category: str):
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
 
-@app.route('/api/plan/<collection_name>', methods=['GET'])
-@app.route('/api/plan/<collection_name>/<group_name>', methods=['GET'])
+@app.route('/panel/api/plan/<collection_name>', methods=['GET'])
+@app.route('/panel/api/plan/<collection_name>/<group_name>', methods=['GET'])
 def get_plan(collection_name: str, group_name: Optional[str] = None):
     try:
         print(f"Pobieranie planu dla kolekcji: {collection_name}, grupy: {group_name}")

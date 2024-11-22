@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from main import db, app
 from werkzeug.exceptions import InternalServerError
 
-@app.route('/api/comparisons/<collection_name>/<group_name>', methods=['GET'])
+@app.route('/panel/api/comparisons/<collection_name>/<group_name>', methods=['GET'])
 def get_comparisons(collection_name: str, group_name: str):
     """
     Retrieves plan comparisons for a specific collection and group

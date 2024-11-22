@@ -345,7 +345,7 @@ def delete_plan(plan_name):
         return jsonify({"error": f"Failed to delete plan: {str(e)}"}), 500
 
 def run_flask_app():
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=80, debug=True)
 
 
 class LessonPlanManager:
