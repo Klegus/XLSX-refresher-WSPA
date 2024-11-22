@@ -8,7 +8,7 @@ import os, requests, json, hashlib
 from werkzeug.exceptions import BadRequest, InternalServerError
 from dotenv import load_dotenv
 from pymongo import MongoClient
-#import HttpException
+from typing import Dict
 from fastapi import HTTPException
 from typing import Optional
 import pymongo
@@ -31,7 +31,7 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
 )
 
-from frontend_serve import app
+app = Flask(__name__)
 
 # Load environment variables
 
@@ -59,7 +59,63 @@ def get_system_config():
         }
         db.system_config.insert_one(config)
     return config
+def extract_faculty_from_collection(collection_name: str) -> str:
+    """
+    Extracts faculty name from collection name following the pattern:
+    plans_faculty_rest_of_name or plans_faculty-name_rest_of_name
+    """
+    if collection_name.startswith('plans_'):
+        # Remove 'plans_' prefix
+        name_without_prefix = collection_name[6:]
+        # Find the next underscore after the faculty name
+        next_underscore = name_without_prefix.find('_')
+        if next_underscore != -1:
+            # Extract faculty name up to the underscore
+            faculty = name_without_prefix[:next_underscore]
+        else:
+            # If no underscore, take the whole remaining string
+            faculty = name_without_prefix
+            
+        # Handle both hyphenated and non-hyphenated names
+        if '-' in faculty:
+            # For hyphenated names, replace hyphens with spaces
+            faculty = faculty.replace('-', ' ')
+        
+        # Capitalize each word
+        return faculty.title()
+    return "Unknown"
 
+def determine_category(collection_name: str) -> str:
+    """
+    Determines the study mode category based on collection name.
+    Returns: 'nst_puw', 'nst', or 'st'
+    """
+    if '_nst_puw' in collection_name:
+        return 'nst_puw'
+    elif '_nst' in collection_name:
+        return 'nst'
+    return 'st'
+def get_semester_collections() -> Dict[str, Dict]:
+    """
+    Pobiera listę wszystkich kolekcji planów i ich najnowsze dokumenty.
+    Zwraca słownik z nazwami kolekcji i odpowiadającymi im informacjami.
+    """
+    collections_data = {}
+    for collection_name in db.list_collection_names():
+        if collection_name.startswith('plans_'):
+            # Pobierz najnowszy dokument z kolekcji
+            latest_plan = db[collection_name].find_one(sort=[("timestamp", -1)])
+            if latest_plan and "plan_name" in latest_plan and "groups" in latest_plan:
+                faculty = extract_faculty_from_collection(collection_name)
+                category = determine_category(collection_name)
+                collections_data[collection_name] = {
+                    "plan_name": latest_plan["plan_name"],
+                    "groups": latest_plan["groups"],
+                    "timestamp": latest_plan["timestamp"],
+                    "category": category,
+                    "faculty": faculty
+                }
+    return collections_data
 
 def get_plans_config():
     """Get plans configuration from MongoDB"""
@@ -134,7 +190,7 @@ class StatusChecker:
 status_checker = StatusChecker()
 
 
-@app.route("/status")
+@app.route("/api/status")
 def status():
     is_active = status_checker.is_active()
     last_check = status_checker.get_last_activity_datetime()
@@ -344,6 +400,59 @@ def delete_plan(plan_name):
     except Exception as e:
         return jsonify({"error": f"Failed to delete plan: {str(e)}"}), 500
 
+@app.route('/api/comparisons/<collection_name>/<group_name>', methods=['GET'])
+def get_comparisons(collection_name: str, group_name: str):
+    """
+    Retrieves plan comparisons for a specific collection and group
+    """
+    try:
+        # Fetch comparisons for the specific plan and group
+        comparisons = list(db.plan_comparisons.find(
+            {
+                "collection_name": collection_name,
+                f"results.{group_name}": {"$exists": True}
+            },
+            {
+                "timestamp": 1,
+                "newer_plan_timestamp": 1,
+                "older_plan_timestamp": 1,
+                "model_used": 1,
+                f"results.{group_name}": 1
+            }
+        ).sort("timestamp", -1))
+        
+        if not comparisons:
+            return jsonify([])  # Return empty list if no comparisons found
+            
+        # Convert ObjectId to string for JSON serialization
+        for comparison in comparisons:
+            comparison['_id'] = str(comparison['_id'])
+        
+        return jsonify(comparisons)
+    except Exception as e:
+        # Log the error if needed
+        print(f"Error in get_comparisons: {str(e)}")
+        return jsonify([])  # Return empty list on error
+
+# Error handler for 500 errors
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"detail": "Internal server error"}), 500
+@app.route('/api/faculties/<category>', methods=['GET'])
+def get_faculties(category: str):
+    """
+    Returns a list of unique faculties for a given category
+    """
+    try:
+        collections_data = get_semester_collections()
+        faculties = sorted(list(set(
+            data["faculty"] 
+            for data in collections_data.values()
+            if data["category"] == category
+        )))
+        return jsonify({"faculties": faculties})
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
 @app.route('/api/activities', methods=['GET'])
 def read_activities():
     try:
@@ -413,6 +522,87 @@ def read_activities():
         return jsonify({"detail": str(e)}), 400
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
+
+@app.route('/api/plans/<category>/<faculty>', methods=['GET'])
+def get_plans(category: str, faculty: str):
+    """
+    Returns a list of plans for a given category and faculty
+    """
+    try:
+        collections_data = get_semester_collections()
+        plans = [
+            {
+                "id": collection_name,
+                "name": data["plan_name"],
+                "groups": data["groups"]
+            }
+            for collection_name, data in collections_data.items()
+            if data["category"] == category and data["faculty"] == faculty
+        ]
+        return jsonify({"plans": plans})
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
+
+@app.route('/api/plan/<collection_name>', methods=['GET'])
+@app.route('/api/plan/<collection_name>/<group_name>', methods=['GET'])
+def get_plan(collection_name: str, group_name: Optional[str] = None):
+    try:
+        print(f"Pobieranie planu dla kolekcji: {collection_name}, grupy: {group_name}")
+        latest_plan = db[collection_name].find_one(sort=[("timestamp", -1)])
+        
+        if not latest_plan:
+            print("Nie znaleziono planu w kolekcji")
+            return jsonify({
+                "detail": "Plan not found"
+            }), 404
+            
+        if group_name is not None:
+            if group_name not in latest_plan["groups"]:
+                print(f"Nie znaleziono grupy {group_name} w planie")
+                available_groups = list(latest_plan["groups"].keys())
+                print(f"Dostępne grupy: {available_groups}")
+                return jsonify({
+                    "detail": {
+                        "message": "Nie znaleziono wybranej grupy",
+                        "requested_group": group_name,
+                        "available_groups": available_groups
+                    }
+                }), 404
+        
+        # Sprawdź czy plan jest złożony (brak kategorii i grup)
+        if "category" not in latest_plan and "groups" not in latest_plan:
+            response = {
+                "plan_name": latest_plan["plan_name"],
+                "timestamp": latest_plan["timestamp"],
+                "url": latest_plan.get("url", ""),  # URL do oryginalnego planu
+                "category": None,
+                "groups": None
+            }
+        else:
+            plan_html = latest_plan["groups"][group_name].replace('\n', ' ') if group_name else latest_plan.get("plan_html", "")
+            response = {
+                "plan_name": latest_plan["plan_name"],
+                "group_name": group_name,
+                "plan_html": plan_html,
+                "timestamp": latest_plan["timestamp"],
+                "category": latest_plan.get("category", "st"),  # domyślnie "st" jeśli nie określono
+                "url": latest_plan.get("url", "")  # URL do oryginalnego planu
+            }
+        print("Wysyłanie odpowiedzi:", response)
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
+
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({"detail": "Not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"detail": "Internal server error"}), 500
+
+
 def run_flask_app():
     app.run(host="0.0.0.0", port=80)
 
