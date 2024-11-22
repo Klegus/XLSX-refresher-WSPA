@@ -67,6 +67,7 @@
                                 <th>Total Plans</th>
                                 <th>Plans Checked</th>
                                 <th>Changes Detected</th>
+                                <th>Execution Time (s)</th>
                             </tr>
                         </thead>
                         <tbody id="logsTable">
@@ -160,6 +161,7 @@
                             <td>${log.total_plans}</td>
                             <td>${log.plans_checked}</td>
                             <td>${log.changes_detected}</td>
+                            <td>${log.execution_time || 'N/A'}</td>
                         `;
                         logsTable.appendChild(row);
                     });

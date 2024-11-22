@@ -146,7 +146,7 @@ def status():
     else:
         return jsonify(response), 503
 
-def log_check_cycle(successful_checks=0, new_plans=0, errors=None):
+def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
     """Log check cycle results to MongoDB"""
     timestamp = datetime.now()
     
@@ -156,6 +156,7 @@ def log_check_cycle(successful_checks=0, new_plans=0, errors=None):
         "successful_checks": successful_checks,
         "new_plans": new_plans,
         "has_errors": bool(errors),
+        "execution_time": execution_time,  # Time in seconds
         "errors": []
     }
     
@@ -591,6 +592,7 @@ def main():
                 successful_checks = 0
                 new_plans = 0
                 errors = []
+                cycle_start_time = time.time()
 
                 for plan_id, manager in lesson_plan_managers.items():
                     plan_name = plans_config[plan_id]['name']
@@ -610,8 +612,17 @@ def main():
                         errors.append(error_info)
                         print(f"Error in manager for {plan_name}: {str(e)}")
 
+                # Calculate total execution time for the cycle
+                cycle_execution_time = round(time.time() - cycle_start_time, 2)
+                print(f"\nTotal cycle execution time: {cycle_execution_time} seconds")
+
                 # Log the check cycle results
-                log_check_cycle(successful_checks, new_plans, errors if errors else None)
+                log_check_cycle(
+                    successful_checks=successful_checks,
+                    new_plans=new_plans, 
+                    errors=errors if errors else None,
+                    execution_time=cycle_execution_time
+                )
 
                 # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
                 try:
