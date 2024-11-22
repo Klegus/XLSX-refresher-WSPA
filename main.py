@@ -5,8 +5,12 @@ from comparer import LessonPlanComparator
 from ActivityDownloader import WebpageDownloader
 from MoodleParserComponent import MoodleFileParser
 import os, requests, json, hashlib
+from werkzeug.exceptions import BadRequest, InternalServerError
 from dotenv import load_dotenv
 from pymongo import MongoClient
+#import HttpException
+from fastapi import HTTPException
+from typing import Optional
 import pymongo
 import traceback
 from flask import Flask, jsonify, request, Response
@@ -55,6 +59,7 @@ def get_system_config():
         }
         db.system_config.insert_one(config)
     return config
+
 
 def get_plans_config():
     """Get plans configuration from MongoDB"""
@@ -314,7 +319,7 @@ def manage_config():
             return jsonify({"error": f"Failed to update plan: {str(e)}"}), 500
 
 
-@app.route("/api/plans/<plan_name>", methods=["DELETE"])
+@app.route("/api/plan/<plan_name>", methods=["DELETE"])
 def delete_plan(plan_name):
     """Delete a specific plan"""
     if get_system_config().get("maintenance_mode", False):
