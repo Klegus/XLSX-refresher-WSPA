@@ -232,7 +232,7 @@
             try {
                 const planData = JSON.parse(planJson);
                 fetch('/api/config', {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
