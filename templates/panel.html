@@ -155,37 +155,48 @@
         }
 
         // Search functionality
-        document.getElementById('planSearch').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const plans = document.querySelectorAll('#currentPlans .list-group-item');
-            
-            plans.forEach(plan => {
-                const planName = plan.querySelector('h5').textContent.toLowerCase();
-                const planUrl = plan.querySelector('small').textContent.toLowerCase();
-                const matches = planName.includes(searchTerm) || planUrl.includes(searchTerm);
-                plan.style.display = matches ? '' : 'none';
-            });
-        });
-
-        function checkMaintenanceMode() {
-            const isMaintenanceMode = document.getElementById('maintenanceMode').checked;
-            const plansSection = document.getElementById('plansSection');
-            const checkIntervalCard = document.querySelector('.card:nth-child(2)');
-            
-            if (isMaintenanceMode) {
-                plansSection.style.display = 'none';
-                checkIntervalCard.style.display = 'none';
-            } else {
-                plansSection.style.display = 'block';
-                checkIntervalCard.style.display = 'block';
+        function initializeSearch() {
+            const searchInput = document.getElementById('planSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const plans = document.querySelectorAll('#currentPlans .list-group-item');
+                    
+                    plans.forEach(plan => {
+                        const planName = plan.querySelector('h5')?.textContent.toLowerCase() || '';
+                        const planUrl = plan.querySelector('small')?.textContent.toLowerCase() || '';
+                        const matches = planName.includes(searchTerm) || planUrl.includes(searchTerm);
+                        plan.style.display = matches ? '' : 'none';
+                    });
+                });
             }
         }
 
+        function checkMaintenanceMode() {
+            const maintenanceCheckbox = document.getElementById('maintenanceMode');
+            const plansSection = document.getElementById('plansSection');
+            const checkIntervalCard = document.querySelector('.card:nth-child(2)');
+            
+            if (!maintenanceCheckbox || !plansSection || !checkIntervalCard) {
+                console.warn('Required elements for maintenance mode not found');
+                return;
+            }
+            
+            const isMaintenanceMode = maintenanceCheckbox.checked;
+            plansSection.style.display = isMaintenanceMode ? 'none' : 'block';
+            checkIntervalCard.style.display = isMaintenanceMode ? 'none' : 'block';
+        }
+
         function loadLogs() {
+            const logsTable = document.getElementById('logsTable');
+            if (!logsTable) {
+                console.warn('Logs table element not found');
+                return;
+            }
+
             fetch('/api/logs')
                 .then(response => response.json())
                 .then(logs => {
-                    const logsTable = document.getElementById('logsTable');
                     logsTable.innerHTML = '';
                     logs.forEach(log => {
                         const row = document.createElement('tr');
@@ -206,7 +217,8 @@
                         `;
                         logsTable.appendChild(row);
                     });
-                });
+                })
+                .catch(error => console.error('Error loading logs:', error));
         }
 
         function editPlan(name, plan) {
@@ -244,6 +256,8 @@
 
         // Initial load
         document.addEventListener('DOMContentLoaded', function() {
+            initializeSearch();
+            initializeMaintenanceMode();
             loadStatus();
             loadConfig();
             loadPlans();
@@ -259,20 +273,35 @@
                 .then(response => response.json())
                 .then(data => {
                     const statusBadge = document.getElementById('statusBadge');
-                    statusBadge.textContent = data.status === 'active' ? 'Active' : 'Inactive';
-                    statusBadge.className = `badge status-badge ${data.status === 'active' ? 'bg-success' : 'bg-danger'}`;
+                    const lastCheck = document.getElementById('lastCheck');
+                    const maintenanceMode = document.getElementById('maintenanceMode');
                     
-                    document.getElementById('lastCheck').textContent = `Last check: ${data.last_check}`;
-                    document.getElementById('maintenanceMode').checked = data.maintenance_mode;
-                });
+                    if (statusBadge) {
+                        statusBadge.textContent = data.status === 'active' ? 'Active' : 'Inactive';
+                        statusBadge.className = `badge status-badge ${data.status === 'active' ? 'bg-success' : 'bg-danger'}`;
+                    }
+                    
+                    if (lastCheck) {
+                        lastCheck.textContent = `Last check: ${data.last_check}`;
+                    }
+                    
+                    if (maintenanceMode) {
+                        maintenanceMode.checked = data.maintenance_mode;
+                    }
+                })
+                .catch(error => console.error('Error loading status:', error));
         }
 
         function loadConfig() {
             fetch('/api/config')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('checkInterval').value = data.system_config.check_interval;
-                });
+                    const intervalInput = document.getElementById('checkInterval');
+                    if (intervalInput) {
+                        intervalInput.value = data.system_config.check_interval;
+                    }
+                })
+                .catch(error => console.error('Error loading config:', error));
         }
 
         function loadPlans() {
@@ -280,6 +309,11 @@
                 .then(response => response.json())
                 .then(data => {
                     const plansContainer = document.getElementById('currentPlans');
+                    if (!plansContainer) {
+                        console.warn('Plans container not found');
+                        return;
+                    }
+                    
                     plansContainer.innerHTML = '';
                     
                     if (data.plans_config) {
@@ -299,7 +333,8 @@
                             plansContainer.appendChild(planElement);
                         });
                     }
-                });
+                })
+                .catch(error => console.error('Error loading plans:', error));
         }
 
         function updateInterval() {
@@ -326,23 +361,32 @@
         // Refresh logs every minute
         setInterval(loadLogs, 60000);
 
-        document.getElementById('maintenanceMode').addEventListener('change', function(e) {
-            checkMaintenanceMode();
-            fetch('/api/config', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    maintenance_mode: e.target.checked
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadStatus();
-            })
-            .catch(error => alert('Error updating maintenance mode'));
-        });
+        function initializeMaintenanceMode() {
+            const maintenanceCheckbox = document.getElementById('maintenanceMode');
+            if (maintenanceCheckbox) {
+                maintenanceCheckbox.addEventListener('change', function(e) {
+                    checkMaintenanceMode();
+                    fetch('/api/config', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            maintenance_mode: e.target.checked
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        loadStatus();
+                    })
+                    .catch(error => {
+                        console.error('Error updating maintenance mode:', error);
+                        alert('Error updating maintenance mode');
+                    });
+                });
+            }
+        }
+
 
         function addPlan() {
             const planJson = document.getElementById('planJson').value;
