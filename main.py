@@ -536,6 +536,11 @@ def parse_html_to_dataframe(html_content):
 def show_panel():
     return Response(open("templates/panel.html").read(), mimetype="text/html")
 
+@app.route("/api/collections")
+def get_collections():
+    collections = get_semester_collections()
+    return jsonify(collections)
+
 
 def main():
     print("Starting main.py")
