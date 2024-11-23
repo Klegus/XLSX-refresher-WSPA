@@ -329,14 +329,12 @@
         document.getElementById('maintenanceMode').addEventListener('change', function(e) {
             checkMaintenanceMode();
             fetch('/api/config', {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    system_config: {
-                        maintenance_mode: e.target.checked
-                    }
+                    maintenance_mode: e.target.checked
                 })
             })
             .then(response => response.json())
