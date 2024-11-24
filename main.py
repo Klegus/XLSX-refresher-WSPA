@@ -558,9 +558,22 @@ def main():
         openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         selected_model = os.getenv("SELECTED_MODEL")
         discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
-        # Load plans configuration
-        with open("plans.json", "r", encoding="utf-8") as f:
-            plans_config = json.load(f)
+        # Check if plans configuration exists in MongoDB
+        plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
+        
+        if plans_config_doc and "plans" in plans_config_doc:
+            print("Loading plans configuration from MongoDB...")
+            plans_config = plans_config_doc["plans"]
+        else:
+            print("No plans configuration found in MongoDB. Loading from plans.json...")
+            # Load from plans.json and store in MongoDB
+            with open("plans.json", "r", encoding="utf-8") as f:
+                plans_config = json.load(f)
+                db.plans_config.insert_one({
+                    "_id": "plans_json",
+                    "plans": plans_config,
+                    "last_updated": datetime.now().isoformat()
+                })
 
         lesson_plans = {}
         lesson_plan_comparators = {}
