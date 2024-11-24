@@ -165,9 +165,20 @@ def update_system_config(updates):
 
 def update_plans_config(plans_data):
     """Update plans configuration in MongoDB"""
+    # Get current plans configuration
+    current_config = db.plans_config.find_one({"_id": "plans_json"})
+    if current_config and "plans" in current_config:
+        current_plans = current_config["plans"]
+        # Update only the plans that are in plans_data
+        for plan_id, plan_data in plans_data.items():
+            current_plans[plan_id] = plan_data
+        plans_to_update = current_plans
+    else:
+        plans_to_update = plans_data
+
     return db.plans_config.update_one(
         {"_id": "plans_json"},
-        {"$set": {"plans": plans_data, "last_updated": datetime.now().isoformat()}},
+        {"$set": {"plans": plans_to_update, "last_updated": datetime.now().isoformat()}},
         upsert=True,
     )
 
