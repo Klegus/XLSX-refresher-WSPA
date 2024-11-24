@@ -94,6 +94,10 @@
                 <div class="mb-3">
                     <h3 class="h5">Add New Plan</h3>
                     <div class="mb-3">
+                        <label for="planId" class="form-label">Plan ID (e.g. informatyka2st1-1)</label>
+                        <input type="text" class="form-control" id="planId">
+                    </div>
+                    <div class="mb-3">
                         <label for="planJson" class="form-label">Plan Configuration (JSON)</label>
                         <textarea class="form-control" id="planJson" rows="10"></textarea>
                     </div>
@@ -391,7 +395,14 @@
 
 
         function addPlan() {
+            const planId = document.getElementById('planId').value;
             const planJson = document.getElementById('planJson').value;
+            
+            if (!planId) {
+                alert('Please enter a Plan ID');
+                return;
+            }
+            
             try {
                 const planData = JSON.parse(planJson);
                 fetch('/api/config', {
@@ -400,7 +411,9 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        plans_config: planData
+                        plans_config: {
+                            [planId]: planData
+                        }
                     })
                 })
                 .then(response => response.json())

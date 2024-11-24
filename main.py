@@ -387,6 +387,11 @@ class LessonPlanManager:
 
     def check_once(self):
         """Wykonuje pojedynczy cykl sprawdzania planu"""
+        # Reload plan config from DB
+        plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
+        if plans_config_doc and "plans" in plans_config_doc:
+            self.lesson_plan.plan_config = plans_config_doc["plans"].get(self.plan_name, self.lesson_plan.plan_config)
+        
         current_time = datetime.now()
         current_hour = current_time.hour
 
