@@ -643,9 +643,9 @@
         "faculty": "Pielegniarstwo",
         "category": "st",
         "groups": {
-            "Grupa 1 - wg nazwisk: \nA-K": "Grupa 1 \npodział wg nazwisk: \nA-K",
-            "Grupa 2 - wg nazwisk: \nL-Sa": "Grupa 2 \npodział wg nazwisk: \nL-Sa",
-            "Grupa 3 - wg nazwisk: \nSz-Ż": "Grupa 3 \npodział wg nazwisk: \nSz-Ż"
+            "Grupa 1 - wg nazwisk: A-K": "Grupa 1 \npodział wg nazwisk: A-K",
+            "Grupa 2 - wg nazwisk: L-Sa": "Grupa 2 \npodział wg nazwisk: L-Sa", 
+            "Grupa 3 - wg nazwisk: Sz-Ż": "Grupa 3 \npodział wg nazwisk: Sz-Ż"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194286/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "PIE st I"
