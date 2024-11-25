@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, timedelta
+from push_notifications import PushNotificationManager
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
 from ActivityDownloader import WebpageDownloader
@@ -215,6 +216,7 @@ from routes.plans import init_plan_routes
 from routes.logs import init_log_routes
 from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
+from routes.notifications import init_notification_routes
 
 
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
@@ -290,6 +292,7 @@ init_plan_routes(app, get_semester_collections, db)
 init_log_routes(app, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
+init_notification_routes(app, push_manager)
 
 
 def run_flask_app():
@@ -574,6 +577,20 @@ def main():
         openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         selected_model = os.getenv("SELECTED_MODEL")
         discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+        
+        # Initialize push notifications
+        vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
+        vapid_public_key = os.getenv("VAPID_PUBLIC_KEY")
+        vapid_claims = {
+            "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspia.edu.pl")
+        }
+        
+        push_manager = PushNotificationManager(
+            db=db,
+            vapid_private_key=vapid_private_key,
+            vapid_public_key=vapid_public_key,
+            vapid_claims=vapid_claims
+        )
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
         

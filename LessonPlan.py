@@ -13,8 +13,9 @@ from datetime import datetime
 
 
 class LessonPlan(LessonPlanDownloader):
-    def __init__(self, username, password, mongo_uri, plan_config, directory=""):
+    def __init__(self, username, password, mongo_uri, plan_config, directory="", push_manager=None):
         super().__init__(username, password, directory, plan_config["download_url"])
+        self.push_manager = push_manager
         self.plan_config = plan_config
         self.sheet_name = plan_config["sheet_name"]
         self.plans_directory = os.path.join(
