@@ -14,6 +14,16 @@ class PushNotificationManager:
     def save_subscription(self, subscription: Dict[str, Any], collection_name: str) -> bool:
         """Save a new push subscription for a plan collection"""
         try:
+            # Check if subscription already exists
+            existing = self.db.push_subscriptions.find_one({
+                "subscription.endpoint": subscription["endpoint"],
+                "collection_name": collection_name
+            })
+            
+            if existing:
+                print(f"Subscription already exists for {collection_name}")
+                return True
+                
             subscription_data = {
                 "subscription": subscription,
                 "collection_name": collection_name,
@@ -29,11 +39,16 @@ class PushNotificationManager:
     def remove_subscription(self, subscription: Dict[str, Any], collection_name: str) -> bool:
         """Remove a push subscription from a plan collection"""
         try:
-            self.db.push_subscriptions.delete_one({
+            result = self.db.push_subscriptions.delete_one({
                 "subscription.endpoint": subscription["endpoint"],
                 "collection_name": collection_name
             })
-            return True
+            if result.deleted_count > 0:
+                print(f"Successfully removed subscription for {collection_name}")
+                return True
+            else:
+                print(f"No subscription found to remove for {collection_name}")
+                return False
         except Exception as e:
             print(f"Error removing subscription: {e}")
             return False
