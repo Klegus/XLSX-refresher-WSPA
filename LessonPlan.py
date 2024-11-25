@@ -766,8 +766,8 @@ class LessonPlan(LessonPlanDownloader):
                     print(
                         f"Successfully processed groups: {', '.join(processed_groups)}"
                     )
-                    
-                    # Send push notifications if manager is available
+
+                    # Send push notifications immediately after saving to database
                     if self.push_manager:
                         print(f"\nAttempting to send push notifications:")
                         print(f"Collection name: {self.collection_name}")
@@ -780,6 +780,7 @@ class LessonPlan(LessonPlanDownloader):
                             print("Push notifications sent successfully")
                         except Exception as e:
                             print(f"Error sending push notifications: {str(e)}")
+
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
 
