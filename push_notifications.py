@@ -11,12 +11,12 @@ class PushNotificationManager:
         self.vapid_public_key = vapid_public_key
         self.vapid_claims = vapid_claims
 
-    def save_subscription(self, subscription: Dict[str, Any], plan_id: str) -> bool:
-        """Save a new push subscription"""
+    def save_subscription(self, subscription: Dict[str, Any], collection_name: str) -> bool:
+        """Save a new push subscription for a plan collection"""
         try:
             subscription_data = {
                 "subscription": subscription,
-                "plan_id": plan_id,
+                "collection_name": collection_name,
                 "created_at": datetime.now(),
                 "last_notified": None
             }
@@ -26,12 +26,12 @@ class PushNotificationManager:
             print(f"Error saving subscription: {e}")
             return False
 
-    def remove_subscription(self, subscription: Dict[str, Any], plan_id: str) -> bool:
-        """Remove a push subscription"""
+    def remove_subscription(self, subscription: Dict[str, Any], collection_name: str) -> bool:
+        """Remove a push subscription from a plan collection"""
         try:
             self.db.push_subscriptions.delete_one({
                 "subscription.endpoint": subscription["endpoint"],
-                "plan_id": plan_id
+                "collection_name": collection_name
             })
             return True
         except Exception as e:
@@ -60,13 +60,13 @@ class PushNotificationManager:
                 self.db.push_subscriptions.delete_one({"subscription.endpoint": subscription["endpoint"]})
             return False
 
-    def notify_plan_update(self, plan_id: str, plan_name: str) -> None:
-        """Send notifications to all subscriptions for a specific plan"""
-        subscriptions = self.db.push_subscriptions.find({"plan_id": plan_id})
+    def notify_plan_update(self, collection_name: str, plan_name: str) -> None:
+        """Send notifications to all subscriptions for a plan collection"""
+        subscriptions = self.db.push_subscriptions.find({"collection_name": collection_name})
         
         for sub in subscriptions:
             message = f"Plan zajęć został zaktualizowany: {plan_name}"
-            url = f"/plan/{plan_id}"  # Adjust URL format as needed
+            url = f"/plan/{collection_name}"  # URL to the plan collection
             
             success = self.send_notification(
                 subscription=sub["subscription"],

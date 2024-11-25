@@ -465,8 +465,9 @@ class LessonPlanManager:
                                 
                                 # Send push notifications if manager is available
                                 if push_manager:
+                                    collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
                                     push_manager.notify_plan_update(
-                                        plan_id=self.plan_config.get("id", self.plan_name.lower().replace(" ", "_")),
+                                        collection_name=collection_name,
                                         plan_name=self.plan_name
                                     )
                                 

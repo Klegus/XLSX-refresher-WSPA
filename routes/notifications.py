@@ -6,12 +6,12 @@ def init_notification_routes(app, push_manager):
         try:
             data = request.get_json()
             subscription = data.get('subscription')
-            plan_id = data.get('planId')
+            collection_name = data.get('collectionName')
             
-            if not subscription or not plan_id:
+            if not subscription or not collection_name:
                 return jsonify({'error': 'Missing required fields'}), 400
                 
-            success = push_manager.save_subscription(subscription, plan_id)
+            success = push_manager.save_subscription(subscription, collection_name)
             
             if success:
                 return jsonify({'status': 'success'}), 200
@@ -26,12 +26,12 @@ def init_notification_routes(app, push_manager):
         try:
             data = request.get_json()
             subscription = data.get('subscription')
-            plan_id = data.get('planId')
+            collection_name = data.get('collectionName')
             
-            if not subscription or not plan_id:
+            if not subscription or not collection_name:
                 return jsonify({'error': 'Missing required fields'}), 400
                 
-            success = push_manager.remove_subscription(subscription, plan_id)
+            success = push_manager.remove_subscription(subscription, collection_name)
             
             if success:
                 return jsonify({'status': 'success'}), 200
