@@ -278,6 +278,20 @@ def log_check_result(total_plans, plans_checked, changes_detected):
     db.check_cycles.insert_one(log_entry)
 
 
+# Initialize push notifications
+vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
+vapid_public_key = os.getenv("VAPID_PUBLIC_KEY")
+vapid_claims = {
+    "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspia.edu.pl")
+}
+
+push_manager = PushNotificationManager(
+    db=db,
+    vapid_private_key=vapid_private_key,
+    vapid_public_key=vapid_public_key,
+    vapid_claims=vapid_claims
+)
+
 # Initialize routes
 init_status_routes(app, status_checker, get_system_config)
 init_config_routes(
@@ -448,6 +462,14 @@ class LessonPlanManager:
                                 self.send_discord_webhook(
                                     webhook_message, force_send=True
                                 )
+                                
+                                # Send push notifications if manager is available
+                                if push_manager:
+                                    push_manager.notify_plan_update(
+                                        plan_id=self.plan_config.get("id", self.plan_name.lower().replace(" ", "_")),
+                                        plan_name=self.plan_name
+                                    )
+                                
                                 print("Wykryto i zapisano zmiany w planie.")
                                 return True
                         except Exception as e:
