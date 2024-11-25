@@ -51,15 +51,15 @@ def init_notification_routes(app, push_manager):
             print(f"Received unsubscribe request with data: {data}")
             
             subscription = data.get('subscription')
-            collection_name = data.get('collectionName')
+            collection_name = data.get('collectionName') or data.get('planId')  # Accept either parameter
             
             if not subscription:
                 print("Missing subscription data")
                 return jsonify({'error': 'Missing subscription data'}), 400
                 
             if not collection_name:
-                print("Missing collection name")
-                return jsonify({'error': 'Missing collection name'}), 400
+                print("Missing collection name or plan ID")
+                return jsonify({'error': 'Missing collection name or plan ID'}), 400
             
             # Extract endpoint from subscription if it's nested
             if isinstance(subscription, dict) and 'endpoint' in subscription:
