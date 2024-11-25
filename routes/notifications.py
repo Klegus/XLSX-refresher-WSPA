@@ -21,6 +21,29 @@ def init_notification_routes(app, push_manager):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
             
+    @app.route('/api/notifications/test', methods=['POST'])
+    def test_notification():
+        try:
+            data = request.get_json()
+            subscription = data.get('subscription')
+            
+            if not subscription:
+                return jsonify({'error': 'Missing subscription'}), 400
+                
+            success = push_manager.send_notification(
+                subscription=subscription,
+                message="To jest testowe powiadomienie!",
+                url="/panel"
+            )
+            
+            if success:
+                return jsonify({'status': 'success'}), 200
+            else:
+                return jsonify({'error': 'Failed to send test notification'}), 500
+                
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+            
     @app.route('/api/notifications/unsubscribe', methods=['POST'])
     def unsubscribe():
         try:
