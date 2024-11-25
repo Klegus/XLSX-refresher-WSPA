@@ -48,18 +48,35 @@ def init_notification_routes(app, push_manager):
     def unsubscribe():
         try:
             data = request.get_json()
+            print(f"Received unsubscribe request with data: {data}")
+            
             subscription = data.get('subscription')
             collection_name = data.get('collectionName')
             
-            if not subscription or not collection_name:
-                return jsonify({'error': 'Missing required fields'}), 400
+            if not subscription:
+                print("Missing subscription data")
+                return jsonify({'error': 'Missing subscription data'}), 400
                 
-            success = push_manager.remove_subscription(subscription, collection_name)
+            if not collection_name:
+                print("Missing collection name")
+                return jsonify({'error': 'Missing collection name'}), 400
+            
+            # Extract endpoint from subscription if it's nested
+            if isinstance(subscription, dict) and 'endpoint' in subscription:
+                endpoint = subscription['endpoint']
+            else:
+                endpoint = subscription
+                
+            print(f"Attempting to remove subscription with endpoint: {endpoint}")
+            success = push_manager.remove_subscription({'endpoint': endpoint}, collection_name)
             
             if success:
+                print(f"Successfully unsubscribed from {collection_name}")
                 return jsonify({'status': 'success'}), 200
             else:
+                print(f"Failed to unsubscribe from {collection_name}")
                 return jsonify({'error': 'Failed to remove subscription'}), 500
                 
         except Exception as e:
+            print(f"Error in unsubscribe endpoint: {str(e)}")
             return jsonify({'error': str(e)}), 500
