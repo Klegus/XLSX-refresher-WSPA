@@ -17,6 +17,7 @@ class LessonPlan(LessonPlanDownloader):
         super().__init__(username, password, directory, plan_config["download_url"])
         self.push_manager = push_manager
         self.plan_config = plan_config
+        self.collection_name = f"plans_{plan_config['faculty'].replace(' ', '-')}_{plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
         self.sheet_name = plan_config["sheet_name"]
         self.plans_directory = os.path.join(
             os.getenv("PLANS_DIRECTORY", "lesson_plans"),
@@ -765,6 +766,14 @@ class LessonPlan(LessonPlanDownloader):
                     print(
                         f"Successfully processed groups: {', '.join(processed_groups)}"
                     )
+                    
+                    # Send push notifications if manager is available
+                    if self.push_manager:
+                        print(f"Sending push notifications for {self.collection_name}")
+                        self.push_manager.notify_plan_update(
+                            collection_name=self.collection_name,
+                            plan_name=self.plan_config["name"]
+                        )
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
 
