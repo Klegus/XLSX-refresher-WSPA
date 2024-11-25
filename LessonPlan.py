@@ -39,7 +39,7 @@ class LessonPlan(LessonPlanDownloader):
                 print("Successfully connected to MongoDB")
             except pymongo.errors.ConnectionFailure as e:
                 print(f"Could not connect to MongoDB: {e}")
-            except Exception as e:
+            except Exception as e: 
                 print(f"An error occurred: {e}")
         if plan_config.get("groups") is None:
             self.groups = {"cały kierunek": "all"}
