@@ -769,11 +769,17 @@ class LessonPlan(LessonPlanDownloader):
                     
                     # Send push notifications if manager is available
                     if self.push_manager:
-                        print(f"Sending push notifications for {self.collection_name}")
-                        self.push_manager.notify_plan_update(
-                            collection_name=self.collection_name,
-                            plan_name=self.plan_config["name"]
-                        )
+                        print(f"\nAttempting to send push notifications:")
+                        print(f"Collection name: {self.collection_name}")
+                        print(f"Plan name: {self.plan_config['name']}")
+                        try:
+                            self.push_manager.notify_plan_update(
+                                collection_name=self.collection_name,
+                                plan_name=self.plan_config["name"]
+                            )
+                            print("Push notifications sent successfully")
+                        except Exception as e:
+                            print(f"Error sending push notifications: {str(e)}")
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
 

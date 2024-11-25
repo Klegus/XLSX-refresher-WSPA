@@ -88,21 +88,49 @@ class PushNotificationManager:
 
     def notify_plan_update(self, collection_name: str, plan_name: str) -> None:
         """Send notifications to all subscriptions for a plan collection"""
-        subscriptions = self.db.push_subscriptions.find({"collection_name": collection_name})
+        print(f"\nNotifying subscribers for collection: {collection_name}")
+        
+        # Find all subscriptions
+        subscriptions = list(self.db.push_subscriptions.find({"collection_name": collection_name}))
+        print(f"Found {len(subscriptions)} subscription(s)")
+        
+        if not subscriptions:
+            print("No subscriptions found for this collection")
+            return
+            
+        successful_notifications = 0
+        failed_notifications = 0
         
         for sub in subscriptions:
+            print(f"\nProcessing subscription: {sub.get('_id')}")
+            print(f"Endpoint: {sub.get('subscription', {}).get('endpoint', 'No endpoint')}")
+            
             message = f"Plan zajęć został zaktualizowany: {plan_name}"
-            url = f"/plan/{collection_name}"  # URL to the plan collection
+            url = f"/plan/{collection_name}"
             
-            success = self.send_notification(
-                subscription=sub["subscription"],
-                message=message,
-                url=url
-            )
-            
-            if success:
-                # Update last_notified timestamp
-                self.db.push_subscriptions.update_one(
-                    {"_id": sub["_id"]},
-                    {"$set": {"last_notified": datetime.now()}}
+            try:
+                success = self.send_notification(
+                    subscription=sub["subscription"],
+                    message=message,
+                    url=url
                 )
+                
+                if success:
+                    # Update last_notified timestamp
+                    self.db.push_subscriptions.update_one(
+                        {"_id": sub["_id"]},
+                        {"$set": {"last_notified": datetime.now()}}
+                    )
+                    successful_notifications += 1
+                    print("Notification sent successfully")
+                else:
+                    failed_notifications += 1
+                    print("Failed to send notification")
+                    
+            except Exception as e:
+                failed_notifications += 1
+                print(f"Error sending notification: {str(e)}")
+                
+        print(f"\nNotification summary:")
+        print(f"- Successful: {successful_notifications}")
+        print(f"- Failed: {failed_notifications}")
