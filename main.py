@@ -602,7 +602,9 @@ def main():
         vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
         vapid_public_key = os.getenv("VAPID_PUBLIC_KEY")
         vapid_claims = {
-            "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspia.edu.pl")
+            "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspia.edu.pl"),
+            "aud": "https://push.services.mozilla.com",  # Add this for Edge compatibility
+            "exp": int(time.time()) + 12 * 60 * 60  # 12 hours expiration
         }
         
         push_manager = PushNotificationManager(

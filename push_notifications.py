@@ -72,18 +72,40 @@ class PushNotificationManager:
                 "url": url
             }
             
+            # Format subscription data specifically for Edge
+            subscription_info = {
+                "endpoint": subscription["endpoint"],
+                "keys": {
+                    "p256dh": subscription["keys"]["p256dh"],
+                    "auth": subscription["keys"]["auth"]
+                }
+            }
+            
+            # Adjust claims based on endpoint
+            adjusted_claims = self.vapid_claims.copy()
+            if "microsoftedge" in subscription["endpoint"].lower():
+                adjusted_claims["aud"] = subscription["endpoint"].split("/", 3)[2]
+            
             webpush(
-                subscription_info=subscription,
+                subscription_info=subscription_info,
                 data=json.dumps(data),
                 vapid_private_key=self.vapid_private_key,
-                vapid_claims=self.vapid_claims
+                vapid_claims=adjusted_claims,
+                timeout=10  # Add timeout for better error handling
             )
             return True
         except Exception as e:
             print(f"Error sending notification: {e}")
-            if "410 Gone" in str(e):
+            error_str = str(e)
+            
+            if "401" in error_str:
+                print(f"Authorization error for endpoint: {subscription.get('endpoint', 'unknown')}")
+                print(f"Using claims: {adjusted_claims}")
+            elif "410 Gone" in error_str:
                 # Subscription expired/invalid - remove it
+                print(f"Removing expired subscription: {subscription.get('endpoint', 'unknown')}")
                 self.db.push_subscriptions.delete_one({"subscription.endpoint": subscription["endpoint"]})
+            
             return False
 
     def notify_plan_update(self, collection_name: str, plan_name: str) -> None:
