@@ -763,23 +763,29 @@ class LessonPlan(LessonPlanDownloader):
                     print(
                         f"Saved plans to MongoDB collection {collection_name} with id: {result.inserted_id}"
                     )
-                    print(
-                        f"Successfully processed groups: {', '.join(processed_groups)}"
-                    )
+                    # Usuwamy zbędny print o przetworzonych grupach
 
                     # Send push notifications immediately after saving to database
                     if self.push_manager:
-                        print(f"\nAttempting to send push notifications:")
-                        print(f"Collection name: {self.collection_name}")
-                        print(f"Plan name: {self.plan_config['name']}")
-                        try:
-                            self.push_manager.notify_plan_update(
-                                collection_name=self.collection_name,
-                                plan_name=self.plan_config["name"]
-                            )
-                            print("Push notifications sent successfully")
-                        except Exception as e:
-                            print(f"Error sending push notifications: {str(e)}")
+                        print(f"\nWysyłanie powiadomień push:")
+                        if not self.push_manager:
+                            print("BŁĄD: push_manager nie został zainicjalizowany")
+                        else:
+                            try:
+                                print(f"- Collection name: {self.collection_name}")
+                                print(f"- Plan name: {self.plan_config['name']}")
+                                print(f"- Push manager type: {type(self.push_manager)}")
+                                print(f"- Push manager methods: {dir(self.push_manager)}")
+                            
+                                result = self.push_manager.notify_plan_update(
+                                    collection_name=self.collection_name,
+                                    plan_name=self.plan_config["name"]
+                                )
+                                print(f"Wynik wysłania powiadomień: {result}")
+                            except Exception as e:
+                                print(f"BŁĄD podczas wysyłania powiadomień push: {str(e)}")
+                                import traceback
+                                traceback.print_exc()
 
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
