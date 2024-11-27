@@ -89,12 +89,20 @@ class PushNotificationManager:
             adjusted_claims = self.vapid_claims.copy()
             is_edge = "notify.windows.com" in subscription["endpoint"].lower()
             
+            # Add expiration time if not present
+            if "exp" not in adjusted_claims:
+                adjusted_claims["exp"] = int(time.time()) + 12 * 3600  # 12 hours
+            
             if is_edge:
                 print("Detected Edge browser endpoint")
                 # Extract the actual endpoint domain
                 endpoint_domain = subscription["endpoint"].split("/", 3)[2]
-                adjusted_claims["aud"] = f"https://{endpoint_domain}"
-                print(f"Adjusted aud claim to: {adjusted_claims['aud']}")
+                adjusted_claims.update({
+                    "aud": f"https://{endpoint_domain}",
+                    "sub": self.vapid_claims["sub"],
+                    "exp": int(time.time()) + 12 * 3600,  # 12 hours
+                })
+                print(f"Adjusted claims for Edge: {adjusted_claims}")
             
             try:
                 print(f"Sending push with claims: {adjusted_claims}")
