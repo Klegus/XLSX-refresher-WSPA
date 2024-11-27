@@ -107,11 +107,21 @@ class PushNotificationManager:
             
             try:
                 print(f"Sending push with claims: {adjusted_claims}")
+                
+                # Prepare headers for WNS (Windows Notification Service)
+                headers = {}
+                if is_edge:
+                    headers.update({
+                        'X-WNS-Type': 'wns/toast',
+                        'Content-Type': 'application/octet-stream',
+                    })
+                
                 webpush(
                     subscription_info=subscription_info,
                     data=json.dumps(data),
                     vapid_private_key=self.vapid_private_key,
                     vapid_claims=adjusted_claims,
+                    headers=headers,
                     timeout=10
                 )
                 print("Push sent successfully")
