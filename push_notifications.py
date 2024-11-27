@@ -72,6 +72,10 @@ class PushNotificationManager:
                 "url": url
             }
             
+            print(f"\nDebug - Processing subscription:")
+            print(f"Endpoint: {subscription['endpoint']}")
+            print(f"Original claims: {self.vapid_claims}")
+            
             # Format subscription data
             subscription_info = {
                 "endpoint": subscription["endpoint"],
@@ -83,17 +87,30 @@ class PushNotificationManager:
             
             # Adjust claims based on endpoint
             adjusted_claims = self.vapid_claims.copy()
-            if "notify.windows.com" in subscription["endpoint"].lower():
-                # For Edge endpoints like wns2-am3p.notify.windows.com
-                adjusted_claims["aud"] = "https://notify.windows.com"
+            is_edge = "notify.windows.com" in subscription["endpoint"].lower()
             
-            webpush(
-                subscription_info=subscription_info,
-                data=json.dumps(data),
-                vapid_private_key=self.vapid_private_key,
-                vapid_claims=adjusted_claims,
-                timeout=10  # Add timeout for better error handling
-            )
+            if is_edge:
+                print("Detected Edge browser endpoint")
+                # Extract the actual endpoint domain
+                endpoint_domain = subscription["endpoint"].split("/", 3)[2]
+                adjusted_claims["aud"] = f"https://{endpoint_domain}"
+                print(f"Adjusted aud claim to: {adjusted_claims['aud']}")
+            
+            try:
+                print(f"Sending push with claims: {adjusted_claims}")
+                webpush(
+                    subscription_info=subscription_info,
+                    data=json.dumps(data),
+                    vapid_private_key=self.vapid_private_key,
+                    vapid_claims=adjusted_claims,
+                    timeout=10
+                )
+                print("Push sent successfully")
+            except Exception as e:
+                print(f"Push failed with error: {str(e)}")
+                print(f"Response details: {getattr(e, 'response', 'No response')}")
+                print(f"Response body: {getattr(e, 'response_body', 'No response body')}")
+                raise
             return True
         except Exception as e:
             print(f"Error sending notification: {e}")
