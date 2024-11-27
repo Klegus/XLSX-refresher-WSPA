@@ -10,11 +10,27 @@ def init_notification_routes(app, push_manager):
             
             if not subscription or not collection_name:
                 return jsonify({'error': 'Missing required fields'}), 400
+
+            # Check if this is an Edge/WNS endpoint
+            is_edge = "notify.windows.com" in subscription.get('endpoint', '').lower()
+            
+            if is_edge:
+                # Add required WNS headers to subscription
+                if 'keys' not in subscription:
+                    subscription['keys'] = {}
+                subscription['keys'].update({
+                    'contentEncoding': 'aes128gcm',
+                    'auth': subscription['keys'].get('auth', ''),
+                    'p256dh': subscription['keys'].get('p256dh', '')
+                })
                 
             success = push_manager.save_subscription(subscription, collection_name)
             
             if success:
-                return jsonify({'status': 'success'}), 200
+                return jsonify({
+                    'status': 'success',
+                    'browser': 'edge' if is_edge else 'other'
+                }), 200
             else:
                 return jsonify({'error': 'Failed to save subscription'}), 500
                 
