@@ -12,12 +12,8 @@ class LessonPlanComparator:
         self.openrouter_api_url = "https://openrouter.ai/api/v1/chat/completions"
         self.selected_model = selected_model
 
-    def get_last_two_plans(self, plan_name):
-        # Handle the special case where "informatyka" appears twice in collection name
-        if "informatyka" in plan_name.lower():
-            collection_name = f"plans_informatyka_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
-        else:
-            collection_name = f"plans_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
+    def get_last_two_plans(self, plan_config):
+        collection_name = f"plans_{plan_config['faculty'].replace(' ', '-')}_{plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
         
         print(f"\n{Fore.CYAN}Debugowanie get_last_two_plans:{Style.RESET_ALL}")
         print(f"- Szukam planów w kolekcji: {collection_name}")
