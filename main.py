@@ -282,7 +282,7 @@ def log_check_result(total_plans, plans_checked, changes_detected):
 vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
 vapid_public_key = os.getenv("VAPID_PUBLIC_KEY")
 vapid_claims = {
-    "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspia.edu.pl")
+    "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspa.edu.pl")
 }
 
 push_manager = PushNotificationManager(
@@ -353,7 +353,7 @@ class LessonPlanManager:
             ):
                 try:
                     os.remove(file)
-                    print(f"Usunięto plik: {file}")
+                    #print(f"Usunięto plik: {file}")
                 except Exception as e:
                     print(f"Błąd podczas usuwania pliku {file}: {str(e)}")
 
@@ -400,7 +400,7 @@ class LessonPlanManager:
         if latest_plan:
             for group, html_content in latest_plan["groups"].items():
                 self.cached_plans[group] = parse_html_to_dataframe(html_content)
-        print("Zaktualizowano pamięć podręczną planów lekcji.")
+        #print("Zaktualizowano pamięć podręczną planów lekcji.")
 
     def check_once(self):
         """Wykonuje pojedynczy cykl sprawdzania planu"""
@@ -436,7 +436,13 @@ class LessonPlanManager:
             else:
                 if new_checksum:
                     print("Plan został zaktualizowany")
-
+                    # Send push notifications if manager is available
+                    if push_manager:
+                        collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+                        push_manager.notify_plan_update(
+                            collection_name=collection_name,
+                            plan_name=self.plan_name
+                        )
                     # Sprawdź czy plan ma włączone porównywanie
                     # Check if plan has comparison enabled and comparator is available
                     should_compare = (
@@ -463,13 +469,7 @@ class LessonPlanManager:
                                     webhook_message, force_send=True
                                 )
                                 
-                                # Send push notifications if manager is available
-                                if push_manager:
-                                    collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
-                                    push_manager.notify_plan_update(
-                                        collection_name=collection_name,
-                                        plan_name=self.plan_name
-                                    )
+                                
                                 
                                 print("Wykryto i zapisano zmiany w planie.")
                                 return True
@@ -618,10 +618,10 @@ def main():
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
         
         if plans_config_doc and "plans" in plans_config_doc:
-            print("Loading plans configuration from MongoDB...")
+            #print("Loading plans configuration from MongoDB...")
             plans_config = plans_config_doc["plans"]
         else:
-            print("No plans configuration found in MongoDB. Loading from plans.json...")
+            #print("No plans configuration found in MongoDB. Loading from plans.json...")
             # Load from plans.json and store in MongoDB
             with open("plans.json", "r", encoding="utf-8") as f:
                 plans_config = json.load(f)
@@ -636,23 +636,24 @@ def main():
         lesson_plan_managers = {}
 
         for plan_id, plan_config in plans_config.items():
-            print(f"Initializing LessonPlan for {plan_config['name']}")
+            #print(f"Initializing LessonPlan for {plan_config['name']}")
             lesson_plans[plan_id] = LessonPlan(
                 username=username,
                 password=password,
                 mongo_uri=mongo_uri,
                 plan_config=plan_config,
             )
-            print(f"LessonPlan for {plan_config['name']} initialized successfully")
+            #print(f"LessonPlan for {plan_config['name']} initialized successfully")
 
             comparator = None
 
             # Debug info about plan settings
             compare_enabled = plan_config.get("compare", False)
             notify_enabled = plan_config.get("notify", False)
-            print(f"\nPlan settings for {plan_config['name']}:")
-            print(f"- Compare enabled: {compare_enabled}")
-            print(f"- Notify enabled: {notify_enabled}")
+            if compare_enabled or notify_enabled:
+                print(f"\nPlan settings for {plan_config['name']}:")
+                print(f"- Compare enabled: {compare_enabled}")
+                print(f"- Notify enabled: {notify_enabled}")
 
             if compare_enabled and openrouter_api_key and selected_model:
                 print(f"Initializing LessonPlanComparator for {plan_config['name']}")
@@ -663,9 +664,9 @@ def main():
                         selected_model=selected_model,
                     )
                     lesson_plan_comparators[plan_id] = comparator
-                    print(
-                        f"LessonPlanComparator for {plan_config['name']} initialized successfully"
-                    )
+                    #print(
+                    #    f"LessonPlanComparator for {plan_config['name']} initialized successfully"
+                    #)
                 except Exception as e:
                     print(
                         f"Failed to initialize comparator for {plan_config['name']}: {e}"
@@ -687,16 +688,16 @@ def main():
                         f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)"
                     )
 
-            print(f"Initializing LessonPlanManager for {plan_config['name']}")
+            #print(f"Initializing LessonPlanManager for {plan_config['name']}")
             lesson_plan_managers[plan_id] = LessonPlanManager(
                 lesson_plans[plan_id],
                 comparator,
                 working_directory=".",
                 discord_webhook_url=discord_webhook_url,
             )
-            print(
-                f"LessonPlanManager for {plan_config['name']} initialized successfully"
-            )
+            #print(
+            #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
+            #)
 
         flask_thread = threading.Thread(target=run_flask_app)
         flask_thread.daemon = True
