@@ -111,7 +111,7 @@ class LessonPlan(LessonPlanDownloader):
                 }
                 
                 result = collection.insert_one(plans_data)
-                print(f"Saved basic plan info to MongoDB collection {collection_name} with id: {result.inserted_id}")
+                #print(f"Saved basic plan info to MongoDB collection {collection_name} with id: {result.inserted_id}")
             return new_checksum
 
         should_process = True
@@ -161,16 +161,16 @@ class LessonPlan(LessonPlanDownloader):
 
                 # Process each group
                 for group_name in groups_to_process:
-                    print(f"\nProcessing group: {group_name}")
+                    #print(f"\nProcessing group: {group_name}")
                     try:
                         df_group = self.get_lessons_for_group(group_name)
                         if df_group is not None and not df_group.empty:
                             # Save group data
                             self.save_group_lessons(group_name, df_group)
                             processed_groups.append(group_name)
-                            print(f"Successfully processed group: {group_name}")
+                            #print(f"Successfully processed group: {group_name}")
                         else:
-                            print(f"No data available for group: {group_name}")
+                            #print(f"No data available for group: {group_name}")
                             failed_groups.append(group_name)
                     except Exception as group_error:
                         print(
@@ -179,9 +179,6 @@ class LessonPlan(LessonPlanDownloader):
                         failed_groups.append(group_name)
                         continue
 
-                # Print summary
-                #print("\nProcessing Summary:")
-                #print(f"Successfully processed groups: {', '.join(processed_groups)}")
                 if failed_groups:
                     print(f"Failed to process groups: {', '.join(failed_groups)}")
 
@@ -231,7 +228,7 @@ class LessonPlan(LessonPlanDownloader):
         self.converted_lesson_plan = os.path.join(dir_path, new_file_name)
 
         wb.save(self.converted_lesson_plan)
-        print(f"Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}")
+        #print(f"Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}")
         return True
 
     @staticmethod
@@ -300,7 +297,7 @@ class LessonPlan(LessonPlanDownloader):
                     else:
                         raise
 
-            print(f"Cleaned file saved as: {self.converted_lesson_plan}")
+            #print(f"Cleaned file saved as: {self.converted_lesson_plan}")
             return True
 
         except Exception as e:
@@ -377,12 +374,12 @@ class LessonPlan(LessonPlanDownloader):
 
         try:
             df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
-            print("\nSearching for group columns...")
-            print("Available columns:", df.columns.tolist())
+            #print("\nSearching for group columns...")
+            #print("Available columns:", df.columns.tolist())
 
             # Jeśli mamy grupę "cały kierunek", używamy poprzedniej logiki
             if len(self.groups) == 1 and "cały kierunek" in self.groups:
-                print("Processing entire course without group division")
+                #print("Processing entire course without group division")
                 days = {
                     "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
                     "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
@@ -455,7 +452,7 @@ class LessonPlan(LessonPlanDownloader):
                 # Jeśli nie znaleźliśmo prawidłowych kolumn, użyj backup
                 if group_name not in group_columns and group_name in backup_columns:
                     group_columns[group_name] = backup_columns[group_name]
-                    print(f"Using backup columns for {group_name}: {backup_columns[group_name]}")
+                    #(f"Using backup columns for {group_name}: {backup_columns[group_name]}")
                 elif group_name not in group_columns:
                     print(f"No columns found for {group_name}")
 
@@ -475,13 +472,13 @@ class LessonPlan(LessonPlanDownloader):
             self.find_group_columns_with_similarity()
 
         try:
-            print(f"\nReading Excel file for group: {group_name}")
+            #print(f"\nReading Excel file for group: {group_name}")
             df = pd.read_excel(
                 self.converted_lesson_plan, sheet_name=self.sheet_name, header=None
             )
 
             if group_name not in self.group_columns:
-                print(f"Group '{group_name}' not found.")
+                #print(f"Group '{group_name}' not found.")
                 return None
 
             # Extract column numbers from the column names
@@ -548,8 +545,7 @@ class LessonPlan(LessonPlanDownloader):
             if time_row_index is not None:
                 # Remove all rows before the time row
                 df_filtered = df_filtered.iloc[time_row_index:]
-            else:
-                print("Warning: Could not find time row")
+            
 
             # Remove header rows that contain "godz" or "GODZ"
             df_filtered = df_filtered[
@@ -582,7 +578,7 @@ class LessonPlan(LessonPlanDownloader):
 
             # Final validation of the data
             if df_filtered.empty:
-                print(f"Warning: No data found for group {group_name}")
+                #print(f"Warning: No data found for group {group_name}")
                 return None
 
             # Verify that we have all expected time slots
@@ -640,7 +636,7 @@ class LessonPlan(LessonPlanDownloader):
                 ):
                     # Usuń ostatni wiersz
                     df_filtered = df_filtered.iloc[:-1]
-                    print(f"Removed last row with non-time value: {last_row_time}")
+                    #print(f"Removed last row with non-time value: {last_row_time}")
             return df_filtered
 
         except Exception as e:
@@ -675,9 +671,8 @@ class LessonPlan(LessonPlanDownloader):
             with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
                 df.to_excel(writer, index=False, sheet_name=sheet_name)
 
-            print(f"Lessons for group '{group_name}' saved to {file_path}")
-            if len(group_name) > 31:
-                print(f"Note: Sheet name was truncated to '{sheet_name}'")
+            #print(f"Lessons for group '{group_name}' saved to {file_path}")
+            
         except Exception as e:
             print(
                 f"An error occurred while saving lessons for group '{group_name}': {str(e)}"
