@@ -72,7 +72,7 @@ class PushNotificationManager:
                 "url": url
             }
             
-            # Format subscription data specifically for Edge
+            # Format subscription data
             subscription_info = {
                 "endpoint": subscription["endpoint"],
                 "keys": {
@@ -83,8 +83,9 @@ class PushNotificationManager:
             
             # Adjust claims based on endpoint
             adjusted_claims = self.vapid_claims.copy()
-            if "microsoftedge" in subscription["endpoint"].lower():
-                adjusted_claims["aud"] = subscription["endpoint"].split("/", 3)[2]
+            if "notify.windows.com" in subscription["endpoint"].lower():
+                # For Edge endpoints like wns2-am3p.notify.windows.com
+                adjusted_claims["aud"] = "https://notify.windows.com"
             
             webpush(
                 subscription_info=subscription_info,
