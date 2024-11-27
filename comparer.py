@@ -13,7 +13,12 @@ class LessonPlanComparator:
         self.selected_model = selected_model
 
     def get_last_two_plans(self, plan_name):
-        collection_name = f"plans_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
+        # Handle the special case where "informatyka" appears twice in collection name
+        if "informatyka" in plan_name.lower():
+            collection_name = f"plans_informatyka_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
+        else:
+            collection_name = f"plans_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
+        
         print(f"\n{Fore.CYAN}Debugowanie get_last_two_plans:{Style.RESET_ALL}")
         print(f"- Szukam planów w kolekcji: {collection_name}")
         
