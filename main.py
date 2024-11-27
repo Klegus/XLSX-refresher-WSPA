@@ -321,6 +321,7 @@ class LessonPlanManager:
         check_interval=900,
         working_directory=".",
         discord_webhook_url=None,
+        plan_config=None,
     ):
         self.lesson_plan = lesson_plan
         self.lesson_plan_comparator = lesson_plan_comparator
@@ -694,6 +695,7 @@ def main():
                 comparator,
                 working_directory=".",
                 discord_webhook_url=discord_webhook_url,
+                plan_config=plan_config,
             )
             #print(
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
