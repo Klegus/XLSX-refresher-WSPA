@@ -105,13 +105,14 @@ class LessonPlanComparator:
         print(f"Wyniki porównania dla {newer_plan['plan_name']} zapisane w bazie danych z ID: {result.inserted_id}")
         return result.inserted_id
 
-    def compare_plans(self, collection_name):
-        newer_plan, older_plan = self.get_last_two_plans(collection_name)
+    def compare_plans(self, plan_config):
+        newer_plan, older_plan = self.get_last_two_plans(plan_config)
         if not newer_plan:
+            collection_name = f"plans_{plan_config['faculty'].replace(' ', '-')}_{plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
             return f"Nie znaleziono żadnych planów w kolekcji {collection_name}."
         
         if not older_plan:
-            return f"Plan w kolekcji {collection_name} został zaktualizowany."
+            return f"Plan został zaktualizowany dla: {plan_config['name']}"
 
         print(f"Używany model: {self.selected_model}")
         print(f"Porównywanie planów z dat: Nowszy {newer_plan['timestamp']}, Starszy {older_plan['timestamp']}")

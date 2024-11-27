@@ -455,14 +455,9 @@ class LessonPlanManager:
                     if should_compare:
                         try:
                             print("Comparing plans...")
-                            collection_name = (
-                                self.plan_name.lower()
-                                .replace(" ", "_")
-                                .replace("-", "_")
-                            )
                             comparison_result = (
                                 self.lesson_plan_comparator.compare_plans(
-                                    collection_name
+                                    self.plan_config
                                 )
                             )
                             if comparison_result:
