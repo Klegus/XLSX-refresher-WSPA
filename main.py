@@ -325,6 +325,7 @@ class LessonPlanManager:
     ):
         self.lesson_plan = lesson_plan
         self.lesson_plan_comparator = lesson_plan_comparator
+        self.plan_config = lesson_plan.plan_config  # Store the plan_config from lesson_plan
         self.plan_name = lesson_plan.plan_config["name"]
         self.check_interval = check_interval
         self.working_directory = working_directory
