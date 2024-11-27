@@ -30,6 +30,8 @@ class LessonPlanComparator:
         if len(plans) < 2:
             print(f"{Fore.YELLOW}Nie znaleziono wystarczającej liczby planów do porównania w kolekcji {collection_name}.{Style.RESET_ALL}")
             print(f"- Wymagane są minimum 2 plany, znaleziono: {len(plans)}")
+            if plans:  # Jeśli jest przynajmniej jeden plan
+                return plans[0], None
             return None, None
             
         # Upewnij się, że plans[0] to najnowszy plan, a plans[1] to poprzedni
@@ -105,8 +107,11 @@ class LessonPlanComparator:
 
     def compare_plans(self, collection_name):
         newer_plan, older_plan = self.get_last_two_plans(collection_name)
-        if not newer_plan or not older_plan:
-            return f"Nie można porównać planów w kolekcji {collection_name} - brak wystarczającej liczby planów."
+        if not newer_plan:
+            return f"Nie znaleziono żadnych planów w kolekcji {collection_name}."
+        
+        if not older_plan:
+            return f"Plan w kolekcji {collection_name} został zaktualizowany."
 
         print(f"Używany model: {self.selected_model}")
         print(f"Porównywanie planów z dat: Nowszy {newer_plan['timestamp']}, Starszy {older_plan['timestamp']}")
