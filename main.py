@@ -1,6 +1,5 @@
 import time
 from datetime import datetime, timedelta
-from push_notifications import PushNotificationManager
 from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
 from ActivityDownloader import WebpageDownloader
@@ -216,7 +215,6 @@ from routes.plans import init_plan_routes
 from routes.logs import init_log_routes
 from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
-from routes.notifications import init_notification_routes
 
 
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
@@ -306,7 +304,6 @@ init_plan_routes(app, get_semester_collections, db)
 init_log_routes(app, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
-init_notification_routes(app, push_manager)
 
 
 def run_flask_app():

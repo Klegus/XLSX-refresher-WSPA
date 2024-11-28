@@ -13,9 +13,8 @@ from datetime import datetime
 
 
 class LessonPlan(LessonPlanDownloader):
-    def __init__(self, username, password, mongo_uri, plan_config, directory="", push_manager=None):
+    def __init__(self, username, password, mongo_uri, plan_config, directory=""):
         super().__init__(username, password, directory, plan_config["download_url"])
-        self.push_manager = push_manager
         self.plan_config = plan_config
         self.collection_name = f"plans_{plan_config['faculty'].replace(' ', '-')}_{plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
         self.sheet_name = plan_config["sheet_name"]
@@ -760,27 +759,6 @@ class LessonPlan(LessonPlanDownloader):
                     )
                     # Usuwamy zbędny print o przetworzonych grupach
 
-                    # Send push notifications immediately after saving to database
-                    if self.push_manager:
-                        print(f"\nWysyłanie powiadomień push:")
-                        if not self.push_manager:
-                            print("BŁĄD: push_manager nie został zainicjalizowany")
-                        else:
-                            try:
-                                print(f"- Collection name: {self.collection_name}")
-                                print(f"- Plan name: {self.plan_config['name']}")
-                                print(f"- Push manager type: {type(self.push_manager)}")
-                                print(f"- Push manager methods: {dir(self.push_manager)}")
-                            
-                                result = self.push_manager.notify_plan_update(
-                                    collection_name=self.collection_name,
-                                    plan_name=self.plan_config["name"]
-                                )
-                                print(f"Wynik wysłania powiadomień: {result}")
-                            except Exception as e:
-                                print(f"BŁĄD podczas wysyłania powiadomień push: {str(e)}")
-                                import traceback
-                                traceback.print_exc()
 
                     if failed_groups:
                         print(f"Failed to process groups: {', '.join(failed_groups)}")
