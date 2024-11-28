@@ -276,19 +276,6 @@ def log_check_result(total_plans, plans_checked, changes_detected):
     db.check_cycles.insert_one(log_entry)
 
 
-# Initialize push notifications
-vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
-vapid_public_key = os.getenv("VAPID_PUBLIC_KEY")
-vapid_claims = {
-    "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspa.edu.pl")
-}
-
-push_manager = PushNotificationManager(
-    db=db,
-    vapid_private_key=vapid_private_key,
-    vapid_public_key=vapid_public_key,
-    vapid_claims=vapid_claims
-)
 
 # Initialize routes
 init_status_routes(app, status_checker, get_system_config)
