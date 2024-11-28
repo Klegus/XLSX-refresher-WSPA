@@ -3,12 +3,12 @@
         "name": "Informatyka - studia I stopnia st II",
         "faculty": "informatyka",
         "groups": {
-            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczy\ngrupa 1\npodział wg nazwisk: A-K",
-            "Technologie Webowe i Internet rzeczy grupa 2": "Technologie Webowe i Internet rzeczy\ngrupa 2\npodział wg nazwisk: L-Z",
+            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczygrupa 1podział wg nazwisk: A-K",
+            "Technologie Webowe i Internet rzeczy grupa 2": "Technologie Webowe i Internet rzeczygrupa 2podział wg nazwisk: L-Z",
             "Technologie mobilne": "Sp.: Technologie mobilne",
             "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrupa 1\npodział wg nazwisk:A-K",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrupa 2\npodział wg nazwisk: L-Z"
+            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrupa 1podział wg nazwisk:A-K",
+            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrupa 2podział wg nazwisk: L-Z"
         },
         "category": "st",
         "compare": true,
@@ -19,10 +19,10 @@
         "name": "Informatyka - studia I stopnia st I",
         "faculty": "informatyka",
         "groups": {
-            "Grupa 1 - A-Ho": "grupa 1:\npodział wg nazwisk:\n A-Ho",
-            "Grupa 2 - Hp-Med.": "grupa 2:\npodział wg nazwisk:\nHp-Med.",
-            "Grupa 3 - Mel-Pi": "grupa 3:\npodział wg nazwisk:\nMel-Pi",
-            "Grupa 4 - Pj-Z": "grupa 4:\npodział wg nazwisk:\nPj-Z"
+            "Grupa 1 - A-Ho": "grupa 1:podział wg nazwisk: A-Ho",
+            "Grupa 2 - Hp-Med.": "grupa 2:podział wg nazwisk:Hp-Med.",
+            "Grupa 3 - Mel-Pi": "grupa 3:podział wg nazwisk:Mel-Pi",
+            "Grupa 4 - Pj-Z": "grupa 4:podział wg nazwisk:Pj-Z"
         },
         "category": "st",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -33,10 +33,10 @@
         "faculty": "informatyka",
         "groups": {
             "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrrupa 1\npodział wg nazwisk: A-K",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza\ngrrupa 2\npodział wg nazwisk: L-Z",
-            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczy\ngrrupa 1\npodział wg nazwisk: A-L",
-            "Technologie Webowe i Internet rzeczy grupa 2": "Sp.: Technologie Webowe i Internet rzeczy\ngrrupa 2\npodział wg nazwisk: M-Z"
+            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrrupa 1podział wg nazwisk: A-K",
+            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrrupa 2podział wg nazwisk: L-Z",
+            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczygrrupa 1podział wg nazwisk: A-L",
+            "Technologie Webowe i Internet rzeczy grupa 2": "Sp.: Technologie Webowe i Internet rzeczygrrupa 2podział wg nazwisk: M-Z"
         },
         "category": "st",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -46,9 +46,9 @@
         "name": "Informatyka - studia I stopnia st IV",
         "faculty": "informatyka",
         "groups": {
-            "Grupa 1": "grupa 1\npodział wg nazwisk: A-Ka",
-            "Grupa 2": "grupa 2\npodział wg nazwisk: Kb-P",
-            "Grupa 3": "grupa 3\npodział wg nazwisk: R-Z"
+            "Grupa 1": "grupa 1podział wg nazwisk: A-Ka",
+            "Grupa 2": "grupa 2podział wg nazwisk: Kb-P",
+            "Grupa 3": "grupa 3podział wg nazwisk: R-Z"
         },
         "category": "st",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -77,10 +77,10 @@
         "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.1",
         "faculty": "informatyka",
         "groups": {
-            "Grupa 1": "grupa 1\nwg nazwisk:A-I",
-            "Grupa 2": "grupa 2\nwg nazwisk: J-M",
-            "Grupa 3": "grupa 3\nwg nazwisk: N-R",
-            "Grupa 4": "grupa 4\nwg nazwisk: S-Z"
+            "Grupa 1": "grupa 1wg nazwisk:A-I",
+            "Grupa 2": "grupa 2wg nazwisk: J-M",
+            "Grupa 3": "grupa 3wg nazwisk: N-R",
+            "Grupa 4": "grupa 4wg nazwisk: S-Z"
         },
         "category": "nst",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -90,10 +90,10 @@
         "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.2,3",
         "faculty": "informatyka",
         "groups": {
-            "Grupa 1": "grupa 1\nwg nazwisk:A-C",
-            "Grupa 2": "grupa 2\nwg nazwisk: D-Kon",
-            "Grupa 3": "grupa 3\nwg nazwisk: Kor-M",
-            "Grupa 4": "grupa 4\nwg nazwisk: N-P"
+            "Grupa 1": "grupa 1wg nazwisk:A-C",
+            "Grupa 2": "grupa 2wg nazwisk: D-Kon",
+            "Grupa 3": "grupa 3wg nazwisk: Kor-M",
+            "Grupa 4": "grupa 4wg nazwisk: N-P"
         },
         "category": "nst",
         "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -244,8 +244,8 @@
         "faculty": "Administracja",
         "category": "nst-online",
         "groups": {
-            "Grupa 1 - wg nazwisk: A-Mi": "grupa 1 \npodzuał wg nazwisk: A-Mi",
-            "Grupa 1 - wg nazwisk: Mj-Z": "grupa 1 \npodzuał wg nazwisk: Mj-Z"
+            "Grupa 1 - wg nazwisk: A-Mi": "grupa 1 podzuał wg nazwisk: A-Mi",
+            "Grupa 1 - wg nazwisk: Mj-Z": "grupa 1 podzuał wg nazwisk: Mj-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "ADM I rok PUW - z. stacjonarne"
@@ -413,8 +413,8 @@
         "faculty": "Finanse i rachunkowosc",
         "category": "nst",
         "groups": {
-            "Grupa 1 - kolejność wg nazwisk: \nA-Ł": "grupa 1 - kolejność wg nazwisk: \nA-Ł",
-            "Grupa 2 - kolejność wg nazwisk: M-Z": "grupa 2 - kolejność wg nazwisk: \nM-Z"
+            "Grupa 1 - kolejność wg nazwisk: A-Ł": "grupa 1 - kolejność wg nazwisk: A-Ł",
+            "Grupa 2 - kolejność wg nazwisk: M-Z": "grupa 2 - kolejność wg nazwisk: M-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "FIR I rok PUW - z. stacjonarne"
@@ -432,8 +432,8 @@
         "faculty": "Finanse i rachunkowosc",
         "category": "nst",
         "groups": {
-            "Rachunkowość i finanse przedsiębiorstw\n gr.1 - wg. nazwisk: A-N": "Sp.: Rachunkowość i finanse przedsiębiorstw\n gr.1 - wg. nazwisk: A-N",
-            "Rachunkowość i finanse przedsiębiorstw\n gr.2 - wg. nazwisk: O-Z": "Sp.: Rachunkowość i finanse przedsiębiorstw\n gr.2 - wg. nazwisk: O-Z"
+            "Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N": "Sp.: Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N",
+            "Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z": "Sp.: Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "FIR II rok PUW - z. stacjonarne"
@@ -505,9 +505,9 @@
         "faculty": "informatyka",
         "category": "nst",
         "groups": {
-            "Grupa 1 -  wg nazwisk: A-J": "grupa 1 \npodział wg nazwisk: A-J",
-            "Grupa 2 -  wg nazwisk: K-N": "grupa 2 \npodział wg nazwisk: K-N",
-            "Grupa 3 -  wg nazwisk: O-Ż": "grupa 3 \npodział wg nazwisk: O-Ż"
+            "Grupa 1 -  wg nazwisk: A-J": "grupa 1 podział wg nazwisk: A-J",
+            "Grupa 2 -  wg nazwisk: K-N": "grupa 2 podział wg nazwisk: K-N",
+            "Grupa 3 -  wg nazwisk: O-Ż": "grupa 3 podział wg nazwisk: O-Ż"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "INF MUZ I PUW - z. stacjonarne"
@@ -525,11 +525,11 @@
         "faculty": "informatyka",
         "category": "nst-online",
         "groups": {
-            "Cyberbezpieczeństwo \ngr.1": "M: Cyberbezpieczeństwo \ngr.1",
-            "Cyberbezpieczeństwo\n gr.2": "M: Cyberbezpieczeństwo\n gr.2",
-            "Cyberbezpieczeństwo\n gr.3": "M: Cyberbezpieczeństwo\n gr.3",
-            "Cyberbezpieczeństwo \ngr.4": "M: Cyberbezpieczeństwo \ngr.4",
-            "Cyberbezpieczeństwo \ngr.5": "M: Cyberbezpieczeństwo \ngr.5"
+            "Cyberbezpieczeństwo gr.1": "M: Cyberbezpieczeństwo gr.1",
+            "Cyberbezpieczeństwo gr.2": "M: Cyberbezpieczeństwo gr.2",
+            "Cyberbezpieczeństwo gr.3": "M: Cyberbezpieczeństwo gr.3",
+            "Cyberbezpieczeństwo gr.4": "M: Cyberbezpieczeństwo gr.4",
+            "Cyberbezpieczeństwo gr.5": "M: Cyberbezpieczeństwo gr.5"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "INF MUZ II PUW - z. stacjonarne"
@@ -643,9 +643,9 @@
         "faculty": "Pielegniarstwo",
         "category": "st",
         "groups": {
-            "Grupa 1 - wg nazwisk: A-K": "Grupa 1 \npodział wg nazwisk: A-K",
-            "Grupa 2 - wg nazwisk: L-Sa": "Grupa 2 \npodział wg nazwisk: L-Sa", 
-            "Grupa 3 - wg nazwisk: Sz-Ż": "Grupa 3 \npodział wg nazwisk: Sz-Ż"
+            "Grupa 1 - wg nazwisk: A-K": "Grupa 1 podział wg nazwisk: A-K",
+            "Grupa 2 - wg nazwisk: L-Sa": "Grupa 2 podział wg nazwisk: L-Sa", 
+            "Grupa 3 - wg nazwisk: Sz-Ż": "Grupa 3 podział wg nazwisk: Sz-Ż"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194286/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "PIE st I"
@@ -663,8 +663,8 @@
         "faculty": "Praca socjalna",
         "category": "nst",
         "groups": {
-            "Grupa 1 - wg nazwisk: A-L": "grupa 1 \npodzuał wg nazwisk: A-L",
-            "Grupa 2 - wg nazwisk: Ł-Z": "grupa 2 \npodzuał wg nazwisk: Ł-Z"
+            "Grupa 1 - wg nazwisk: A-L": "grupa 1 podzuał wg nazwisk: A-L",
+            "Grupa 2 - wg nazwisk: Ł-Z": "grupa 2 podzuał wg nazwisk: Ł-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "PS I rok PUW - z. stacjonarne"
@@ -770,7 +770,7 @@
         "sheet_name": "PW nst III"
     },
     "socjologia1": {
-        "name": " \nSocjologia - studia I stopnia - st III - semestr zimowy",
+        "name": " Socjologia - studia I stopnia - st III - semestr zimowy",
         "faculty": "Socjologia",
         "category": "st",
         "groups": null,
@@ -778,7 +778,7 @@
         "sheet_name": "SOC st III"
     },
     "socjologia2": {
-        "name": " \nSocjologia - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+        "name": " Socjologia - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
         "faculty": "Socjologia",
         "category": "nst",
         "groups": {
@@ -788,7 +788,7 @@
         "sheet_name": "SOC II rok PUW - z. stacjonarne"
     },
     "socjologia3": {
-        "name": " \nSocjologia - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
+        "name": " Socjologia - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
         "faculty": "Socjologia",
         "category": "nst-online",
         "groups": {
@@ -902,24 +902,24 @@
         "sheet_name": "TRT III rok PUW - z. on-line"
     },
     "zarzadzanie1": {
-        "name": " \nZarządzanie - studia I stopnia - st I - semestr zimowy",
+        "name": " Zarządzanie - studia I stopnia - st I - semestr zimowy",
         "faculty": "Zarządzanie",
         "category": "st",
         "groups": {
-            "Grupa 1 podział wg nazwisk: A-K": "grupa 1 \npodział wg nazwisk: \nA-K",
-            "Grupa 2 podział wg nazwisk: L-Z": "grupa 2 \npodział wg nazwisk: \nL-Z"
+            "Grupa 1 podział wg nazwisk: A-K": "grupa 1 podział wg nazwisk: A-K",
+            "Grupa 2 podział wg nazwisk: L-Z": "grupa 2 podział wg nazwisk: L-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "ZAZ st I"
     },
     "zarzadzanie2": {
-        "name": " \nZarządzanie - studia I stopnia - st II - semestr zimowy",
+        "name": " Zarządzanie - studia I stopnia - st II - semestr zimowy",
         "faculty": "Zarządzanie",
         "category": "st",
         "groups": {
-            "Innowacyjne zarządzanie firmą grupa 1 wg nazwisk: A-Lud": "Sp.: Innowacyjne zarządzanie firmą\ngrupa 1\npodział wg nazwisk: A-Lud",
-            "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: Luk-R": "Sp.: Innowacyjne zarządzanie firmą \ngrupa 2\n podział wg nazwisk: Luk-R",
-            "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: S-Z": "Sp.: Innowacyjne zarządzanie firmą\ngrupa 2\npodział wg nazwisk: S-Z",
+            "Innowacyjne zarządzanie firmą grupa 1 wg nazwisk: A-Lud": "Sp.: Innowacyjne zarządzanie firmągrupa 1podział wg nazwisk: A-Lud",
+            "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: Luk-R": "Sp.: Innowacyjne zarządzanie firmą grupa 2 podział wg nazwisk: Luk-R",
+            "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: S-Z": "Sp.: Innowacyjne zarządzanie firmągrupa 2podział wg nazwisk: S-Z",
             "Zarządzanie HR": "Sp.: Zarządzanie HR"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
@@ -930,8 +930,8 @@
         "faculty": "Zarządzanie",
         "category": "st",
         "groups": {
-            "Grupa 1 wg nazwisk: A-M": "grupa 1:\npodział wg nazwisk: A-M",
-            "Grupa 2 wg nazwisk: N-Z": "grupa 2:\npodział wg nazwisk: N-Z"
+            "Grupa 1 wg nazwisk: A-M": "grupa 1:podział wg nazwisk: A-M",
+            "Grupa 2 wg nazwisk: N-Z": "grupa 2:podział wg nazwisk: N-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "ZAZ st III"
@@ -976,10 +976,10 @@
         "faculty": "Zarządzanie",
         "category": "nst-online",
         "groups": {
-            "Grupa 1 wg nazwisk: A-Gi": "Grupa 1\npodział wg nazwisk:A-Gi",
-            "Grupa 2 wg nazwisk: Gj-Kot": "Grupa 2\npodział wg nazwisk:Gj-Kot",
-            "Grupa 3 wg nazwisk: Kos-O": "Grupa 3\npodział wg nazwisk:Kos-O",
-            "Grupa 4 wg nazwisk: P-Z": "Grupa 4\npodział wg nazwisk:P-Z"
+            "Grupa 1 wg nazwisk: A-Gi": "Grupa 1podział wg nazwisk:A-Gi",
+            "Grupa 2 wg nazwisk: Gj-Kot": "Grupa 2podział wg nazwisk:Gj-Kot",
+            "Grupa 3 wg nazwisk: Kos-O": "Grupa 3podział wg nazwisk:Kos-O",
+            "Grupa 4 wg nazwisk: P-Z": "Grupa 4podział wg nazwisk:P-Z"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
         "sheet_name": "ZAZ III PUW - z. stacjonarne"
@@ -1021,9 +1021,9 @@
         "faculty": "Zarządzanie",
         "category": "nst",
         "groups": {
-            "E-biznes i nowoczesne formy marketingu wg nazwisk: A-M": "Sp.: E-biznes i nowoczesne formy marketingu\nwg nazwisk: A-M",
-            "E-biznes i nowoczesne formy marketingu wg nazwisk: N-Rej": "Sp.: E-biznes \ni nowoczesne formy marketingu\nwg nazwisk: \nN-Rej",
-            "E-biznes i nowoczesne formy marketingu wg nazwisk: Rek-Z": "Sp.: E-biznes \ni nowoczesne formy marketingu\nwg nazwisk: \nRek-Z",
+            "E-biznes i nowoczesne formy marketingu wg nazwisk: A-M": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: A-M",
+            "E-biznes i nowoczesne formy marketingu wg nazwisk: N-Rej": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: N-Rej",
+            "E-biznes i nowoczesne formy marketingu wg nazwisk: Rek-Z": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: Rek-Z",
             "Menedżer finansowy": "Sp.: Menedżer finansowy"
         },
         "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",

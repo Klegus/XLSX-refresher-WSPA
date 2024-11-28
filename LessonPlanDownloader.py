@@ -31,11 +31,11 @@ class LessonPlanDownloader:
         headers = {'anchor': ''}
     
         session = requests.Session()
-        print("Downloading file from PUW")
+        #print("Downloading file from PUW")
         response_login = session.post(url_login, headers=headers, data=payload)
         
         if response_login.ok:
-            print("Login successful")
+            #print("Login successful")
     
             try:
                 response_download = session.get(url_download)
@@ -44,12 +44,12 @@ class LessonPlanDownloader:
                 return False
     
             if response_download.ok:
-                print("File downloaded successfully")
+                #print("File downloaded successfully")
     
                 with open(file_save_path, 'wb') as file:
                     file.write(response_download.content)
                 self.file_save_path = os.path.abspath(file_save_path)
-                print(f"File saved path = {self.file_save_path}")
+                #print(f"File saved path = {self.file_save_path}")
                 
                 # Calculate and return checksum
                 checksum = self.calculate_checksum(self.file_save_path)

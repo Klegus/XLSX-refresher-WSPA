@@ -5,6 +5,9 @@ import hashlib, requests
 from lxml import html, etree
 from datetime import datetime
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 @dataclass
 class MoodleActivity:
@@ -39,7 +42,7 @@ class MoodleFileParser:
         self.openrouter_api_key = api_key
         self.activities_hierarchy = []
         self.mongo_client = MongoClient(mongodb_uri)
-        self.db = self.mongo_client['Lesson_dev']
+        self.db = self.mongo_client[os.getenv('MONGO_DB', 'Lesson_dev')]
         self.collection = self.db['Activities']
         
     def load_file(self):
