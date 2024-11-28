@@ -306,7 +306,6 @@ class LessonPlanManager:
         working_directory=".",
         discord_webhook_url=None,
         plan_config=None,
-        push_manager=None,
     ):
         self.lesson_plan = lesson_plan
         self.lesson_plan_comparator = lesson_plan_comparator
@@ -318,7 +317,6 @@ class LessonPlanManager:
         self.discord_webhook_url = discord_webhook_url
         self.status_checker = status_checker
         self.cached_plans = {}
-        self.push_manager = push_manager
 
     def get_file_structure(self):
         file_structure = set()
@@ -424,13 +422,6 @@ class LessonPlanManager:
             else:
                 if new_checksum:
                     print("Plan został zaktualizowany")
-                    # Send push notifications if manager is available
-                    if self.push_manager:
-                        collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
-                        self.push_manager.notify_plan_update(
-                            collection_name=collection_name,
-                            plan_name=self.plan_name
-                        )
                     # Sprawdź czy plan ma włączone porównywanie
                     # Check if plan has comparison enabled and comparator is available
                     should_compare = (
@@ -584,21 +575,6 @@ def main():
         selected_model = os.getenv("SELECTED_MODEL")
         discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
         
-        # Initialize push notifications
-        vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
-        vapid_public_key = os.getenv("VAPID_PUBLIC_KEY")
-        vapid_claims = {
-            "sub": "mailto:" + os.getenv("VAPID_CONTACT_EMAIL", "admin@wspia.edu.pl"),
-            "aud": "https://notify.windows.com",  # Default to Edge endpoint
-            "exp": int(time.time()) + 12 * 60 * 60  # 12 hours expiration
-        }
-        
-        push_manager = PushNotificationManager(
-            db=db,
-            vapid_private_key=vapid_private_key,
-            vapid_public_key=vapid_public_key,
-            vapid_claims=vapid_claims
-        )
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
         
@@ -680,7 +656,6 @@ def main():
                 working_directory=".",
                 discord_webhook_url=discord_webhook_url,
                 plan_config=plan_config,
-                push_manager=push_manager
             )
             #print(
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
@@ -781,7 +756,6 @@ def main():
             lesson_plan_comparator,
             working_directory=".",
             discord_webhook_url=discord_webhook_url,
-            push_manager=push_manager
         )
         print("LessonPlanManager initialized successfully")
 
