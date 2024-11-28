@@ -306,6 +306,7 @@ class LessonPlanManager:
         working_directory=".",
         discord_webhook_url=None,
         plan_config=None,
+        push_manager=None,
     ):
         self.lesson_plan = lesson_plan
         self.lesson_plan_comparator = lesson_plan_comparator
@@ -317,6 +318,7 @@ class LessonPlanManager:
         self.discord_webhook_url = discord_webhook_url
         self.status_checker = status_checker
         self.cached_plans = {}
+        self.push_manager = push_manager
 
     def get_file_structure(self):
         file_structure = set()
@@ -423,9 +425,9 @@ class LessonPlanManager:
                 if new_checksum:
                     print("Plan został zaktualizowany")
                     # Send push notifications if manager is available
-                    if push_manager:
+                    if self.push_manager:
                         collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
-                        push_manager.notify_plan_update(
+                        self.push_manager.notify_plan_update(
                             collection_name=collection_name,
                             plan_name=self.plan_name
                         )
@@ -678,6 +680,7 @@ def main():
                 working_directory=".",
                 discord_webhook_url=discord_webhook_url,
                 plan_config=plan_config,
+                push_manager=push_manager
             )
             #print(
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
@@ -778,6 +781,7 @@ def main():
             lesson_plan_comparator,
             working_directory=".",
             discord_webhook_url=discord_webhook_url,
+            push_manager=push_manager
         )
         print("LessonPlanManager initialized successfully")
 
