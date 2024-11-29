@@ -315,7 +315,7 @@ class LessonPlanManager:
         self.check_interval = check_interval
         self.working_directory = working_directory
         self.initial_file_structure = set()
-        self.discord_webhook_url = discord_webhook_url
+        self.discord_bot = None  # Will be set during initialization
         self.status_checker = status_checker
         self.cached_plans = {}
 
@@ -432,8 +432,11 @@ class LessonPlanManager:
                             print(f"Error during plan comparison: {e}")
                             # Fall back to simple notification if comparison fails
                             if self.lesson_plan.plan_config.get("notify", False):
-                                webhook_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                                self.send_discord_webhook(webhook_message)
+                                notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                                await self.send_discord_notification(
+                                    notification_message,
+                                    self.lesson_plan.collection_name
+                                )
                     elif self.lesson_plan.plan_config.get("notify", False):
                         # If not comparing but notify is true
                         notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
