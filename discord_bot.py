@@ -16,10 +16,7 @@ class LessonBot(commands.Bot):
         self.get_collections = get_collections_func
         self.get_config = get_config_func
         
-        # Register commands
-        self.plan.name = 'plan'
-        self.status.name = 'status'
-        self.setup.name = 'setup'
+        # Commands will be registered via decorators
 
     async def setup_hook(self):
         print(f"{datetime.now()}: Bot is setting up...")
