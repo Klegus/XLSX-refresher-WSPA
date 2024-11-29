@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 from datetime import datetime
 import pytz
+import re
 from main import get_semester_collections, get_system_config
 
 class LessonBot(commands.Bot):
@@ -17,6 +18,7 @@ class LessonBot(commands.Bot):
         # Dodaj podstawowe komendy
         self.add_command(commands.Command(self.plan, name='plan'))
         self.add_command(commands.Command(self.status, name='status'))
+        self.add_command(commands.Command(self.setup, name='setup'))
 
     async def setup_hook(self):
         print(f"{datetime.now()}: Bot is setting up...")
@@ -76,3 +78,107 @@ def init_discord_bot(get_collections_func, get_config_func):
         return None
         
     return LessonBot(get_collections_func, get_config_func)
+    def format_category_name(self, collection_name: str) -> str:
+        """Formatuje nazwę kolekcji na nazwę kategorii Discord."""
+        # Usuń prefix 'plans_'
+        name = collection_name[6:]
+        
+        # Znajdź pierwszy underscore po nazwie wydziału
+        faculty_end = name.find('_')
+        if faculty_end != -1:
+            # Weź tylko część po nazwie wydziału
+            name = name[faculty_end + 1:]
+        
+        # Wyciągnij tryb studiów (st/nst/nst_puw)
+        mode = ""
+        if "_nst_puw" in name:
+            mode = "-nst-puw"
+            name = name.replace("_nst_puw", "")
+        elif "_nst" in name:
+            mode = "-nst"
+            name = name.replace("_nst", "")
+        elif "_st" in name:
+            mode = "-st"
+            name = name.replace("_st", "")
+            
+        # Usuń zbędne części
+        name = re.sub(r'_+', '_', name)  # Zamień multiple underscores na pojedynczy
+        name = re.sub(r'_?(semestr|sem).*$', '', name, flags=re.IGNORECASE)  # Usuń wszystko po "semestr"
+        name = name.strip('_')  # Usuń początkowe i końcowe underscores
+        
+        # Dodaj tryb studiów na końcu
+        result = f"{name}{mode}".lower()
+        
+        # Zamień underscores na myślniki i ogranicz długość do 50 znaków (limit Discord)
+        result = result.replace('_', '-')[:50]
+        
+        return result
+
+    @commands.has_permissions(administrator=True)
+    async def setup(self, ctx):
+        """Tworzy kategorie, kanały i role dla każdego planu zajęć"""
+        if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
+            return
+            
+        try:
+            collections = self.get_collections()
+            if not collections:
+                await ctx.send("Nie znaleziono żadnych planów zajęć.")
+                return
+                
+            for collection_name, data in collections.items():
+                category_name = self.format_category_name(collection_name)
+                role_name = f"plan-{category_name}"
+                
+                # Stwórz rolę jeśli nie istnieje
+                role = discord.utils.get(ctx.guild.roles, name=role_name)
+                if not role:
+                    role = await ctx.guild.create_role(
+                        name=role_name,
+                        reason="Automatycznie utworzona rola dla planu zajęć"
+                    )
+                
+                # Stwórz kategorię jeśli nie istnieje
+                category = discord.utils.get(ctx.guild.categories, name=category_name)
+                if not category:
+                    overwrites = {
+                        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                        role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
+                        ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                    }
+                    category = await ctx.guild.create_category(
+                        name=category_name,
+                        overwrites=overwrites
+                    )
+                
+                # Stwórz kanały jeśli nie istnieją
+                notifications_channel = discord.utils.get(category.channels, name="powiadomienia-plan")
+                if not notifications_channel:
+                    notifications_overwrites = {
+                        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                        role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
+                        ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                    }
+                    await category.create_text_channel(
+                        "powiadomienia-plan",
+                        overwrites=notifications_overwrites
+                    )
+                
+                chat_channel = discord.utils.get(category.channels, name="czat")
+                if not chat_channel:
+                    chat_overwrites = {
+                        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                        role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                        ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                    }
+                    await category.create_text_channel(
+                        "czat",
+                        overwrites=chat_overwrites
+                    )
+            
+            await ctx.send("✅ Pomyślnie utworzono wszystkie kategorie, kanały i role!")
+            
+        except discord.Forbidden:
+            await ctx.send("❌ Bot nie ma wystarczających uprawnień do wykonania tej operacji!")
+        except Exception as e:
+            await ctx.send(f"❌ Wystąpił błąd: {str(e)}")
