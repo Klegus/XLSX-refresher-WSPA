@@ -168,14 +168,14 @@ class LessonBot(commands.Bot):
                     chat_channel = None
                     
                     if discord_data.get('notifications_channel_id'):
-                        notifications_channel = ctx.guild.get_channel(int(discord_data['notifications_channel_id']))
+                        notifications_channel = interaction.guild.get_channel(int(discord_data['notifications_channel_id']))
                     if not notifications_channel:
                         notifications_channel = discord.utils.get(category.channels, name="powiadomienia-plan")
                         if not notifications_channel:
                             notifications_overwrites = {
-                                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                                 role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
-                                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
                             }
                             notifications_channel = await category.create_text_channel(
                                 "powiadomienia-plan",
@@ -188,14 +188,14 @@ class LessonBot(commands.Bot):
                         verified_count += 1
 
                     if discord_data.get('chat_channel_id'):
-                        chat_channel = ctx.guild.get_channel(int(discord_data['chat_channel_id']))
+                        chat_channel = interaction.guild.get_channel(int(discord_data['chat_channel_id']))
                     if not chat_channel:
                         chat_channel = discord.utils.get(category.channels, name="czat")
                         if not chat_channel:
                             chat_overwrites = {
-                                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                                 role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
                             }
                             chat_channel = await category.create_text_channel(
                                 "czat",
