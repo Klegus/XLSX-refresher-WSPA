@@ -16,10 +16,10 @@ class LessonBot(commands.Bot):
         self.get_collections = get_collections_func
         self.get_config = get_config_func
         
-        # Dodaj podstawowe komendy
-        self.add_command(commands.Command(self.plan, name='plan'))
-        self.add_command(commands.Command(self.status, name='status'))
-        self.add_command(commands.Command(self.setup, name='setup'))
+        # Register commands
+        self.plan.name = 'plan'
+        self.status.name = 'status'
+        self.setup.name = 'setup'
 
     async def setup_hook(self):
         print(f"{datetime.now()}: Bot is setting up...")
@@ -27,6 +27,7 @@ class LessonBot(commands.Bot):
     async def on_ready(self):
         print(f"{datetime.now()}: Bot is ready as {self.user}")
         
+    @commands.command()
     async def plan(self, ctx: commands.Context):
         """Pokazuje aktualny plan zajęć"""
         # Sprawdź czy komenda jest wykonywana na dozwolonym serwerze
@@ -49,6 +50,7 @@ class LessonBot(commands.Bot):
         except Exception as e:
             await ctx.send(f"Wystąpił błąd: {str(e)}")
 
+    @commands.command()
     async def status(self, ctx: commands.Context):
         """Pokazuje status systemu"""
         if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
