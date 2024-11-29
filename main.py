@@ -575,6 +575,7 @@ async def main():
         # Inicjalizacja i uruchomienie bota Discord
         discord_bot = init_discord_bot(get_semester_collections, get_system_config)
         if discord_bot:
+            await discord_bot.setup_hook()  # Wywołujemy setup_hook przed startem
             discord_thread = threading.Thread(
                 target=lambda: asyncio.run(discord_bot.start(os.getenv('DISCORD_BOT_TOKEN')))
             )

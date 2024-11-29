@@ -11,10 +11,12 @@ class LessonBot(commands.Bot):
     def __init__(self, get_collections_func, get_config_func):
         intents = discord.Intents.default()
         intents.message_content = True
+        intents.guilds = True  # Dodajemy uprawnienie do zarządzania serwerem
         super().__init__(command_prefix='!', intents=intents)
         
         self.get_collections = get_collections_func
         self.get_config = get_config_func
+        self.db = MongoClient(os.getenv('MONGO_URI'))[os.getenv('MONGO_DB')]
         
         # Commands will be registered via decorators
 
@@ -259,8 +261,7 @@ def init_discord_bot(get_collections_func, get_config_func):
                         "role_id": str(role.id)
                     }
                     
-                    db = self.get_collections().__class__.__module__
-                    db.plans_config.update_one(
+                    self.db.plans_config.update_one(
                         {"_id": "plans_json", f"plans.{collection_name}": {"$exists": True}},
                         {"$set": {f"plans.{collection_name}.discord": discord_data}},
                         upsert=True
