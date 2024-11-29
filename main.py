@@ -437,10 +437,11 @@ class LessonPlanManager:
                                 self.send_discord_webhook(webhook_message)
                     elif self.lesson_plan.plan_config.get("notify", False):
                         # If not comparing but notify is true
-                        webhook_message = (
-                            f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        await self.send_discord_notification(
+                            notification_message,
+                            self.lesson_plan.collection_name
                         )
-                        self.send_discord_webhook(webhook_message)
                         print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
