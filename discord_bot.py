@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import pytz
 import re
+from pymongo import MongoClient
 from shared_utils import get_semester_collections, get_system_config
 import custom_print
 
