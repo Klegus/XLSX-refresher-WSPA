@@ -21,7 +21,7 @@ from bs4 import BeautifulSoup
 import sentry_sdk
 import asyncio
 from discord_bot import init_discord_bot
-
+import custom_print
 load_dotenv()
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),

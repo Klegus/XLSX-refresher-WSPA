@@ -5,6 +5,7 @@ from datetime import datetime
 import pytz
 import re
 from main import get_semester_collections, get_system_config
+import custom_print
 
 class LessonBot(commands.Bot):
     def __init__(self, get_collections_func, get_config_func):
