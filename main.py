@@ -306,7 +306,6 @@ class LessonPlanManager:
         lesson_plan_comparator,
         check_interval=900,
         working_directory=".",
-        discord_webhook_url=None,
         plan_config=None,
     ):
         self.lesson_plan = lesson_plan
@@ -369,7 +368,7 @@ class LessonPlanManager:
                 self.cached_plans[group] = parse_html_to_dataframe(html_content)
         #print("Zaktualizowano pamięć podręczną planów lekcji.")
 
-    def check_once(self):
+    async def check_once(self):
         """Wykonuje pojedynczy cykl sprawdzania planu"""
         # Reload plan config from DB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
@@ -541,7 +540,7 @@ def get_collections():
     return jsonify(collections)
 
 
-def main():
+async def main():
     print("Starting main.py")
     check_interval = 600
 
@@ -639,7 +638,7 @@ def main():
                 plan_config=plan_config,
             )
             # Przypisz bota Discord do managera
-            lesson_plan_managers[plan_id].discord_bot = discord_bot
+            lesson_plan_managers[plan_id].discord_bot = None  # Will be set after bot initialization
             #print(
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
             #)
@@ -666,11 +665,25 @@ def main():
                 errors = []
                 cycle_start_time = time.time()
 
+                # Initialize Discord bot first
+                discord_bot = init_discord_bot(get_semester_collections, get_system_config)
+                if discord_bot:
+                    # Update all managers with the bot instance
+                    for manager in lesson_plan_managers.values():
+                        manager.discord_bot = discord_bot
+                    
+                    # Start Discord bot
+                    discord_thread = threading.Thread(
+                        target=lambda: asyncio.run(discord_bot.start(os.getenv('DISCORD_BOT_TOKEN')))
+                    )
+                    discord_thread.daemon = True
+                    discord_thread.start()
+
                 for plan_id, manager in lesson_plan_managers.items():
                     plan_name = plans_config[plan_id]["name"]
                     print(f"\nStarting check cycle for {plan_name}")
                     try:
-                        result = manager.check_once()
+                        result = await manager.check_once()
                         successful_checks += 1
                         if result:
                             new_plans += 1
@@ -748,7 +761,6 @@ def main():
             lesson_plan,
             lesson_plan_comparator,
             working_directory=".",
-            discord_webhook_url=discord_webhook_url,
         )
         print("LessonPlanManager initialized successfully")
 
@@ -761,4 +773,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
