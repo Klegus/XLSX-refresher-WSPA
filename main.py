@@ -590,19 +590,6 @@ async def main():
                 errors = []
                 cycle_start_time = time.time()
 
-                # Initialize Discord bot first
-                discord_bot = init_discord_bot(get_semester_collections, get_system_config)
-                if discord_bot:
-                    # Update all managers with the bot instance
-                    for manager in lesson_plan_managers.values():
-                        manager.discord_bot = discord_bot
-                    
-                    # Start Discord bot
-                    discord_thread = threading.Thread(
-                        target=lambda: asyncio.run(discord_bot.start(os.getenv('DISCORD_BOT_TOKEN')))
-                    )
-                    discord_thread.daemon = True
-                    discord_thread.start()
 
                 for plan_id, manager in lesson_plan_managers.items():
                     plan_name = plans_config[plan_id]["name"]

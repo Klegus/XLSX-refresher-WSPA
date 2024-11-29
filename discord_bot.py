@@ -12,8 +12,8 @@ class LessonBot(commands.Bot):
     def __init__(self, get_collections_func, get_config_func):
         intents = discord.Intents.default()
         intents.message_content = True
-        intents.guilds = True  # Dodajemy uprawnienie do zarządzania serwerem
-        super().__init__(command_prefix='!', intents=intents)
+        intents.guilds = True
+        super().__init__(command_prefix='/', intents=intents)
         
         self.get_collections = get_collections_func
         self.get_config = get_config_func
@@ -27,7 +27,7 @@ class LessonBot(commands.Bot):
     async def on_ready(self):
         print(f"{datetime.now()}: Bot is ready as {self.user}")
         
-    @commands.command()
+    @discord.app_commands.command(description="Tworzy lub weryfikuje kategorie, kanały i role dla każdego planu zajęć")
     async def plan(self, ctx: commands.Context):
         """Pokazuje aktualny plan zajęć"""
         # Sprawdź czy komenda jest wykonywana na dozwolonym serwerze
