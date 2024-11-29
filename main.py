@@ -19,6 +19,8 @@ import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
 import sentry_sdk
+import asyncio
+from discord_bot import init_discord_bot
 
 load_dotenv()
 sentry_sdk.init(
@@ -661,9 +663,19 @@ def main():
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
             #)
 
+        # Inicjalizacja i uruchomienie Flask
         flask_thread = threading.Thread(target=run_flask_app)
         flask_thread.daemon = True
         flask_thread.start()
+
+        # Inicjalizacja i uruchomienie bota Discord
+        discord_bot = init_discord_bot()
+        if discord_bot:
+            discord_thread = threading.Thread(
+                target=lambda: asyncio.run(discord_bot.start(os.getenv('DISCORD_BOT_TOKEN')))
+            )
+            discord_thread.daemon = True
+            discord_thread.start()
 
         # Run managers sequentially in the main thread
         try:
