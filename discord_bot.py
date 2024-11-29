@@ -159,7 +159,7 @@ def init_discord_bot(get_collections_func, get_config_func):
                         role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
                         ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
                     }
-                    await category.create_text_channel(
+                    notifications_channel = await category.create_text_channel(
                         "powiadomienia-plan",
                         overwrites=notifications_overwrites
                     )
@@ -171,10 +171,27 @@ def init_discord_bot(get_collections_func, get_config_func):
                         role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
                         ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
                     }
-                    await category.create_text_channel(
+                    chat_channel = await category.create_text_channel(
                         "czat",
                         overwrites=chat_overwrites
                     )
+                
+                # Zapisz ID kanałów i kategorii w bazie danych
+                discord_data = {
+                    "category_id": str(category.id),
+                    "notifications_channel_id": str(notifications_channel.id),
+                    "chat_channel_id": str(chat_channel.id),
+                    "role_id": str(role.id)
+                }
+                
+                # Zaktualizuj konfigurację planu w bazie danych
+                self.get_collections()  # Odśwież kolekcje
+                db = self.get_collections().__class__.__module__  # Pobierz obiekt bazy danych
+                db.plans_config.update_one(
+                    {"_id": "plans_json", f"plans.{collection_name}": {"$exists": True}},
+                    {"$set": {f"plans.{collection_name}.discord": discord_data}},
+                    upsert=True
+                )
             
             await ctx.send("✅ Pomyślnie utworzono wszystkie kategorie, kanały i role!")
             
