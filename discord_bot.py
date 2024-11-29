@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 import os
 from datetime import datetime
 import pytz
@@ -20,26 +21,6 @@ class LessonBot(commands.Bot):
         self.db = MongoClient(os.getenv('MONGO_URI'))[os.getenv('MONGO_DB')]
         
         # Commands will be registered via decorators
-
-    async def setup_hook(self):
-        print(f"{datetime.now()}: Bot is setting up...")
-
-    async def on_ready(self):
-        print(f"{datetime.now()}: Bot is ready as {self.user}")
-        
-
-def init_discord_bot(get_collections_func, get_config_func):
-    """Inicjalizuje bota Discord"""
-    token = os.getenv('DISCORD_BOT_TOKEN')
-    if not token:
-        print("DISCORD_BOT_TOKEN nie został ustawiony w zmiennych środowiskowych")
-        return None
-        
-    if not os.getenv('DISCORD_SERVER_ID'):
-        print("DISCORD_SERVER_ID nie został ustawiony w zmiennych środowiskowych")
-        return None
-        
-    return LessonBot(get_collections_func, get_config_func)
     async def send_plan_notification(self, collection_name: str, message: str):
         """Wysyła powiadomienie o zmianie planu na odpowiedni kanał Discord."""
         try:
@@ -103,8 +84,9 @@ def init_discord_bot(get_collections_func, get_config_func):
         
         return result
 
-    @commands.has_permissions(administrator=True)
-    async def setup(self, ctx: commands.Context):
+    @self.tree.command(name="setup", description="Tworzy lub weryfikuje kategorie, kanały i role dla planów zajęć")
+    @app_commands.default_permissions(administrator=True)
+    async def setup(interaction: discord.Interaction):
         """Tworzy lub weryfikuje kategorie, kanały i role dla każdego planu zajęć"""
         if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
             return
@@ -244,3 +226,23 @@ def init_discord_bot(get_collections_func, get_config_func):
             await ctx.send("❌ Bot nie ma wystarczających uprawnień do wykonania tej operacji!")
         except Exception as e:
             await ctx.send(f"❌ Wystąpił błąd: {str(e)}")
+
+        async def setup_hook(self):
+            print(f"{datetime.now()}: Bot is setting up...")
+
+        async def on_ready(self):
+            print(f"{datetime.now()}: Bot is ready as {self.user}")
+            
+
+def init_discord_bot(get_collections_func, get_config_func):
+    """Inicjalizuje bota Discord"""
+    token = os.getenv('DISCORD_BOT_TOKEN')
+    if not token:
+        print("DISCORD_BOT_TOKEN nie został ustawiony w zmiennych środowiskowych")
+        return None
+        
+    if not os.getenv('DISCORD_SERVER_ID'):
+        print("DISCORD_SERVER_ID nie został ustawiony w zmiennych środowiskowych")
+        return None
+        
+    return LessonBot(get_collections_func, get_config_func)
