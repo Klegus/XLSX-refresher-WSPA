@@ -27,7 +27,7 @@ class LessonBot(commands.Bot):
     async def on_ready(self):
         print(f"{datetime.now()}: Bot is ready as {self.user}")
         
-    async def plan(self, ctx):
+    async def plan(self, ctx: commands.Context):
         """Pokazuje aktualny plan zajęć"""
         # Sprawdź czy komenda jest wykonywana na dozwolonym serwerze
         if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
@@ -49,7 +49,7 @@ class LessonBot(commands.Bot):
         except Exception as e:
             await ctx.send(f"Wystąpił błąd: {str(e)}")
 
-    async def status(self, ctx):
+    async def status(self, ctx: commands.Context):
         """Pokazuje status systemu"""
         if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
             return
@@ -143,7 +143,7 @@ def init_discord_bot(get_collections_func, get_config_func):
         return result
 
     @commands.has_permissions(administrator=True)
-    async def setup(self, ctx):
+    async def setup(self, ctx: commands.Context):
         """Tworzy lub weryfikuje kategorie, kanały i role dla każdego planu zajęć"""
         if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
             return
