@@ -27,47 +27,6 @@ class LessonBot(commands.Bot):
     async def on_ready(self):
         print(f"{datetime.now()}: Bot is ready as {self.user}")
         
-    @discord.app_commands.command(description="Tworzy lub weryfikuje kategorie, kanały i role dla każdego planu zajęć")
-    async def plan(self, ctx: commands.Context):
-        """Pokazuje aktualny plan zajęć"""
-        # Sprawdź czy komenda jest wykonywana na dozwolonym serwerze
-        if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
-            return
-            
-        try:
-            collections = self.get_collections()
-            if not collections:
-                await ctx.send("Nie znaleziono żadnych planów zajęć.")
-                return
-                
-            response = "Dostępne plany zajęć:\n"
-            for collection_name, data in collections.items():
-                response += f"\n**{data['plan_name']}**"
-                response += f"\nOstatnia aktualizacja: {data['timestamp']}"
-                response += "\n---"
-                
-            await ctx.send(response)
-        except Exception as e:
-            await ctx.send(f"Wystąpił błąd: {str(e)}")
-
-    @commands.command()
-    async def status(self, ctx: commands.Context):
-        """Pokazuje status systemu"""
-        if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
-            return
-            
-        try:
-            config = self.get_config()
-            stats = config.get('last_check_stats', {})
-            
-            response = "**Status systemu:**\n"
-            response += f"Ostatnie sprawdzenie: {stats.get('timestamp', 'brak')}\n"
-            response += f"Sprawdzone plany: {stats.get('plans_checked', 0)}\n"
-            response += f"Wykryte zmiany: {stats.get('changes_detected', 0)}\n"
-            
-            await ctx.send(response)
-        except Exception as e:
-            await ctx.send(f"Wystąpił błąd: {str(e)}")
 
 def init_discord_bot(get_collections_func, get_config_func):
     """Inicjalizuje bota Discord"""
