@@ -351,37 +351,16 @@ class LessonPlanManager:
         # Domyślnie notify i compare są False
         return plan_config.get("notify", False) or plan_config.get("compare", False)
 
-    def send_discord_webhook(self, message, force_send=False):
-        """
-        Wysyła webhook jeśli jest skonfigurowany i dozwolony.
-        force_send wymusza wysłanie niezależnie od ustawień notify/compare
-        """
-        if not self.discord_webhook_url:
-            return
-
-        if not force_send and not self.should_send_webhook():
-            return
-
-        payload = {
-            "embeds": [
-                {
-                    "title": "Aktualizacja Planu Lekcji",
-                    "description": message,
-                    "color": 15158332,
-                    "timestamp": datetime.utcnow().isoformat(),
-                }
-            ]
-        }
+    async def send_discord_notification(self, message, collection_name):
+        """Wysyła powiadomienie przez bota Discord na odpowiedni kanał."""
         try:
-            response = requests.post(
-                self.discord_webhook_url,
-                data=json.dumps(payload),
-                headers={"Content-Type": "application/json"},
-            )
-            response.raise_for_status()
-            print("Webhook Discord wysłany pomyślnie")
-        except requests.exceptions.RequestException as e:
-            print(f"Błąd podczas wysyłania webhooka Discord: {str(e)}")
+            if not hasattr(self, 'discord_bot'):
+                print("Bot Discord nie jest zainicjalizowany")
+                return
+                
+            await self.discord_bot.send_plan_notification(collection_name, message)
+        except Exception as e:
+            print(f"Błąd podczas wysyłania powiadomienia Discord: {str(e)}")
 
     def update_cached_plans(self):
         latest_plan = get_latest_lesson_plan()
@@ -440,9 +419,10 @@ class LessonPlanManager:
                                 )
                             )
                             if comparison_result:
-                                webhook_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
-                                self.send_discord_webhook(
-                                    webhook_message, force_send=True
+                                notification_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
+                                await self.send_discord_notification(
+                                    notification_message,
+                                    self.lesson_plan.collection_name
                                 )
                                 
                                 
@@ -575,7 +555,6 @@ def main():
         mongo_uri = os.getenv("MONGO_URI")
         openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         selected_model = os.getenv("SELECTED_MODEL")
-        discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
         
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
@@ -656,9 +635,10 @@ def main():
                 lesson_plans[plan_id],
                 comparator,
                 working_directory=".",
-                discord_webhook_url=discord_webhook_url,
                 plan_config=plan_config,
             )
+            # Przypisz bota Discord do managera
+            lesson_plan_managers[plan_id].discord_bot = discord_bot
             #print(
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
             #)

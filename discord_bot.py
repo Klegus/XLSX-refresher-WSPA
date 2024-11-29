@@ -78,6 +78,33 @@ def init_discord_bot(get_collections_func, get_config_func):
         return None
         
     return LessonBot(get_collections_func, get_config_func)
+    async def send_plan_notification(self, collection_name: str, message: str):
+        """Wysyła powiadomienie o zmianie planu na odpowiedni kanał Discord."""
+        try:
+            # Pobierz konfigurację planów
+            config = self.get_config()
+            plans_config = config.get('plans_config', {}).get('plans', {})
+            
+            # Pobierz dane Discord dla danej kolekcji
+            discord_data = plans_config.get(collection_name, {}).get('discord', {})
+            
+            if not discord_data or 'notifications_channel_id' not in discord_data:
+                print(f"Brak skonfigurowanego kanału dla kolekcji {collection_name}")
+                return
+            
+            # Pobierz kanał Discord
+            channel_id = int(discord_data['notifications_channel_id'])
+            channel = self.get_channel(channel_id)
+            
+            if channel:
+                await channel.send(message)
+                print(f"Wysłano powiadomienie na kanał {channel.name}")
+            else:
+                print(f"Nie znaleziono kanału o ID {channel_id}")
+                
+        except Exception as e:
+            print(f"Błąd podczas wysyłania powiadomienia Discord: {str(e)}")
+
     def format_category_name(self, collection_name: str) -> str:
         """Formatuje nazwę kolekcji na nazwę kategorii Discord."""
         # Usuń prefix 'plans_'
