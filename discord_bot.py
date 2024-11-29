@@ -84,20 +84,32 @@ class LessonBot(commands.Bot):
         
         return result
 
-    @self.tree.command(name="setup", description="Tworzy lub weryfikuje kategorie, kanały i role dla planów zajęć")
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{datetime.now()}: Bot is ready as {self.user}")
+        try:
+            print("Synchronizing command tree...")
+            await self.tree.sync()
+            print("Command tree synchronized successfully")
+        except Exception as e:
+            print(f"Failed to sync command tree: {e}")
+
+    @app_commands.command(name="setup", description="Tworzy lub weryfikuje kategorie, kanały i role dla planów zajęć")
     @app_commands.default_permissions(administrator=True)
-    async def setup(interaction: discord.Interaction):
+    async def setup(self, interaction: discord.Interaction):
         """Tworzy lub weryfikuje kategorie, kanały i role dla każdego planu zajęć"""
-        if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
+        if str(interaction.guild.id) != os.getenv('DISCORD_SERVER_ID'):
+            await interaction.response.send_message("Ten serwer nie jest autoryzowany do używania tego bota.", ephemeral=True)
             return
             
         try:
             collections = self.get_collections()
             if not collections:
-                await ctx.send("Nie znaleziono żadnych planów zajęć.")
+                await interaction.response.send_message("Nie znaleziono żadnych planów zajęć.", ephemeral=True)
                 return
 
-            status_message = await ctx.send("🔄 Rozpoczynam weryfikację struktury Discord...")
+            await interaction.response.defer()
+            status_message = await interaction.followup.send("🔄 Rozpoczynam weryfikację struktury Discord...")
             created_count = 0
             verified_count = 0
             error_count = 0
@@ -115,11 +127,11 @@ class LessonBot(commands.Bot):
                     # Weryfikacja/tworzenie roli
                     role = None
                     if discord_data.get('role_id'):
-                        role = ctx.guild.get_role(int(discord_data['role_id']))
+                        role = interaction.guild.get_role(int(discord_data['role_id']))
                     if not role:
-                        role = discord.utils.get(ctx.guild.roles, name=role_name)
+                        role = discord.utils.get(interaction.guild.roles, name=role_name)
                         if not role:
-                            role = await ctx.guild.create_role(
+                            role = await interaction.guild.create_role(
                                 name=role_name,
                                 reason="Automatycznie utworzona rola dla planu zajęć"
                             )
@@ -132,16 +144,16 @@ class LessonBot(commands.Bot):
                     # Weryfikacja/tworzenie kategorii
                     category = None
                     if discord_data.get('category_id'):
-                        category = ctx.guild.get_channel(int(discord_data['category_id']))
+                        category = interaction.guild.get_channel(int(discord_data['category_id']))
                     if not category:
-                        category = discord.utils.get(ctx.guild.categories, name=category_name)
+                        category = discord.utils.get(interaction.guild.categories, name=category_name)
                         if not category:
                             overwrites = {
-                                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                                 role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
-                                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True),
                             }
-                            category = await ctx.guild.create_category(
+                            category = await interaction.guild.create_category(
                                 name=category_name,
                                 overwrites=overwrites
                             )
@@ -223,9 +235,9 @@ class LessonBot(commands.Bot):
             ))
             
         except discord.Forbidden:
-            await ctx.send("❌ Bot nie ma wystarczających uprawnień do wykonania tej operacji!")
+            await interaction.followup.send("❌ Bot nie ma wystarczających uprawnień do wykonania tej operacji!", ephemeral=True)
         except Exception as e:
-            await ctx.send(f"❌ Wystąpił błąd: {str(e)}")
+            await interaction.followup.send(f"❌ Wystąpił błąd: {str(e)}", ephemeral=True)
 
         async def setup_hook(self):
             print(f"{datetime.now()}: Bot is setting up...")
