@@ -669,7 +669,7 @@ def main():
         flask_thread.start()
 
         # Inicjalizacja i uruchomienie bota Discord
-        discord_bot = init_discord_bot()
+        discord_bot = init_discord_bot(get_semester_collections, get_system_config)
         if discord_bot:
             discord_thread = threading.Thread(
                 target=lambda: asyncio.run(discord_bot.start(os.getenv('DISCORD_BOT_TOKEN')))
