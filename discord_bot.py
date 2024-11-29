@@ -116,7 +116,7 @@ def init_discord_bot(get_collections_func, get_config_func):
 
     @commands.has_permissions(administrator=True)
     async def setup(self, ctx):
-        """Tworzy kategorie, kanały i role dla każdego planu zajęć"""
+        """Tworzy lub weryfikuje kategorie, kanały i role dla każdego planu zajęć"""
         if str(ctx.guild.id) != os.getenv('DISCORD_SERVER_ID'):
             return
             
@@ -125,75 +125,132 @@ def init_discord_bot(get_collections_func, get_config_func):
             if not collections:
                 await ctx.send("Nie znaleziono żadnych planów zajęć.")
                 return
-                
-            for collection_name, data in collections.items():
-                category_name = self.format_category_name(collection_name)
-                role_name = f"plan-{category_name}"
-                
-                # Stwórz rolę jeśli nie istnieje
-                role = discord.utils.get(ctx.guild.roles, name=role_name)
-                if not role:
-                    role = await ctx.guild.create_role(
-                        name=role_name,
-                        reason="Automatycznie utworzona rola dla planu zajęć"
-                    )
-                
-                # Stwórz kategorię jeśli nie istnieje
-                category = discord.utils.get(ctx.guild.categories, name=category_name)
-                if not category:
-                    overwrites = {
-                        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-                        role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
-                        ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                    }
-                    category = await ctx.guild.create_category(
-                        name=category_name,
-                        overwrites=overwrites
-                    )
-                
-                # Stwórz kanały jeśli nie istnieją
-                notifications_channel = discord.utils.get(category.channels, name="powiadomienia-plan")
-                if not notifications_channel:
-                    notifications_overwrites = {
-                        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-                        role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
-                        ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
-                    }
-                    notifications_channel = await category.create_text_channel(
-                        "powiadomienia-plan",
-                        overwrites=notifications_overwrites
-                    )
-                
-                chat_channel = discord.utils.get(category.channels, name="czat")
-                if not chat_channel:
-                    chat_overwrites = {
-                        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-                        role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                        ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
-                    }
-                    chat_channel = await category.create_text_channel(
-                        "czat",
-                        overwrites=chat_overwrites
-                    )
-                
-                # Zapisz ID kanałów i kategorii w bazie danych
-                discord_data = {
-                    "category_id": str(category.id),
-                    "notifications_channel_id": str(notifications_channel.id),
-                    "chat_channel_id": str(chat_channel.id),
-                    "role_id": str(role.id)
-                }
-                
-                # Zaktualizuj konfigurację planu w bazie danych
-                self.get_collections()  # Odśwież kolekcje
-                db = self.get_collections().__class__.__module__  # Pobierz obiekt bazy danych
-                db.plans_config.update_one(
-                    {"_id": "plans_json", f"plans.{collection_name}": {"$exists": True}},
-                    {"$set": {f"plans.{collection_name}.discord": discord_data}},
-                    upsert=True
-                )
+
+            status_message = await ctx.send("🔄 Rozpoczynam weryfikację struktury Discord...")
+            created_count = 0
+            verified_count = 0
+            error_count = 0
             
-            await ctx.send("✅ Pomyślnie utworzono wszystkie kategorie, kanały i role!")
+            for collection_name, data in collections.items():
+                try:
+                    # Sprawdź czy istnieją dane w bazie
+                    config = self.get_config()
+                    plans_config = config.get('plans_config', {}).get('plans', {})
+                    discord_data = plans_config.get(collection_name, {}).get('discord', {})
+                    
+                    category_name = self.format_category_name(collection_name)
+                    role_name = f"plan-{category_name}"
+                    
+                    # Weryfikacja/tworzenie roli
+                    role = None
+                    if discord_data.get('role_id'):
+                        role = ctx.guild.get_role(int(discord_data['role_id']))
+                    if not role:
+                        role = discord.utils.get(ctx.guild.roles, name=role_name)
+                        if not role:
+                            role = await ctx.guild.create_role(
+                                name=role_name,
+                                reason="Automatycznie utworzona rola dla planu zajęć"
+                            )
+                            created_count += 1
+                        else:
+                            verified_count += 1
+                    else:
+                        verified_count += 1
+
+                    # Weryfikacja/tworzenie kategorii
+                    category = None
+                    if discord_data.get('category_id'):
+                        category = ctx.guild.get_channel(int(discord_data['category_id']))
+                    if not category:
+                        category = discord.utils.get(ctx.guild.categories, name=category_name)
+                        if not category:
+                            overwrites = {
+                                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                                role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
+                                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                            }
+                            category = await ctx.guild.create_category(
+                                name=category_name,
+                                overwrites=overwrites
+                            )
+                            created_count += 1
+                        else:
+                            verified_count += 1
+                    else:
+                        verified_count += 1
+
+                    # Weryfikacja/tworzenie kanałów
+                    notifications_channel = None
+                    chat_channel = None
+                    
+                    if discord_data.get('notifications_channel_id'):
+                        notifications_channel = ctx.guild.get_channel(int(discord_data['notifications_channel_id']))
+                    if not notifications_channel:
+                        notifications_channel = discord.utils.get(category.channels, name="powiadomienia-plan")
+                        if not notifications_channel:
+                            notifications_overwrites = {
+                                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                                role: discord.PermissionOverwrite(read_messages=True, send_messages=False),
+                                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                            }
+                            notifications_channel = await category.create_text_channel(
+                                "powiadomienia-plan",
+                                overwrites=notifications_overwrites
+                            )
+                            created_count += 1
+                        else:
+                            verified_count += 1
+                    else:
+                        verified_count += 1
+
+                    if discord_data.get('chat_channel_id'):
+                        chat_channel = ctx.guild.get_channel(int(discord_data['chat_channel_id']))
+                    if not chat_channel:
+                        chat_channel = discord.utils.get(category.channels, name="czat")
+                        if not chat_channel:
+                            chat_overwrites = {
+                                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                                role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                                ctx.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                            }
+                            chat_channel = await category.create_text_channel(
+                                "czat",
+                                overwrites=chat_overwrites
+                            )
+                            created_count += 1
+                        else:
+                            verified_count += 1
+                    else:
+                        verified_count += 1
+
+                    # Aktualizacja danych w bazie
+                    discord_data = {
+                        "category_id": str(category.id),
+                        "notifications_channel_id": str(notifications_channel.id),
+                        "chat_channel_id": str(chat_channel.id),
+                        "role_id": str(role.id)
+                    }
+                    
+                    db = self.get_collections().__class__.__module__
+                    db.plans_config.update_one(
+                        {"_id": "plans_json", f"plans.{collection_name}": {"$exists": True}},
+                        {"$set": {f"plans.{collection_name}.discord": discord_data}},
+                        upsert=True
+                    )
+
+                except Exception as e:
+                    error_count += 1
+                    print(f"Błąd podczas przetwarzania {collection_name}: {str(e)}")
+                    continue
+
+            await status_message.edit(content=(
+                f"✅ Zakończono weryfikację struktury Discord!\n"
+                f"📊 Statystyki:\n"
+                f"- Utworzono nowych elementów: {created_count}\n"
+                f"- Zweryfikowano istniejących: {verified_count}\n"
+                f"- Błędy: {error_count}"
+            ))
             
         except discord.Forbidden:
             await ctx.send("❌ Bot nie ma wystarczających uprawnień do wykonania tej operacji!")
