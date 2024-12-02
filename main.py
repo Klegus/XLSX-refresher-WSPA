@@ -276,10 +276,9 @@ class LessonPlanManager:
 
     def should_send_webhook(self):
         """Sprawdza czy należy wysyłać powiadomienia webhook dla tego planu"""
-        plan_config = self.lesson_plan.plan_config
         webhook_url = self.get_webhook_url()
-        # Sprawdź czy plan ma włączone powiadomienia i czy istnieje webhook URL
-        return (plan_config.get("notify", False) or plan_config.get("compare", False)) and webhook_url is not None
+        # Wysyłaj powiadomienia zawsze gdy jest webhook URL
+        return webhook_url is not None
 
 
     def update_cached_plans(self):
@@ -323,7 +322,6 @@ class LessonPlanManager:
             else:
                 if new_checksum:
                     print("Plan został zaktualizowany")
-                    # Sprawdź czy plan ma włączone porównywanie
                     # Check if plan has comparison enabled and comparator is available
                     should_compare = (
                         self.lesson_plan.plan_config.get("compare", False)
@@ -351,20 +349,21 @@ class LessonPlanManager:
                                 return True
                         except Exception as e:
                             print(f"Error during plan comparison: {e}")
-                            # Fall back to simple notification if comparison fails
-                            if self.lesson_plan.plan_config.get("notify", False):
-                                notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                    elif self.lesson_plan.plan_config.get("notify", False):
-                        # If not comparing but notify is true
+                            # Fall back to simple notification
+                            notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                    else:
+                        # If not comparing, send simple notification
                         notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                        webhook_url = self.get_webhook_url()
-                        if webhook_url:
-                            try:
-                                requests.post(webhook_url, json={"content": notification_message})
-                                print("Wysłano powiadomienie webhook o aktualizacji planu.")
-                            except Exception as e:
-                                print(f"Błąd podczas wysyłania webhooka: {str(e)}")
-                        print("Wykryto i zapisano zmiany w planie.")
+                    
+                    # Send notification (now always enabled by default)
+                    webhook_url = self.get_webhook_url()
+                    if webhook_url:
+                        try:
+                            requests.post(webhook_url, json={"content": notification_message})
+                            print("Wysłano powiadomienie webhook o aktualizacji planu.")
+                        except Exception as e:
+                            print(f"Błąd podczas wysyłania webhooka: {str(e)}")
+                    print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
                 else:
