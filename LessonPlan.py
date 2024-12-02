@@ -119,9 +119,13 @@ class LessonPlan(LessonPlanDownloader):
             # Use plan-specific collection
             collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
             collection = self.db[collection_name]
-            # Check MongoDB for changes
+            # Check MongoDB for changes - exclude discord_config document
             latest_plan = collection.find_one(
-                {"plan_name": self.plan_config["name"]}, sort=[("timestamp", -1)]
+                {
+                    "plan_name": self.plan_config["name"],
+                    "_id": {"$ne": "discord_config"}
+                }, 
+                sort=[("timestamp", -1)]
             )
 
             latest_checksum = (
