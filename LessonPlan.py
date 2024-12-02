@@ -10,7 +10,7 @@ import openpyxl
 import re
 import pymongo
 from datetime import datetime
-
+import custom_print
 
 class LessonPlan(LessonPlanDownloader):
     def __init__(self, username, password, mongo_uri, plan_config, directory=""):
