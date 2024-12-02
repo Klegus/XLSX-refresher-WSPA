@@ -328,42 +328,46 @@ class LessonPlanManager:
                         and self.lesson_plan_comparator is not None
                     )
 
-                    if should_compare:
-                        try:
-                            print("Comparing plans...")
-                            comparison_result = (
-                                self.lesson_plan_comparator.compare_plans(
-                                    self.plan_config
-                                )
-                            )
-                            if comparison_result:
-                                notification_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
-                                webhook_url = self.get_webhook_url()
-                                if webhook_url:
-                                    try:
-                                        requests.post(webhook_url, json={"content": notification_message})
-                                        print("Wysłano powiadomienie webhook o zmianach w planie.")
-                                    except Exception as e:
-                                        print(f"Błąd podczas wysyłania webhooka: {str(e)}")
-                                print("Wykryto i zapisano zmiany w planie.")
-                                return True
-                        except Exception as e:
-                            print(f"Error during plan comparison: {e}")
-                            # Fall back to simple notification
-                            notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                    else:
-                        # If not comparing, send simple notification
-                        notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                    
-                    # Send notification (now always enabled by default)
                     webhook_url = self.get_webhook_url()
                     if webhook_url:
                         try:
-                            requests.post(webhook_url, json={"content": notification_message})
+                            embed = {
+                                "title": f"Aktualizacja planu zajęć: {self.plan_name}",
+                                "color": 15158332,  # Czerwony kolor (decimal)
+                                "timestamp": datetime.utcnow().isoformat(),
+                                "fields": []
+                            }
+
+                            if should_compare:
+                                try:
+                                    print("Comparing plans...")
+                                    comparison_result = (
+                                        self.lesson_plan_comparator.compare_plans(
+                                            self.plan_config
+                                        )
+                                    )
+                                    if comparison_result:
+                                        embed["description"] = "Wykryto zmiany w planie zajęć!"
+                                        embed["fields"].append({
+                                            "name": "Szczegóły zmian",
+                                            "value": comparison_result
+                                        })
+                                except Exception as e:
+                                    print(f"Error during plan comparison: {e}")
+                                    embed["description"] = "Plan zajęć został zaktualizowany.\nWystąpił błąd podczas porównywania zmian."
+                            else:
+                                embed["description"] = "Plan zajęć został zaktualizowany."
+
+                            webhook_data = {
+                                "embeds": [embed]
+                            }
+
+                            requests.post(webhook_url, json=webhook_data)
                             print("Wysłano powiadomienie webhook o aktualizacji planu.")
                         except Exception as e:
                             print(f"Błąd podczas wysyłania webhooka: {str(e)}")
                     print("Wykryto i zapisano zmiany w planie.")
+                    return True
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
                 else:
