@@ -263,11 +263,23 @@ class LessonPlanManager:
                 except Exception as e:
                     print(f"Błąd podczas usuwania pliku {file}: {str(e)}")
 
+    def get_webhook_url(self):
+        """Pobiera URL webhooka z konfiguracji Discord w kolekcji planu"""
+        try:
+            collection = db[self.lesson_plan.collection_name]
+            discord_config = collection.find_one({"_id": "discord_config"})
+            if discord_config and "webhook_url" in discord_config:
+                return discord_config["webhook_url"]
+        except Exception as e:
+            print(f"Błąd podczas pobierania webhook URL: {str(e)}")
+        return None
+
     def should_send_webhook(self):
         """Sprawdza czy należy wysyłać powiadomienia webhook dla tego planu"""
         plan_config = self.lesson_plan.plan_config
-        # Domyślnie notify i compare są False
-        return plan_config.get("notify", False) or plan_config.get("compare", False)
+        webhook_url = self.get_webhook_url()
+        # Sprawdź czy plan ma włączone powiadomienia i czy istnieje webhook URL
+        return (plan_config.get("notify", False) or plan_config.get("compare", False)) and webhook_url is not None
 
 
     def update_cached_plans(self):
@@ -328,6 +340,13 @@ class LessonPlanManager:
                             )
                             if comparison_result:
                                 notification_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
+                                webhook_url = self.get_webhook_url()
+                                if webhook_url:
+                                    try:
+                                        requests.post(webhook_url, json={"content": notification_message})
+                                        print("Wysłano powiadomienie webhook o zmianach w planie.")
+                                    except Exception as e:
+                                        print(f"Błąd podczas wysyłania webhooka: {str(e)}")
                                 print("Wykryto i zapisano zmiany w planie.")
                                 return True
                         except Exception as e:
@@ -338,6 +357,13 @@ class LessonPlanManager:
                     elif self.lesson_plan.plan_config.get("notify", False):
                         # If not comparing but notify is true
                         notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
+                        webhook_url = self.get_webhook_url()
+                        if webhook_url:
+                            try:
+                                requests.post(webhook_url, json={"content": notification_message})
+                                print("Wysłano powiadomienie webhook o aktualizacji planu.")
+                            except Exception as e:
+                                print(f"Błąd podczas wysyłania webhooka: {str(e)}")
                         print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
