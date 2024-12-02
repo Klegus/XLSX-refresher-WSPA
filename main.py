@@ -20,7 +20,6 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import sentry_sdk
 import asyncio
-from discord_bot import init_discord_bot
 import custom_print
 load_dotenv()
 sentry_sdk.init(
@@ -236,7 +235,6 @@ class LessonPlanManager:
         self.check_interval = check_interval
         self.working_directory = working_directory
         self.initial_file_structure = set()
-        self.discord_bot = None  # Will be set during initialization
         self.status_checker = status_checker
         self.cached_plans = {}
 
@@ -271,16 +269,6 @@ class LessonPlanManager:
         # Domyślnie notify i compare są False
         return plan_config.get("notify", False) or plan_config.get("compare", False)
 
-    async def send_discord_notification(self, message, collection_name):
-        """Wysyła powiadomienie przez bota Discord na odpowiedni kanał."""
-        try:
-            if not hasattr(self, 'discord_bot'):
-                print("Bot Discord nie jest zainicjalizowany")
-                return
-                
-            await self.discord_bot.send_plan_notification(collection_name, message)
-        except Exception as e:
-            print(f"Błąd podczas wysyłania powiadomienia Discord: {str(e)}")
 
     def update_cached_plans(self):
         latest_plan = get_latest_lesson_plan()
@@ -340,13 +328,6 @@ class LessonPlanManager:
                             )
                             if comparison_result:
                                 notification_message = f"Zmiany w planie dla: {self.plan_name}\n\n{comparison_result}"
-                                await self.send_discord_notification(
-                                    notification_message,
-                                    self.lesson_plan.collection_name
-                                )
-                                
-                                
-                                
                                 print("Wykryto i zapisano zmiany w planie.")
                                 return True
                         except Exception as e:
@@ -354,17 +335,9 @@ class LessonPlanManager:
                             # Fall back to simple notification if comparison fails
                             if self.lesson_plan.plan_config.get("notify", False):
                                 notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                                await self.send_discord_notification(
-                                    notification_message,
-                                    self.lesson_plan.collection_name
-                                )
                     elif self.lesson_plan.plan_config.get("notify", False):
                         # If not comparing but notify is true
                         notification_message = f"Plan zajęć został zaktualizowany dla: {self.plan_name}"
-                        await self.send_discord_notification(
-                            notification_message,
-                            self.lesson_plan.collection_name
-                        )
                         print("Wykryto i zapisano zmiany w planie.")
                     self.update_cached_plans()
                     print("Zaktualizowano pamięć podręczną planów.")
@@ -561,8 +534,6 @@ async def main():
                 working_directory=".",
                 plan_config=plan_config,
             )
-            # Przypisz bota Discord do managera
-            lesson_plan_managers[plan_id].discord_bot = None  # Will be set after bot initialization
             #print(
             #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
             #)
@@ -572,15 +543,6 @@ async def main():
         flask_thread.daemon = True
         flask_thread.start()
 
-        # Inicjalizacja i uruchomienie bota Discord
-        discord_bot = init_discord_bot(get_semester_collections, get_system_config)
-        if discord_bot:
-            await discord_bot.setup_hook()  # Wywołujemy setup_hook przed startem
-            discord_thread = threading.Thread(
-                target=lambda: asyncio.run(discord_bot.start(os.getenv('DISCORD_BOT_TOKEN')))
-            )
-            discord_thread.daemon = True
-            discord_thread.start()
 
         # Run managers sequentially in the main thread
         try:
