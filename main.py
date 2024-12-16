@@ -292,6 +292,7 @@ class LessonPlanManager:
 
     async def check_once(self):
         """Wykonuje pojedynczy cykl sprawdzania planu"""
+        os.system('clear')
         # Reload plan config from DB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
         if plans_config_doc and "plans" in plans_config_doc:
@@ -584,7 +585,17 @@ async def main():
                 cycle_start_time = time.time()
 
 
+                # Refresh plans config from MongoDB
+                plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
+                if plans_config_doc and "plans" in plans_config_doc:
+                    plans_config = plans_config_doc["plans"]
+                
                 for plan_id, manager in lesson_plan_managers.items():
+                    # Update plan config in manager
+                    if plan_id in plans_config:
+                        manager.lesson_plan.plan_config = plans_config[plan_id]
+                        manager.plan_config = plans_config[plan_id]
+                    
                     plan_name = plans_config[plan_id]["name"]
                     print(f"\nStarting check cycle for {plan_name}")
                     try:
