@@ -332,6 +332,7 @@ class LessonPlanManager:
                     )
                     #check if plan has notify enabled
                     should_notify = self.lesson_plan.plan_config.get("notify", False)
+                    webhook_url = None
                     if should_notify:
                         webhook_url = self.get_webhook_url()
                     if webhook_url:
