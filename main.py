@@ -330,8 +330,10 @@ class LessonPlanManager:
                         self.lesson_plan.plan_config.get("compare", False)
                         and self.lesson_plan_comparator is not None
                     )
-
-                    webhook_url = self.get_webhook_url()
+                    #check if plan has notify enabled
+                    should_notify = self.lesson_plan.plan_config.get("notify", False)
+                    if should_notify:
+                        webhook_url = self.get_webhook_url()
                     if webhook_url:
                         try:
                             embed = {
@@ -483,7 +485,7 @@ async def main():
         password = os.getenv("PASSWORD")
         mongo_uri = os.getenv("MONGO_URI")
         openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "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")
-        selected_model = os.getenv("SELECTED_MODEL", "")
+        selected_model = os.getenv("SELECTED_MODEL", "openai/chatgpt-4o-latest")
         
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
