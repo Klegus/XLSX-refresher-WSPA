@@ -269,6 +269,8 @@ class LessonPlanManager:
             collection = db[self.lesson_plan.collection_name]
             discord_config = collection.find_one({"_id": "discord_config"})
             if discord_config and "webhook_url" in discord_config:
+                print("Pobrano URL webhooka z konfiguracji Discord.")
+                print(f"Webhook URL: {discord_config['webhook_url']}")
                 return discord_config["webhook_url"]
         except Exception as e:
             print(f"Błąd podczas pobierania webhook URL: {str(e)}")
@@ -479,8 +481,8 @@ async def main():
         username = os.getenv("EMAIL")
         password = os.getenv("PASSWORD")
         mongo_uri = os.getenv("MONGO_URI")
-        openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        selected_model = os.getenv("SELECTED_MODEL")
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "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")
+        selected_model = os.getenv("SELECTED_MODEL", "")
         
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
@@ -596,6 +598,7 @@ async def main():
                             "traceback": traceback.format_exc(),
                             "plan_name": plan_name,
                         }
+                        sentry_sdk.capture_exception(e)
                         errors.append(error_info)
                         print(f"Error in manager for {plan_name}: {str(e)}")
 
