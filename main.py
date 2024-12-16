@@ -605,10 +605,14 @@ async def main():
                             new_plans += 1
                     except Exception as e:
                         error_info = {
-                            "error": e,
+                            "timestamp": datetime.now(),
+                            "error": str(e),
                             "traceback": traceback.format_exc(),
                             "plan_name": plan_name,
+                            "type": "plan_check_error"
                         }
+                        # Store in errors collection
+                        db.errors.insert_one(error_info)
                         sentry_sdk.capture_exception(e)
                         errors.append(error_info)
                         print(f"Error in manager for {plan_name}: {str(e)}")
@@ -653,6 +657,14 @@ async def main():
                             print(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
 
                 except Exception as e:
+                    error_info = {
+                        "timestamp": datetime.now(),
+                        "error": str(e),
+                        "traceback": traceback.format_exc(),
+                        "type": "moodle_activity_error"
+                    }
+                    # Store in errors collection
+                    db.errors.insert_one(error_info)
                     print(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
 
                 print(
