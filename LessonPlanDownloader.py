@@ -1,7 +1,7 @@
 import os, requests
 import os
 import hashlib
-
+import custom_print
 class LessonPlanDownloader:
     def __init__(self, username, password, directory="", download_url=None):
         self.username = username

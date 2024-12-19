@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest
 from datetime import datetime
-
+import custom_print
 def init_activity_routes(app, db):
     @app.route('/api/activities', methods=['GET'])
     def read_activities():

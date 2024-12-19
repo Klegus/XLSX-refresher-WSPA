@@ -8,7 +8,7 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
+import custom_print
 @dataclass
 class MoodleActivity:
     id: str

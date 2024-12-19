@@ -1,6 +1,6 @@
 from flask import jsonify
 from datetime import datetime
-
+import custom_print
 def init_status_routes(app, status_checker, get_system_config):
     @app.route("/api/status")
     def status():

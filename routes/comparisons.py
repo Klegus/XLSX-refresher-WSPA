@@ -1,5 +1,5 @@
 from flask import jsonify
-
+import custom_print
 def init_comparison_routes(app, db):
     @app.route('/api/comparisons/<collection_name>/<group_name>', methods=['GET'])
     def get_comparisons(collection_name: str, group_name: str):

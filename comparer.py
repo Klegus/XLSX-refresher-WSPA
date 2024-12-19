@@ -3,6 +3,7 @@ init(autoreset=True)
 import requests
 from datetime import datetime
 from pymongo import MongoClient
+import custom_print
 
 class LessonPlanComparator:
     def __init__(self, mongo_uri, openrouter_api_key, selected_model):

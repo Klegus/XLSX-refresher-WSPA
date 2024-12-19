@@ -1,5 +1,5 @@
 from flask import jsonify, request
-
+import custom_print
 def init_config_routes(app, get_system_config, get_plans_config, update_system_config, update_plans_config, db):
     @app.route("/api/config", methods=["GET", "POST", "PUT"])
     def manage_config():

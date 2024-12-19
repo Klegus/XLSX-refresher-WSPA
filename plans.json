@@ -1,1043 +1,1055 @@
 {
-    "informatyka2": {
-        "name": "Informatyka - studia I stopnia st II",
-        "faculty": "informatyka",
-        "groups": {
-            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczygrupa 1podział wg nazwisk: A-K",
-            "Technologie Webowe i Internet rzeczy grupa 2": "Technologie Webowe i Internet rzeczygrupa 2podział wg nazwisk: L-Z",
-            "Technologie mobilne": "Sp.: Technologie mobilne",
-            "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrupa 1podział wg nazwisk:A-K",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrupa 2podział wg nazwisk: L-Z"
-        },
-        "category": "st",
-        "compare": true,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF st II"
-    },
-    "informatyka1": {
-        "name": "Informatyka - studia I stopnia st I",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1 - A-Ho": "grupa 1:podział wg nazwisk: A-Ho",
-            "Grupa 2 - Hp-Med.": "grupa 2:podział wg nazwisk:Hp-Med.",
-            "Grupa 3 - Mel-Pi": "grupa 3:podział wg nazwisk:Mel-Pi",
-            "Grupa 4 - Pj-Z": "grupa 4:podział wg nazwisk:Pj-Z"
-        },
-        "category": "st",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF st I"
-    },
-    "informatyka3": {
-        "name": "Informatyka - studia I stopnia st III",
-        "faculty": "informatyka",
-        "groups": {
-            "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrrupa 1podział wg nazwisk: A-K",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrrupa 2podział wg nazwisk: L-Z",
-            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczygrrupa 1podział wg nazwisk: A-L",
-            "Technologie Webowe i Internet rzeczy grupa 2": "Sp.: Technologie Webowe i Internet rzeczygrrupa 2podział wg nazwisk: M-Z"
-        },
-        "category": "st",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF st III "
-    },
-    "informatyka4": {
-        "name": "Informatyka - studia I stopnia st IV",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1": "grupa 1podział wg nazwisk: A-Ka",
-            "Grupa 2": "grupa 2podział wg nazwisk: Kb-P",
-            "Grupa 3": "grupa 3podział wg nazwisk: R-Z"
-        },
-        "category": "st",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF st IV"
-    },
-    "informatyka5": {
-        "name": "Informatyka - studia I stopnia nst I - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1": "grupa 1 podział wg nazwisk: A-Mi",
-            "Grupa 2": "grupa 2 podział wg nazwisk: Mj-Z"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF NST I - z. stacjonarne"
-    },
-    "informatyka6": {
-        "name": "Informatyka - studia I stopnia nst I - semestr zimowy - z. online",
-        "faculty": "informatyka",
-        "groups": null,
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF NST I - z. on-line"
-    },
-    "informatyka7": {
-        "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.1",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1": "grupa 1wg nazwisk:A-I",
-            "Grupa 2": "grupa 2wg nazwisk: J-M",
-            "Grupa 3": "grupa 3wg nazwisk: N-R",
-            "Grupa 4": "grupa 4wg nazwisk: S-Z"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF I rok PUW - z. stac. zj.1"
-    },
-    "informatyka21": {
-        "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.2,3",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1": "grupa 1wg nazwisk:A-C",
-            "Grupa 2": "grupa 2wg nazwisk: D-Kon",
-            "Grupa 3": "grupa 3wg nazwisk: Kor-M",
-            "Grupa 4": "grupa 4wg nazwisk: N-P"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF I rok PUW - z. stac. zj.2,3"
-    },
-    "informatyka8": {
-        "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. on-line",
-        "faculty": "informatyka",
-        "groups": null,
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF I rok PUW - z. on-line"
-    },
-    "informatyka9": {
-        "name": "Informatyka - studia I stopnia nst II - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Cyberbezpieczeństwo i informatyka śledcza - grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - grupa 1 podział wg nazwisk: A-Ko",
-            "Cyberbezpieczeństwo i informatyka śledcza - grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - grupa 2 podział wg nazwisk: Kp-Z"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF nst II - z. stacjonarne"
-    },
-    "informatyka10": {
-        "name": "Informatyka - studia I stopnia nst II - semestr zimowy - z. on-line",
-        "faculty": "informatyka",
-        "groups": {
-            "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF nst II - z. on-line"
-    },
-    "informatyka11": {
-        "name": "Informatyka - studia I stopnia nst III - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Technologie Webowe i Internet rzeczy": "Sp.:  Technologie Webowe i Internet rzeczy",
-            "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF nst III - z. stacjonarne"
-    },
-    "informatyka12": {
-        "name": "Informatyka - studia I stopnia nst III - semestr zimowy - z. on-line",
-        "faculty": "informatyka",
-        "groups": {
-            "Technologie Webowe i Internet rzeczy": "Sp.:  Technologie Webowe i Internet rzeczy",
-            "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
-        },
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF nst III - z. on-line"
-    },
-    "informatyka13": {
-        "name": "Informatyka - studia I stopnia nst IV - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1": "grupa 1",
-            "Grupa 2": "grupa 2"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF nst IV - z. stacjonarne"
-    },
-    "informatyka14": {
-        "name": "Informatyka - studia I stopnia nst IV - semestr zimowy - z. on-line",
-        "faculty": "informatyka",
-        "groups": null,
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF nst IV - z. on-line"
-    },
-    "informatyka15": {
-        "name": "Informatyka - studia I stopnia nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Bazy danych - grupa 1": "Sp.: Bazy danych - gr.1 wg nazwisk: A-Pa",
-            "Bazy danych - grupa 2": "Sp.: Bazy danych - gr.2 wg nazwisk: Py-Z",
-            "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1 wg nazwisk: A-M",
-            "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2 wg nazwisk: N-Z"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF II rok PUW - z. stacjonarne"
-    },
-    "informatyka16": {
-        "name": "Informatyka - studia I stopnia nst puw II - semestr zimowy - z. online",
-        "faculty": "informatyka",
-        "groups": {
-            "Bazy danych": "Sp.: Bazy danych",
-            "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
-            "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
-        },
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF II rok PUW - z. on-line"
-    },
-    "informatyka17": {
-        "name": "Informatyka - studia I stopnia nst puw III - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Bazy danych": "Sp.: Bazy danych",
-            "Technologie Webowe i Internet rzeczy grupa 1": "Sp.:  Technologie Webowe i Internet rzeczy gr.1: A-M",
-            "Technologie Webowe i Internet rzeczy grupa 2": "Sp.:  Technologie Webowe i Internet rzeczy gr.2: O-Z",
-            "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
-        },
-        "category": "nst",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF III PUW - z. stacjonarne"
-    },
-    "informatyka18": {
-        "name": "Informatyka - studia I stopnia nst puw III - semestr zimowy - z. online",
-        "faculty": "informatyka",
-        "groups": {
-            "Bazy danych": "Sp.: Bazy danych",
-            "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
-            "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
-        },
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF III PUW - z. on-line"
-    },
-    "informatyka19": {
-        "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "groups": {
-            "Grupa 1": "grupa 1: podział wg nazwisk:",
-            "Grupa 2": "grupa 2: podział wg nazwisk:"
-        },
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF IV PUW - z. stacjonarne"
-    },
-    "informatyka20": {
-        "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. online",
-        "faculty": "informatyka",
-        "groups": null,
-        "category": "nst-online",
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF IV PUW - z. on-line"
-    },
-    "administracja1": {
-        "name": "Administracja - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": {
-            "Grupa 1 - wg nazwisk: A-Mi": "grupa 1 podzuał wg nazwisk: A-Mi",
-            "Grupa 1 - wg nazwisk: Mj-Z": "grupa 1 podzuał wg nazwisk: Mj-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM I rok PUW - z. stacjonarne"
-    },
-    "administracja2": {
-        "name": "Administracja - studia I stopnia - nst puw I - semestr zimowy - z. online",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM I rok PUW - z. on-line"
-    },
-    "administracja3": {
-        "name": "Administracja - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": {
-            "Nowoczesna administracja cz. 1": "Sp.: Nowoczesna administracja cz. 1",
-            "Smart city i smart village cz. 1": "Sp.: Smart city i smart village cz. 1"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM II rok PUW - z. stacjonarne"
-    },
-    "administracja4": {
-        "name": "Administracja - studia I stopnia - nst puw II - semestr zimowy z. online",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": {
-            "Nowoczesna administracja cz. 1": "Sp.: Nowoczesna administracja cz. 1",
-            "Smart city i smart village cz. 1": "Sp.: Smart city i smart village cz. 1"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM II rok PUW - z. on-line"
-    },
-    "administracja5": {
-        "name": "Administracja - studia I stopnia - nst puw III - semestr zimowy - z.stacjonarne",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM III PUW - z. stacjonarne"
-    },
-    "administracja6": {
-        "name": "Administracja - studia I stopnia - nst puw III - semestr zimowy - z. online",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM III PUW - z. on-line"
-    },
-    "administracja7": {
-        "name": "Administracja - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Administracja",
-        "category": null,
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM MUZ I PUW - z. stacjonarne"
-    },
-    "administracja8": {
-        "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - z. online",
-        "faculty": "Administracja",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM MUZ I PUW - z. on-line"
-    },
-    "administracja9": {
-        "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": {
-            "Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym",
-            "Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM MUZ II PUW - z. stacjonarne"
-    },
-    "administracja10": {
-        "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - z. on-line",
-        "faculty": "Administracja",
-        "category": "nst-online",
-        "groups": {
-            "Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym",
-            "Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ADM MUZ II PUW - z. on-line"
-    },
-    "architektura1": {
-        "name": "Architektura - studia I stopnia - nst II - semestr zimowy ",
-        "faculty": "Architektura",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU NST II"
-    },
-    "architektura2": {
-        "name": "Architektura - studia I stopnia - st I - semestr zimowy ",
-        "faculty": "Architektura",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU nst I"
-    },
-    "architektura3": {
-        "name": "Architektura - studia I stopnia - st II - semestr zimowy ",
-        "faculty": "Architektura",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU ST II"
-    },
-    "architektura4": {
-        "name": "Architektura - studia I stopnia - st III - semestr zimowy ",
-        "faculty": "Architektura",
-        "category": "nst",
-        "groups": {
-            "Socjologia": "M: Socjologia"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU st III"
-    },
-    "architektura5": {
-        "name": "Architektura - studia I stopnia - st IV - semestr zimowy ",
-        "faculty": "Architektura",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU st IV"
-    },
-    "architektura6": {
-        "name": "Architektura - studia II stopnia - st I - semestr zimowy ",
-        "faculty": "Architektura",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211391/mod_folder/content/0/Architektura%20-%20studia%20II%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU MUZ nst I"
-    },
-    "architektura7": {
-        "name": "Architektura - studia II stopnia - st II - semestr zimowy",
-        "faculty": "Architektura",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211391/mod_folder/content/0/Architektura%20-%20studia%20II%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ARU MUZ st II"
-    },
-    "Finanseirachunkowosc1": {
-        "name": "Finanse i rachunkowość - studia I stopnia - st I - semestr zimowy - z. stacjonarne",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194279/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR st I"
-    },
-    "Finanseirachunkowosc2": {
-        "name": "Finanse i rachunkowość - studia I stopnia - st III - semestr zimowy",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194279/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR st III"
-    },
-    "Finanseirachunkowosc3": {
-        "name": "Finanse i rachunkowość - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "nst",
-        "groups": {
-            "Grupa 1 - kolejność wg nazwisk: A-Ł": "grupa 1 - kolejność wg nazwisk: A-Ł",
-            "Grupa 2 - kolejność wg nazwisk: M-Z": "grupa 2 - kolejność wg nazwisk: M-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR I rok PUW - z. stacjonarne"
-    },
-    "Finanseirachunkowosc4": {
-        "name": "Finanse i rachunkowość - studia I stopnia - nst puw I - semestr zimowy - z. on-line",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR I rok PUW - z. on-line"
-    },
-    "Finanseirachunkowosc5": {
-        "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "nst",
-        "groups": {
-            "Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N": "Sp.: Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N",
-            "Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z": "Sp.: Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR II rok PUW - z. stacjonarne"
-    },
-    "Finanseirachunkowosc6": {
-        "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "nst-online",
-        "groups": {
-            "Rachunkowość i finanse przedsiębiorstw": "Sp.: Rachunkowość i finanse przedsiębiorstw"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR II rok PUW - z. on-line"
-    },
-    "Finanseirachunkowosc7": {
-        "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR III PUW - z. stacjonarne"
-    },
-    "Finanseirachunkowosc8": {
-        "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy - z. online",
-        "faculty": "Finanse i rachunkowosc",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "FIR III PUW - z. on-line"
-    },
-    "gospodarkaprzestrzenna1": {
-        "name": "Gospodarka przestrzenna - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Gospodarka przestrzenna",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "GP I rok PUW - z. stacjonarne"
-    },
-    "gospodarkaprzestrzenna2": {
-        "name": "Gospodarka przestrzenna - studia I stopnia - nst puw I - semestr zimowy - z. online",
-        "faculty": "Gospodarka przestrzenna",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "GP I rok PUW - z. online"
-    },
-    "gospodarkaprzestrzenna3": {
-        "name": "Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
-        "faculty": "Gospodarka przestrzenna",
-        "category": "nst-online",
-        "groups": {
-            "Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "GP III rok PUW - z. stacjonarne"
-    },
-    "gospodarkaprzestrzenna4": {
-        "name": "Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
-        "faculty": "Gospodarka przestrzenna",
-        "category": "nst-online",
-        "groups": {
-            "Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "GP III rok PUW - z. on-line"
-    },
-    "informatyka2st1": {
-        "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "category": "nst",
-        "groups": {
-            "Grupa 1 -  wg nazwisk: A-J": "grupa 1 podział wg nazwisk: A-J",
-            "Grupa 2 -  wg nazwisk: K-N": "grupa 2 podział wg nazwisk: K-N",
-            "Grupa 3 -  wg nazwisk: O-Ż": "grupa 3 podział wg nazwisk: O-Ż"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF MUZ I PUW - z. stacjonarne"
-    },
-    "informatyka2st2": {
-        "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - z. on-line",
-        "faculty": "informatyka",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF MUZ I PUW - z. on-line"
-    },
-    "informatyka2st3": {
-        "name": "Informatyka - studia II stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "informatyka",
-        "category": "nst-online",
-        "groups": {
-            "Cyberbezpieczeństwo gr.1": "M: Cyberbezpieczeństwo gr.1",
-            "Cyberbezpieczeństwo gr.2": "M: Cyberbezpieczeństwo gr.2",
-            "Cyberbezpieczeństwo gr.3": "M: Cyberbezpieczeństwo gr.3",
-            "Cyberbezpieczeństwo gr.4": "M: Cyberbezpieczeństwo gr.4",
-            "Cyberbezpieczeństwo gr.5": "M: Cyberbezpieczeństwo gr.5"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF MUZ II PUW - z. stacjonarne"
-    },
-    "informatyka2st4": {
-        "name": "Informatyka - studia II stopnia - nst puw II - semestr zimowy - z. on-line",
-        "faculty": "informatyka",
-        "category": "nst-online",
-        "groups": {
-            "Cyberbezpieczeństwo": "M: Cyberbezpieczeństwo"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "INF MUZ II PUW - z. on-line"
-    },
-    "medaidziennik1": {
-        "name": "Media i dziennikarstwo - studia I stopnia - st I - semestr zimowy - z. stacjonarne",
-        "faculty": "Media i dziennikarstwo",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194284/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID st I"
-    },
-    "medaidziennik2": {
-        "name": "Media i dziennikarstwo - studia I stopnia - st II - semestr zimowy - z. stacjonarne",
-        "faculty": "Media i dziennikarstwo",
-        "category": "st",
-        "groups": {
-            "Nowe media": "Sp.: Nowe media"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194284/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID st II"
-    },
-    "mediaidziennik1": {
-        "name": "Media i dziennikarstwo - studia I stopnia - st III - semestr zimowy - z. stacjonarne",
-        "faculty": "Media i dziennikarstwo",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194284/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID st III"
-    },
-    "mediaidziennik2": {
-        "name": "Media i dziennikarstwo - studia I stopnia - nst puw I - semestr zimowy z. stacjonarne",
-        "faculty": "Media i dziennikarstwo",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID I rok PUW - z. stacjonarne"
-    },
-    "mediaidziennik3": {
-        "name": "Media i dziennikarstwo - studia I stopnia - nst puw I - semestr zimowy z. on-line",
-        "faculty": "Media i dziennikarstwo",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID I rok PUW - z. on-line"
-    },
-    "mediaidziennik4": {
-        "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy z. stacjonarne",
-        "faculty": "Media i dziennikarstwo",
-        "category": "nst",
-        "groups": {
-            "Nowe media": "Sp.: Nowe media"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID II rok PUW - z. stacjonarny"
-    },
-    "mediaidziennik5": {
-        "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy z. on-line",
-        "faculty": "Media i dziennikarstwo",
-        "category": "nst",
-        "groups": {
-            "Nowe media": "Sp.: Nowe media"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID II rok PUW - z. on-line"
-    },
-    "mediaidziennik6": {
-        "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy z. stacjonarne",
-        "faculty": "Media i dziennikarstwo",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID III rok PUW - z.stacjonarny"
-    },
-    "mediaidziennik7": {
-        "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy z. online",
-        "faculty": "Media i dziennikarstwo",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "MID III rok PUW - z. on-line"
-    },
-    "pedagogikapw1": {
-        "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst I - semestr zimowy",
-        "faculty": "Pedagogika przedszkolna i wczesnoszkolna",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211392/mod_folder/content/0/Pedagogika%20przedszkolna%20i%20wczesnoszkolna%20-%20studia%20jednolite%20magisterskie%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PG J nst I"
-    },
-    "pedagogikapw2": {
-        "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst III - semestr zimowy",
-        "faculty": "Pedagogika przedszkolna i wczesnoszkolna",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/211392/mod_folder/content/0/Pedagogika%20przedszkolna%20i%20wczesnoszkolna%20-%20studia%20jednolite%20magisterskie%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PG J nst III"
-    },
-    "pielegniarstwo1": {
-        "name": "Pielęgniarstwo - studia I stopnia - st I - semestr zimowy",
-        "faculty": "Pielegniarstwo",
-        "category": "st",
-        "groups": {
-            "Grupa 1 - wg nazwisk: A-K": "Grupa 1 podział wg nazwisk: A-K",
-            "Grupa 2 - wg nazwisk: L-Sa": "Grupa 2 podział wg nazwisk: L-Sa", 
-            "Grupa 3 - wg nazwisk: Sz-Ż": "Grupa 3 podział wg nazwisk: Sz-Ż"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194286/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PIE st I"
-    },
-    "pielegniarstwo2": {
-        "name": "Pielęgniarstwo - studia I stopnia - st II - semestr zimowy",
-        "faculty": "Pielegniarstwo",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194286/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PIE st II"
-    },
-    "pracasocjalna1": {
-        "name": "Praca socjalna - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Praca socjalna",
-        "category": "nst",
-        "groups": {
-            "Grupa 1 - wg nazwisk: A-L": "grupa 1 podzuał wg nazwisk: A-L",
-            "Grupa 2 - wg nazwisk: Ł-Z": "grupa 2 podzuał wg nazwisk: Ł-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PS I rok PUW - z. stacjonarne"
-    },
-    "pracasocjalna2": {
-        "name": "Praca socjalna - studia I stopnia - nst puw I - semestr zimowy - z. online",
-        "faculty": "Praca socjalna",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PS I rok PUW - z. online"
-    },
-    "pracasocjalna3": {
-        "name": "Praca socjalna - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
-        "faculty": "Praca socjalna",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PS III rok PUW - z. stacjonarne"
-    },
-    "pracasocjalna4": {
-        "name": "Praca socjalna - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
-        "faculty": "Praca socjalna",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PS III rok PUW - z. on-line"
-    },
-    "projektowaniewnetrz1": {
-        "name": "Projektowanie wnętrz - studia I stopnia - st I - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW st I"
-    },
-    "projektowaniewnetrz2": {
-        "name": "Projektowanie wnętrz - studia I stopnia - st II - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "st",
-        "groups": {
-            "Moduł A": "M: Moduł A"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW st II"
-    },
-    "projektowaniewnetrz3": {
-        "name": "Projektowanie wnętrz - studia I stopnia - st III - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "st",
-        "groups": {
-            "Moduł B": "M: Moduł B"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW st III"
-    },
-    "projektowaniewnetrz4": {
-        "name": "Projektowanie wnętrz - studia I stopnia - st IV - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "st",
-        "groups": {
-            "Moduł B": "M: Moduł B"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW st IV"
-    },
-    "projektowanie-wnetrz1": {
-        "name": "Projektowanie wnętrz - studia I stopnia - nst I - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "nst",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW nst I"
-    },
-    "projektowaniewnetrz5": {
-        "name": "Projektowanie wnętrz - studia I stopnia - nst II - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "nst",
-        "groups": {
-            "Moduł A": "M: Moduł A"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW nst II"
-    },
-    "projektowaniewnetrz6": {
-        "name": "Projektowanie wnętrz - studia I stopnia - nst III - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "nst",
-        "groups": {
-            "Moduł A": "M: Moduł A"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW nst III"
-    },
-    "projektowaniewnetrz7": {
-        "name": "Projektowanie wnętrz - studia I stopnia - nst IV - semestr zimowy",
-        "faculty": "Projektowanie wnetrz",
-        "category": "nst",
-        "groups": {
-            "Moduł A": "M: Moduł A"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "PW nst III"
-    },
-    "socjologia1": {
-        "name": " Socjologia - studia I stopnia - st III - semestr zimowy",
-        "faculty": "Socjologia",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194291/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "SOC st III"
-    },
-    "socjologia2": {
-        "name": " Socjologia - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "Socjologia",
-        "category": "nst",
-        "groups": {
-            "Kryminologia": "Sp.: Kryminologia"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "SOC II rok PUW - z. stacjonarne"
-    },
-    "socjologia3": {
-        "name": " Socjologia - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
-        "faculty": "Socjologia",
-        "category": "nst-online",
-        "groups": {
-            "Kryminologia": "Sp.: Kryminologia"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "SOC II rok PUW - z. on-line"
-    },
-    "socjologia4": {
-        "name": "Socjologia - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
-        "faculty": "Socjologia",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "SOC III PUW - z. stacjonarne"
-    },
-    "socjologia5": {
-        "name": "Socjologia - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
-        "faculty": "Socjologia",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "SOC III PUW - z. on-line"
-    },
-    "stosunki_miedzynarodowe1": {
-        "name": "Stosunki międzynarodowe - studia I stopnia - st I - semestr zimowy",
-        "faculty": "Stosunki międzynarodowe",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194293/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "STM st I"
-    },
-    "stosunki_miedzynarodowe2": {
-        "name": "Stosunki międzynarodowe - studia I stopnia - st II - semestr zimowy",
-        "faculty": "Stosunki międzynarodowe",
-        "category": "st",
-        "groups": {
-            "Biznes międzynarodowy i współpraca transgraniczna": "Sp.: Biznes międzynarodowy i współpraca transgraniczna"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194293/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "STM st II"
-    },
-    "stosunki_miedzynarodowe3": {
-        "name": "Stosunki międzynarodowe - studia I stopnia - st III - semestr zimowy",
-        "faculty": "Stosunki międzynarodowe",
-        "category": "st",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194293/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "STM st III"
-    },
-    "transport1": {
-        "name": "Transport - studia I stopnia - st I - semestr zimowy",
-        "faculty": "Transport",
-        "category": "nst",
-        "groups": {
-            "Grupa 1": "Grupa 1",
-            "Grupa 2": "Grupa 2"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194295/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "TRT I"
-    },
-    "transport2": {
-        "name": "Transport - studia I stopnia - st II - semestr zimowy",
-        "faculty": "Transport",
-        "category": "st",
-        "groups": {
-            "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194295/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "TRT st II"
-    },
-    "transport3": {
-        "name": "Transport - studia I stopnia - st III - semestr zimowy",
-        "faculty": "Transport",
-        "category": "st",
-        "groups": {
-            "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194295/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "TRT st III"
-    },
-    "transport 1": {
-        "name": "Transport - studia I stopnia - nst puw I - semestr zimowy",
-        "faculty": "Transport",
-        "category": "nst",
-        "groups": {
-            "Grupa 1": "Grupa 1",
-            "Grupa 2": "Grupa 2"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194296/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "TRT I"
-    },
-    "transport4": {
-        "name": "Transport - studia I stopnia - nst puw III - semestr zimowy z. stacjonarne",
-        "faculty": "Transport",
-        "category": "nst",
-        "groups": {
-            "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194296/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "TRT III rok PUW - z.stacjonarne"
-    },
-    "transport5": {
-        "name": "Transport - studia I stopnia - nst puw III - semestr zimowy z. on-line",
-        "faculty": "Transport",
-        "category": "nst",
-        "groups": {
-            "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194296/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "TRT III rok PUW - z. on-line"
-    },
-    "zarzadzanie1": {
-        "name": " Zarządzanie - studia I stopnia - st I - semestr zimowy",
-        "faculty": "Zarządzanie",
-        "category": "st",
-        "groups": {
-            "Grupa 1 podział wg nazwisk: A-K": "grupa 1 podział wg nazwisk: A-K",
-            "Grupa 2 podział wg nazwisk: L-Z": "grupa 2 podział wg nazwisk: L-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ st I"
-    },
-    "zarzadzanie2": {
-        "name": " Zarządzanie - studia I stopnia - st II - semestr zimowy",
-        "faculty": "Zarządzanie",
-        "category": "st",
-        "groups": {
-            "Innowacyjne zarządzanie firmą grupa 1 wg nazwisk: A-Lud": "Sp.: Innowacyjne zarządzanie firmągrupa 1podział wg nazwisk: A-Lud",
-            "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: Luk-R": "Sp.: Innowacyjne zarządzanie firmą grupa 2 podział wg nazwisk: Luk-R",
-            "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: S-Z": "Sp.: Innowacyjne zarządzanie firmągrupa 2podział wg nazwisk: S-Z",
-            "Zarządzanie HR": "Sp.: Zarządzanie HR"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ st II"
-    },
-    "zarzadzanie3": {
-        "name": "Zarządzanie - studia I stopnia - st III - semestr zimowy",
-        "faculty": "Zarządzanie",
-        "category": "st",
-        "groups": {
-            "Grupa 1 wg nazwisk: A-M": "grupa 1:podział wg nazwisk: A-M",
-            "Grupa 2 wg nazwisk: N-Z": "grupa 2:podział wg nazwisk: N-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ st III"
-    },
-    "zarzadzanie4": {
-        "name": "Zarządzanie - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Zarządzanie",
-        "category": null,
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ I rok PUW - z. stacjonarne"
-    },
-    "zarzadzanie5": {
-        "name": "Zarządzanie - studia I stopnia - nst puw I - semestr zimowy - z. on-line",
-        "faculty": "Zarządzanie",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ I rok PUW - z. on-line"
-    },
-    "zarzadzanie6": {
-        "name": "Zarządzanie - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "Zarządzanie",
-        "category": null,
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ II rok PUW - z. stacjonarne"
-    },
-    "zarzadzanie7": {
-        "name": "Zarządzanie - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
-        "faculty": "Zarządzanie",
-        "category": "nst-online",
-        "groups": {
-            "Innowacyjne zarządzanie firmą": "Sp.: Innowacyjne zarządzanie firmą",
-            "Zarządzanie HR": "Sp.: Zarządzanie HR"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ II rok PUW - z. on-line"
-    },
-    "zarzadzanie8": {
-        "name": "Zarządzanie - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
-        "faculty": "Zarządzanie",
-        "category": "nst-online",
-        "groups": {
-            "Grupa 1 wg nazwisk: A-Gi": "Grupa 1podział wg nazwisk:A-Gi",
-            "Grupa 2 wg nazwisk: Gj-Kot": "Grupa 2podział wg nazwisk:Gj-Kot",
-            "Grupa 3 wg nazwisk: Kos-O": "Grupa 3podział wg nazwisk:Kos-O",
-            "Grupa 4 wg nazwisk: P-Z": "Grupa 4podział wg nazwisk:P-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ III PUW - z. stacjonarne"
-    },
-    "zarzadzanie9": {
-        "name": "Zarządzanie - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
-        "faculty": "Zarządzanie",
-        "category": "nst-online",
-        "groups": null,
-        "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ III PUW - z. on-line"
-    },
-    "zarzadzanie10": {
-        "name": "Zarządzanie - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne",
-        "faculty": "Zarządzanie",
-        "category": "nst",
-        "groups": {
-            "Grupa 1 - E-biznes i nowoczesne formy marketingu": "grupa 1 - wg nazwisk: A-Ja",
-            "Grupa 2 - E-biznes i nowoczesne formy marketingu": "grupa 2 - wg nazwisk: Jb-Ma",
-            "Grupa 3 - E-biznes i nowoczesne formy marketingu": "grupa 3 - wg nazwisk: Mb-Pl",
-            "Grupa 4 - E-biznes i nowoczesne formy marketingu": "grupa 4 - wg nazwisk: MPł-Z"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ MUZ I PUW - z. stacjonarne"
-    },
-    "zarzadzanie11": {
-        "name": "Zarządzanie - studia II stopnia - nst puw I - semestr zimowy - z. on-line",
-        "faculty": "Zarządzanie",
-        "category": "nst-online",
-        "groups": {
-            "E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
-            "Menedżer HR i coaching biznesowy": "Sp.: Menedżer HR i coaching biznesowy"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ MUZ I PUW - z. on-line"
-    },
-    "zarzadzanie12": {
-        "name": "Zarządzanie - studia II stopnia - nst puw II - semestr zimowy - z. stacjonarne",
-        "faculty": "Zarządzanie",
-        "category": "nst",
-        "groups": {
-            "E-biznes i nowoczesne formy marketingu wg nazwisk: A-M": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: A-M",
-            "E-biznes i nowoczesne formy marketingu wg nazwisk: N-Rej": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: N-Rej",
-            "E-biznes i nowoczesne formy marketingu wg nazwisk: Rek-Z": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: Rek-Z",
-            "Menedżer finansowy": "Sp.: Menedżer finansowy"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ MUZ II PUW - z. stacjonarne"
-    },
-    "zarzadzanie13": {
-        "name": "Zarządzanie - studia II stopnia - nst puw II - semestr zimowy - z. on-line",
-        "faculty": "Zarządzanie",
-        "category": "nst",
-        "groups": {
-            "E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
-            "Menedżer finansowy": "Sp.: Menedżer finansowy"
-        },
-        "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-        "sheet_name": "ZAZ MUZ II PUW - z. on-line"
-    }
+  "informatyka2": {
+    "name": "Informatyka - studia I stopnia st II",
+    "faculty": "informatyka",
+    "groups": {
+      "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczygrupa 1podział wg nazwisk: A-K",
+      "Technologie Webowe i Internet rzeczy grupa 2": "Technologie Webowe i Internet rzeczygrupa 2podział wg nazwisk: L-Z",
+      "Technologie mobilne": "Sp.: Technologie mobilne",
+      "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
+      "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrupa 1podział wg nazwisk:A-K",
+      "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrupa 2podział wg nazwisk: L-Z"
+    },
+    "category": "st",
+    "compare": true,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF st II"
+  },
+  "informatyka1": {
+    "name": "Informatyka - studia I stopnia st I",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1 - A-Ho": "grupa 1:podział wg nazwisk: A-Ho",
+      "Grupa 2 - Hp-Med.": "grupa 2:podział wg nazwisk:Hp-Med.",
+      "Grupa 3 - Mel-Pi": "grupa 3:podział wg nazwisk:Mel-Pi",
+      "Grupa 4 - Pj-Z": "grupa 4:podział wg nazwisk:Pj-Z"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF st I"
+  },
+  "informatyka3": {
+    "name": "Informatyka - studia I stopnia st III",
+    "faculty": "informatyka",
+    "groups": {
+      "Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
+      "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrrupa 1podział wg nazwisk: A-K",
+      "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledczagrrupa 2podział wg nazwisk: L-Z",
+      "Technologie Webowe i Internet rzeczy grupa 1": "Sp.: Technologie Webowe i Internet rzeczygrrupa 1podział wg nazwisk: A-L",
+      "Technologie Webowe i Internet rzeczy grupa 2": "Sp.: Technologie Webowe i Internet rzeczygrrupa 2podział wg nazwisk: M-Z"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF st III "
+  },
+  "informatyka4": {
+    "name": "Informatyka - studia I stopnia st IV",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1": "grupa 1podział wg nazwisk: A-Ka",
+      "Grupa 2": "grupa 2podział wg nazwisk: Kb-P",
+      "Grupa 3": "grupa 3podział wg nazwisk: R-Z"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194281/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF st IV"
+  },
+  "informatyka5": {
+    "name": "Informatyka - studia I stopnia nst I - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1": "grupa 1 podział wg nazwisk: A-Mi",
+      "Grupa 2": "grupa 2 podział wg nazwisk: Mj-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF NST I - z. stacjonarne"
+  },
+  "informatyka6": {
+    "name": "Informatyka - studia I stopnia nst I - semestr zimowy - z. online",
+    "faculty": "informatyka",
+    "groups": null,
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF NST I - z. on-line"
+  },
+  "informatyka7": {
+    "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.1",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1": "grupa 1wg nazwisk:A-I",
+      "Grupa 2": "grupa 2wg nazwisk: J-M",
+      "Grupa 3": "grupa 3wg nazwisk: N-R",
+      "Grupa 4": "grupa 4wg nazwisk: S-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF I rok PUW - z. stac. zj.1"
+  },
+  "informatyka21": {
+    "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.2,3",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1": "grupa 1wg nazwisk:A-C",
+      "Grupa 2": "grupa 2wg nazwisk: D-Kon",
+      "Grupa 3": "grupa 3wg nazwisk: Kor-M",
+      "Grupa 4": "grupa 4wg nazwisk: N-P"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF I rok PUW - z. stac. zj.2,3"
+  },
+  "informatyka8": {
+    "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - z. on-line",
+    "faculty": "informatyka",
+    "groups": null,
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF I rok PUW - z. on-line"
+  },
+  "informatyka9": {
+    "name": "Informatyka - studia I stopnia nst II - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Cyberbezpieczeństwo i informatyka śledcza - grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - grupa 1 podział wg nazwisk: A-Ko",
+      "Cyberbezpieczeństwo i informatyka śledcza - grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - grupa 2 podział wg nazwisk: Kp-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF nst II - z. stacjonarne"
+  },
+  "informatyka10": {
+    "name": "Informatyka - studia I stopnia nst II - semestr zimowy - z. on-line",
+    "faculty": "informatyka",
+    "groups": {
+      "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF nst II - z. on-line"
+  },
+  "informatyka11": {
+    "name": "Informatyka - studia I stopnia nst III - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Technologie Webowe i Internet rzeczy": "Sp.:  Technologie Webowe i Internet rzeczy",
+      "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF nst III - z. stacjonarne"
+  },
+  "informatyka12": {
+    "name": "Informatyka - studia I stopnia nst III - semestr zimowy - z. on-line",
+    "faculty": "informatyka",
+    "groups": {
+      "Technologie Webowe i Internet rzeczy": "Sp.:  Technologie Webowe i Internet rzeczy",
+      "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF nst III - z. on-line"
+  },
+  "informatyka13": {
+    "name": "Informatyka - studia I stopnia nst IV - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1": "grupa 1",
+      "Grupa 2": "grupa 2"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF nst IV - z. stacjonarne"
+  },
+  "informatyka14": {
+    "name": "Informatyka - studia I stopnia nst IV - semestr zimowy - z. on-line",
+    "faculty": "informatyka",
+    "groups": null,
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194282/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF nst IV - z. on-line"
+  },
+  "informatyka15": {
+    "name": "Informatyka - studia I stopnia nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Bazy danych - grupa 1": "Sp.: Bazy danych - gr.1 wg nazwisk: A-Pa",
+      "Bazy danych - grupa 2": "Sp.: Bazy danych - gr.2 wg nazwisk: Py-Z",
+      "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
+      "Cyberbezpieczeństwo i informatyka śledcza grupa 1": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1 wg nazwisk: A-M",
+      "Cyberbezpieczeństwo i informatyka śledcza grupa 2": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2 wg nazwisk: N-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF II rok PUW - z. stacjonarne"
+  },
+  "informatyka16": {
+    "name": "Informatyka - studia I stopnia nst puw II - semestr zimowy - z. online",
+    "faculty": "informatyka",
+    "groups": {
+      "Bazy danych": "Sp.: Bazy danych",
+      "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
+      "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF II rok PUW - z. on-line"
+  },
+  "informatyka17": {
+    "name": "Informatyka - studia I stopnia nst puw III - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Bazy danych": "Sp.: Bazy danych",
+      "Technologie Webowe i Internet rzeczy grupa 1": "Sp.:  Technologie Webowe i Internet rzeczy gr.1: A-M",
+      "Technologie Webowe i Internet rzeczy grupa 2": "Sp.:  Technologie Webowe i Internet rzeczy gr.2: O-Z",
+      "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF III PUW - z. stacjonarne"
+  },
+  "informatyka18": {
+    "name": "Informatyka - studia I stopnia nst puw III - semestr zimowy - z. online",
+    "faculty": "informatyka",
+    "groups": {
+      "Bazy danych": "Sp.: Bazy danych",
+      "Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i internet rzeczy",
+      "Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF III PUW - z. on-line"
+  },
+  "informatyka19": {
+    "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Grupa 1": "grupa 1: podział wg nazwisk:",
+      "Grupa 2": "grupa 2: podział wg nazwisk:"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF IV PUW - z. stacjonarne"
+  },
+  "informatyka20": {
+    "name": "Informatyka - studia I stopnia nst puw IV - semestr zimowy - z. online",
+    "faculty": "informatyka",
+    "groups": null,
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194283/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF IV PUW - z. on-line"
+  },
+  "administracja1": {
+    "name": "Administracja - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": {
+      "Grupa 1 - wg nazwisk: A-Mi": "grupa 1 podzuał wg nazwisk: A-Mi",
+      "Grupa 1 - wg nazwisk: Mj-Z": "grupa 1 podzuał wg nazwisk: Mj-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM I rok PUW - z. stacjonarne"
+  },
+  "administracja2": {
+    "name": "Administracja - studia I stopnia - nst puw I - semestr zimowy - z. online",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM I rok PUW - z. on-line"
+  },
+  "administracja3": {
+    "name": "Administracja - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": {
+      "Nowoczesna administracja cz. 1": "Sp.: Nowoczesna administracja cz. 1",
+      "Smart city i smart village cz. 1": "Sp.: Smart city i smart village cz. 1"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM II rok PUW - z. stacjonarne"
+  },
+  "administracja4": {
+    "name": "Administracja - studia I stopnia - nst puw II - semestr zimowy z. online",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": {
+      "Nowoczesna administracja cz. 1": "Sp.: Nowoczesna administracja cz. 1",
+      "Smart city i smart village cz. 1": "Sp.: Smart city i smart village cz. 1"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM II rok PUW - z. on-line"
+  },
+  "administracja5": {
+    "name": "Administracja - studia I stopnia - nst puw III - semestr zimowy - z.stacjonarne",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM III PUW - z. stacjonarne"
+  },
+  "administracja6": {
+    "name": "Administracja - studia I stopnia - nst puw III - semestr zimowy - z. online",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97239/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM III PUW - z. on-line"
+  },
+  "administracja7": {
+    "name": "Administracja - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Administracja",
+    "category": null,
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM MUZ I PUW - z. stacjonarne"
+  },
+  "administracja8": {
+    "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - z. online",
+    "faculty": "Administracja",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM MUZ I PUW - z. on-line"
+  },
+  "administracja9": {
+    "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": {
+      "Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym",
+      "Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM MUZ II PUW - z. stacjonarne"
+  },
+  "administracja10": {
+    "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - z. on-line",
+    "faculty": "Administracja",
+    "category": "nst-online",
+    "groups": {
+      "Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym",
+      "Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144303/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ADM MUZ II PUW - z. on-line"
+  },
+  "architektura1": {
+    "name": "Architektura - studia I stopnia - nst II - semestr zimowy ",
+    "faculty": "Architektura",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU NST II"
+  },
+  "architektura2": {
+    "name": "Architektura - studia I stopnia - st I - semestr zimowy ",
+    "faculty": "Architektura",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU nst I"
+  },
+  "architektura3": {
+    "name": "Architektura - studia I stopnia - st II - semestr zimowy ",
+    "faculty": "Architektura",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU ST II"
+  },
+  "architektura4": {
+    "name": "Architektura - studia I stopnia - st III - semestr zimowy ",
+    "faculty": "Architektura",
+    "category": "nst",
+    "groups": {
+      "Socjologia": "M: Socjologia"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU st III"
+  },
+  "architektura5": {
+    "name": "Architektura - studia I stopnia - st IV - semestr zimowy ",
+    "faculty": "Architektura",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211389/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU st IV"
+  },
+  "architektura6": {
+    "name": "Architektura - studia II stopnia - st I - semestr zimowy ",
+    "faculty": "Architektura",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211391/mod_folder/content/0/Architektura%20-%20studia%20II%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU MUZ nst I"
+  },
+  "architektura7": {
+    "name": "Architektura - studia II stopnia - st II - semestr zimowy",
+    "faculty": "Architektura",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211391/mod_folder/content/0/Architektura%20-%20studia%20II%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ARU MUZ st II"
+  },
+  "Finanseirachunkowosc1": {
+    "name": "Finanse i rachunkowość - studia I stopnia - st I - semestr zimowy - z. stacjonarne",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194279/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR st I"
+  },
+  "Finanseirachunkowosc2": {
+    "name": "Finanse i rachunkowość - studia I stopnia - st III - semestr zimowy",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194279/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR st III"
+  },
+  "Finanseirachunkowosc3": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "nst",
+    "groups": {
+      "Grupa 1 - kolejność wg nazwisk: A-Ł": "grupa 1 - kolejność wg nazwisk: A-Ł",
+      "Grupa 2 - kolejność wg nazwisk: M-Z": "grupa 2 - kolejność wg nazwisk: M-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR I rok PUW - z. stacjonarne"
+  },
+  "Finanseirachunkowosc4": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw I - semestr zimowy - z. on-line",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR I rok PUW - z. on-line"
+  },
+  "Finanseirachunkowosc5": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "nst",
+    "groups": {
+      "Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N": "Sp.: Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N",
+      "Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z": "Sp.: Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR II rok PUW - z. stacjonarne"
+  },
+  "Finanseirachunkowosc6": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "nst-online",
+    "groups": {
+      "Rachunkowość i finanse przedsiębiorstw": "Sp.: Rachunkowość i finanse przedsiębiorstw"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR II rok PUW - z. on-line"
+  },
+  "Finanseirachunkowosc7": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR III PUW - z. stacjonarne"
+  },
+  "Finanseirachunkowosc8": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy - z. online",
+    "faculty": "Finanse i rachunkowosc",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194280/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "FIR III PUW - z. on-line"
+  },
+  "gospodarkaprzestrzenna1": {
+    "name": "Gospodarka przestrzenna - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Gospodarka przestrzenna",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "GP I rok PUW - z. stacjonarne"
+  },
+  "gospodarkaprzestrzenna2": {
+    "name": "Gospodarka przestrzenna - studia I stopnia - nst puw I - semestr zimowy - z. online",
+    "faculty": "Gospodarka przestrzenna",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "GP I rok PUW - z. online"
+  },
+  "gospodarkaprzestrzenna3": {
+    "name": "Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
+    "faculty": "Gospodarka przestrzenna",
+    "category": "nst-online",
+    "groups": {
+      "Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "GP III rok PUW - z. stacjonarne"
+  },
+  "gospodarkaprzestrzenna4": {
+    "name": "Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
+    "faculty": "Gospodarka przestrzenna",
+    "category": "nst-online",
+    "groups": {
+      "Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144273/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "GP III rok PUW - z. on-line"
+  },
+  "informatyka2st1": {
+    "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.1",
+    "faculty": "informatyka",
+    "category": "nst",
+    "groups": {
+      "Grupa 1 -  wg nazwisk: A-J": "grupa 1 podział wg nazwisk: A-J",
+      "Grupa 2 -  wg nazwisk: K-N": "grupa 2 podział wg nazwisk: K-N",
+      "Grupa 3 -  wg nazwisk: O-Ż": "grupa 3 podział wg nazwisk: O-Ż"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ I PUW - z. stacjonarne zj.1"
+  },
+  "informatyka2st1-2": {
+    "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne zj.2",
+    "faculty": "informatyka",
+    "category": "nst",
+    "groups": {
+      "Grupa 1 -  wg nazwisk: A-J": "grupa 1 podział wg nazwisk: A-J",
+      "Grupa 2 -  wg nazwisk: K-N": "grupa 2 podział wg nazwisk: K-N",
+      "Grupa 3 -  wg nazwisk: O-Ż": "grupa 3 podział wg nazwisk: O-Ż"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ I PUW - z. stacjonarne zj.2"
+  },
+  "informatyka2st2": {
+    "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - z. on-line",
+    "faculty": "informatyka",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ I PUW - z. on-line"
+  },
+  "informatyka2st3": {
+    "name": "Informatyka - studia II stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "informatyka",
+    "category": "nst-online",
+    "groups": {
+      "Cyberbezpieczeństwo gr.1": "M: Cyberbezpieczeństwo gr.1",
+      "Cyberbezpieczeństwo gr.2": "M: Cyberbezpieczeństwo gr.2",
+      "Cyberbezpieczeństwo gr.3": "M: Cyberbezpieczeństwo gr.3",
+      "Cyberbezpieczeństwo gr.4": "M: Cyberbezpieczeństwo gr.4",
+      "Cyberbezpieczeństwo gr.5": "M: Cyberbezpieczeństwo gr.5"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ II PUW - z. stacjonarne"
+  },
+  "informatyka2st4": {
+    "name": "Informatyka - studia II stopnia - nst puw II - semestr zimowy - z. on-line",
+    "faculty": "informatyka",
+    "category": "nst-online",
+    "groups": {
+      "Cyberbezpieczeństwo": "M: Cyberbezpieczeństwo"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97291/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ II PUW - z. on-line"
+  },
+  "medaidziennik1": {
+    "name": "Media i dziennikarstwo - studia I stopnia - st I - semestr zimowy - z. stacjonarne",
+    "faculty": "Media i dziennikarstwo",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194284/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID st I"
+  },
+  "medaidziennik2": {
+    "name": "Media i dziennikarstwo - studia I stopnia - st II - semestr zimowy - z. stacjonarne",
+    "faculty": "Media i dziennikarstwo",
+    "category": "st",
+    "groups": {
+      "Nowe media": "Sp.: Nowe media"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194284/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID st II"
+  },
+  "mediaidziennik1": {
+    "name": "Media i dziennikarstwo - studia I stopnia - st III - semestr zimowy - z. stacjonarne",
+    "faculty": "Media i dziennikarstwo",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194284/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID st III"
+  },
+  "mediaidziennik2": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw I - semestr zimowy z. stacjonarne",
+    "faculty": "Media i dziennikarstwo",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID I rok PUW - z. stacjonarne"
+  },
+  "mediaidziennik3": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw I - semestr zimowy z. on-line",
+    "faculty": "Media i dziennikarstwo",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID I rok PUW - z. on-line"
+  },
+  "mediaidziennik4": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy z. stacjonarne",
+    "faculty": "Media i dziennikarstwo",
+    "category": "nst",
+    "groups": {
+      "Nowe media": "Sp.: Nowe media"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID II rok PUW - z. stacjonarny"
+  },
+  "mediaidziennik5": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy z. on-line",
+    "faculty": "Media i dziennikarstwo",
+    "category": "nst",
+    "groups": {
+      "Nowe media": "Sp.: Nowe media"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID II rok PUW - z. on-line"
+  },
+  "mediaidziennik6": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy z. stacjonarne",
+    "faculty": "Media i dziennikarstwo",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID III rok PUW - z.stacjonarny"
+  },
+  "mediaidziennik7": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy z. online",
+    "faculty": "Media i dziennikarstwo",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194285/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "MID III rok PUW - z. on-line"
+  },
+  "pedagogikapw1": {
+    "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst I - semestr zimowy",
+    "faculty": "Pedagogika przedszkolna i wczesnoszkolna",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211392/mod_folder/content/0/Pedagogika%20przedszkolna%20i%20wczesnoszkolna%20-%20studia%20jednolite%20magisterskie%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PG J nst I"
+  },
+  "pedagogikapw2": {
+    "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst III - semestr zimowy",
+    "faculty": "Pedagogika przedszkolna i wczesnoszkolna",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/211392/mod_folder/content/0/Pedagogika%20przedszkolna%20i%20wczesnoszkolna%20-%20studia%20jednolite%20magisterskie%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PG J nst III"
+  },
+  "pielegniarstwo1": {
+    "name": "Pielęgniarstwo - studia I stopnia - st I - semestr zimowy",
+    "faculty": "Pielegniarstwo",
+    "category": "st",
+    "groups": {
+      "Grupa 1 - wg nazwisk: A-K": "Grupa 1 podział wg nazwisk: A-K",
+      "Grupa 2 - wg nazwisk: L-Sa": "Grupa 2 podział wg nazwisk: L-Sa",
+      "Grupa 3 - wg nazwisk: Sz-Ż": "Grupa 3 podział wg nazwisk: Sz-Ż"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194286/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PIE st I"
+  },
+  "pielegniarstwo2": {
+    "name": "Pielęgniarstwo - studia I stopnia - st II - semestr zimowy",
+    "faculty": "Pielegniarstwo",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194286/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PIE st II"
+  },
+  "pracasocjalna1": {
+    "name": "Praca socjalna - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Praca socjalna",
+    "category": "nst",
+    "groups": {
+      "Grupa 1 - wg nazwisk: A-L": "grupa 1 podzuał wg nazwisk: A-L",
+      "Grupa 2 - wg nazwisk: Ł-Z": "grupa 2 podzuał wg nazwisk: Ł-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PS I rok PUW - z. stacjonarne"
+  },
+  "pracasocjalna2": {
+    "name": "Praca socjalna - studia I stopnia - nst puw I - semestr zimowy - z. online",
+    "faculty": "Praca socjalna",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PS I rok PUW - z. online"
+  },
+  "pracasocjalna3": {
+    "name": "Praca socjalna - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
+    "faculty": "Praca socjalna",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PS III rok PUW - z. stacjonarne"
+  },
+  "pracasocjalna4": {
+    "name": "Praca socjalna - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
+    "faculty": "Praca socjalna",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/144289/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PS III rok PUW - z. on-line"
+  },
+  "projektowaniewnetrz1": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st I - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW st I"
+  },
+  "projektowaniewnetrz2": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st II - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "st",
+    "groups": {
+      "Moduł A": "M: Moduł A"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW st II"
+  },
+  "projektowaniewnetrz3": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st III - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "st",
+    "groups": {
+      "Moduł B": "M: Moduł B"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW st III"
+  },
+  "projektowaniewnetrz4": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st IV - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "st",
+    "groups": {
+      "Moduł B": "M: Moduł B"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194287/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW st IV"
+  },
+  "projektowanie-wnetrz1": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst I - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "nst",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW nst I"
+  },
+  "projektowaniewnetrz5": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst II - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "nst",
+    "groups": {
+      "Moduł A": "M: Moduł A"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW nst II"
+  },
+  "projektowaniewnetrz6": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst III - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "nst",
+    "groups": {
+      "Moduł A": "M: Moduł A"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW nst III"
+  },
+  "projektowaniewnetrz7": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst IV - semestr zimowy",
+    "faculty": "Projektowanie wnetrz",
+    "category": "nst",
+    "groups": {
+      "Moduł A": "M: Moduł A"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194288/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20IV%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "PW nst III"
+  },
+  "socjologia1": {
+    "name": " Socjologia - studia I stopnia - st III - semestr zimowy",
+    "faculty": "Socjologia",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194291/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "SOC st III"
+  },
+  "socjologia2": {
+    "name": " Socjologia - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "Socjologia",
+    "category": "nst",
+    "groups": {
+      "Kryminologia": "Sp.: Kryminologia"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "SOC II rok PUW - z. stacjonarne"
+  },
+  "socjologia3": {
+    "name": " Socjologia - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
+    "faculty": "Socjologia",
+    "category": "nst-online",
+    "groups": {
+      "Kryminologia": "Sp.: Kryminologia"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "SOC II rok PUW - z. on-line"
+  },
+  "socjologia4": {
+    "name": "Socjologia - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
+    "faculty": "Socjologia",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "SOC III PUW - z. stacjonarne"
+  },
+  "socjologia5": {
+    "name": "Socjologia - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
+    "faculty": "Socjologia",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194292/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "SOC III PUW - z. on-line"
+  },
+  "stosunki_miedzynarodowe1": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - st I - semestr zimowy",
+    "faculty": "Stosunki międzynarodowe",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194293/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "STM st I"
+  },
+  "stosunki_miedzynarodowe2": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - st II - semestr zimowy",
+    "faculty": "Stosunki międzynarodowe",
+    "category": "st",
+    "groups": {
+      "Biznes międzynarodowy i współpraca transgraniczna": "Sp.: Biznes międzynarodowy i współpraca transgraniczna"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194293/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "STM st II"
+  },
+  "stosunki_miedzynarodowe3": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - st III - semestr zimowy",
+    "faculty": "Stosunki międzynarodowe",
+    "category": "st",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194293/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "STM st III"
+  },
+  "transport1": {
+    "name": "Transport - studia I stopnia - st I - semestr zimowy",
+    "faculty": "Transport",
+    "category": "nst",
+    "groups": {
+      "Grupa 1": "Grupa 1",
+      "Grupa 2": "Grupa 2"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194295/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "TRT I"
+  },
+  "transport2": {
+    "name": "Transport - studia I stopnia - st II - semestr zimowy",
+    "faculty": "Transport",
+    "category": "st",
+    "groups": {
+      "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194295/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "TRT st II"
+  },
+  "transport3": {
+    "name": "Transport - studia I stopnia - st III - semestr zimowy",
+    "faculty": "Transport",
+    "category": "st",
+    "groups": {
+      "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194295/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "TRT st III"
+  },
+  "transport 1": {
+    "name": "Transport - studia I stopnia - nst puw I - semestr zimowy",
+    "faculty": "Transport",
+    "category": "nst",
+    "groups": {
+      "Grupa 1": "Grupa 1",
+      "Grupa 2": "Grupa 2"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194296/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "TRT I"
+  },
+  "transport4": {
+    "name": "Transport - studia I stopnia - nst puw III - semestr zimowy z. stacjonarne",
+    "faculty": "Transport",
+    "category": "nst",
+    "groups": {
+      "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194296/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "TRT III rok PUW - z.stacjonarne"
+  },
+  "transport5": {
+    "name": "Transport - studia I stopnia - nst puw III - semestr zimowy z. on-line",
+    "faculty": "Transport",
+    "category": "nst",
+    "groups": {
+      "Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194296/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "TRT III rok PUW - z. on-line"
+  },
+  "zarzadzanie1": {
+    "name": " Zarządzanie - studia I stopnia - st I - semestr zimowy",
+    "faculty": "Zarządzanie",
+    "category": "st",
+    "groups": {
+      "Grupa 1 podział wg nazwisk: A-K": "grupa 1 podział wg nazwisk: A-K",
+      "Grupa 2 podział wg nazwisk: L-Z": "grupa 2 podział wg nazwisk: L-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ st I"
+  },
+  "zarzadzanie2": {
+    "name": " Zarządzanie - studia I stopnia - st II - semestr zimowy",
+    "faculty": "Zarządzanie",
+    "category": "st",
+    "groups": {
+      "Innowacyjne zarządzanie firmą grupa 1 wg nazwisk: A-Lud": "Sp.: Innowacyjne zarządzanie firmągrupa 1podział wg nazwisk: A-Lud",
+      "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: Luk-R": "Sp.: Innowacyjne zarządzanie firmą grupa 2 podział wg nazwisk: Luk-R",
+      "Innowacyjne zarządzanie firmą grupa 2 wg nazwisk: S-Z": "Sp.: Innowacyjne zarządzanie firmągrupa 2podział wg nazwisk: S-Z",
+      "Zarządzanie HR": "Sp.: Zarządzanie HR"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ st II"
+  },
+  "zarzadzanie3": {
+    "name": "Zarządzanie - studia I stopnia - st III - semestr zimowy",
+    "faculty": "Zarządzanie",
+    "category": "st",
+    "groups": {
+      "Grupa 1 wg nazwisk: A-M": "grupa 1:podział wg nazwisk: A-M",
+      "Grupa 2 wg nazwisk: N-Z": "grupa 2:podział wg nazwisk: N-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194301/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ st III"
+  },
+  "zarzadzanie4": {
+    "name": "Zarządzanie - studia I stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Zarządzanie",
+    "category": null,
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ I rok PUW - z. stacjonarne"
+  },
+  "zarzadzanie5": {
+    "name": "Zarządzanie - studia I stopnia - nst puw I - semestr zimowy - z. on-line",
+    "faculty": "Zarządzanie",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ I rok PUW - z. on-line"
+  },
+  "zarzadzanie6": {
+    "name": "Zarządzanie - studia I stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "Zarządzanie",
+    "category": null,
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ II rok PUW - z. stacjonarne"
+  },
+  "zarzadzanie7": {
+    "name": "Zarządzanie - studia I stopnia - nst puw II - semestr zimowy - z. on-line",
+    "faculty": "Zarządzanie",
+    "category": "nst-online",
+    "groups": {
+      "Innowacyjne zarządzanie firmą": "Sp.: Innowacyjne zarządzanie firmą",
+      "Zarządzanie HR": "Sp.: Zarządzanie HR"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ II rok PUW - z. on-line"
+  },
+  "zarzadzanie8": {
+    "name": "Zarządzanie - studia I stopnia - nst puw III - semestr zimowy - z. stacjonarne",
+    "faculty": "Zarządzanie",
+    "category": "nst-online",
+    "groups": {
+      "Grupa 1 wg nazwisk: A-Gi": "Grupa 1podział wg nazwisk:A-Gi",
+      "Grupa 2 wg nazwisk: Gj-Kot": "Grupa 2podział wg nazwisk:Gj-Kot",
+      "Grupa 3 wg nazwisk: Kos-O": "Grupa 3podział wg nazwisk:Kos-O",
+      "Grupa 4 wg nazwisk: P-Z": "Grupa 4podział wg nazwisk:P-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ III PUW - z. stacjonarne"
+  },
+  "zarzadzanie9": {
+    "name": "Zarządzanie - studia I stopnia - nst puw III - semestr zimowy - z. on-line",
+    "faculty": "Zarządzanie",
+    "category": "nst-online",
+    "groups": null,
+    "download_url": "https://puw.wspa.pl/pluginfile.php/194303/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ III PUW - z. on-line"
+  },
+  "zarzadzanie10": {
+    "name": "Zarządzanie - studia II stopnia - nst puw I - semestr zimowy - z. stacjonarne",
+    "faculty": "Zarządzanie",
+    "category": "nst",
+    "groups": {
+      "Grupa 1 - E-biznes i nowoczesne formy marketingu": "grupa 1 - wg nazwisk: A-Ja",
+      "Grupa 2 - E-biznes i nowoczesne formy marketingu": "grupa 2 - wg nazwisk: Jb-Ma",
+      "Grupa 3 - E-biznes i nowoczesne formy marketingu": "grupa 3 - wg nazwisk: Mb-Pl",
+      "Grupa 4 - E-biznes i nowoczesne formy marketingu": "grupa 4 - wg nazwisk: MPł-Z"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ I PUW - z. stacjonarne"
+  },
+  "zarzadzanie11": {
+    "name": "Zarządzanie - studia II stopnia - nst puw I - semestr zimowy - z. on-line",
+    "faculty": "Zarządzanie",
+    "category": "nst-online",
+    "groups": {
+      "E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+      "Menedżer HR i coaching biznesowy": "Sp.: Menedżer HR i coaching biznesowy"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ I PUW - z. on-line"
+  },
+  "zarzadzanie12": {
+    "name": "Zarządzanie - studia II stopnia - nst puw II - semestr zimowy - z. stacjonarne",
+    "faculty": "Zarządzanie",
+    "category": "nst",
+    "groups": {
+      "E-biznes i nowoczesne formy marketingu wg nazwisk: A-M": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: A-M",
+      "E-biznes i nowoczesne formy marketingu wg nazwisk: N-Rej": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: N-Rej",
+      "E-biznes i nowoczesne formy marketingu wg nazwisk: Rek-Z": "Sp.: E-biznes i nowoczesne formy marketinguwg nazwisk: Rek-Z",
+      "Menedżer finansowy": "Sp.: Menedżer finansowy"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ II PUW - z. stacjonarne"
+  },
+  "zarzadzanie13": {
+    "name": "Zarządzanie - studia II stopnia - nst puw II - semestr zimowy - z. on-line",
+    "faculty": "Zarządzanie",
+    "category": "nst",
+    "groups": {
+      "E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+      "Menedżer finansowy": "Sp.: Menedżer finansowy"
+    },
+    "download_url": "https://puw.wspa.pl/pluginfile.php/97368/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20zimowy.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ II PUW - z. on-line"
+  }
 }

@@ -1,0 +1,12 @@
+.github/
+.aider*
+.bandit*
+.codecov*
+.env*
+.gitignore
+.safety-policy.yml
+mypy.ini
+plans-old.json
+public-keys.json
+readme.md
+test.html

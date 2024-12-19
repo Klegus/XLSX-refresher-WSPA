@@ -2,7 +2,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-
+import custom_print
 class WebpageDownloader:
     def __init__(self):
         self.headers = {
