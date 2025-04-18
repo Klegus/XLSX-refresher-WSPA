@@ -1,5 +1,4 @@
 # Lesson Plan Manager - Backend
-
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
