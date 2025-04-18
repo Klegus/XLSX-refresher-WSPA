@@ -2,8 +2,17 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-import custom_print
+from shared_utils import get_logger
+import re
+import urllib.parse
+from typing import Optional
+
+# Setup logger
+logger = get_logger('WebpageDownloader')
+
 class WebpageDownloader:
+    def __init__(self, save_dir="downloaded_pages"):
+        self.save_dir = save_dir
     def __init__(self):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -35,7 +44,7 @@ class WebpageDownloader:
             if output_filename is None:
                 output_filename = self._create_filename(url)
 
-            print(f"Pobieram stronę z: {url}")
+            logger.info(f"Pobieram stronę z: {url}")
             response = requests.get(url, headers=self.headers, timeout=30)
             response.raise_for_status()
 
@@ -46,15 +55,15 @@ class WebpageDownloader:
                 f.write(str(soup))
 
             abs_path = os.path.abspath(output_filename)
-            print(f"Strona pomyślnie zapisana do: {abs_path}")
+            logger.info(f"Strona pomyślnie zapisana do: {abs_path}")
             return abs_path
 
         except requests.exceptions.RequestException as e:
-            print(f"Błąd pobierania strony: {str(e)}")
+            logger.error(f"Błąd pobierania strony: {str(e)}")
             return None
         except IOError as e:
-            print(f"Błąd zapisywania pliku: {str(e)}")
+            logger.error(f"Błąd zapisywania pliku: {str(e)}")
             return None
         except Exception as e:
-            print(f"Nieoczekiwany błąd: {str(e)}")
+            logger.error(f"Nieoczekiwany błąd: {str(e)}")
             return None

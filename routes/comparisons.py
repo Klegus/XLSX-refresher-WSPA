@@ -1,5 +1,9 @@
 from flask import jsonify
-import custom_print
+from shared_utils import get_logger
+
+# Setup logger
+logger = get_logger('routes.comparisons')
+
 def init_comparison_routes(app, db):
     @app.route('/api/comparisons/<collection_name>/<group_name>', methods=['GET'])
     def get_comparisons(collection_name: str, group_name: str):
@@ -7,6 +11,7 @@ def init_comparison_routes(app, db):
         Retrieves plan comparisons for a specific collection and group
         """
         try:
+            logger.debug(f"Fetching comparisons for collection: {collection_name}, group: {group_name}")
             comparisons = list(db.plan_comparisons.find(
                 {
                     "collection_name": collection_name,
@@ -22,12 +27,14 @@ def init_comparison_routes(app, db):
             ).sort("timestamp", -1))
             
             if not comparisons:
+                logger.debug(f"No comparisons found for collection: {collection_name}, group: {group_name}")
                 return jsonify([])
                 
             for comparison in comparisons:
                 comparison['_id'] = str(comparison['_id'])
             
+            logger.debug(f"Retrieved {len(comparisons)} comparisons")
             return jsonify(comparisons)
         except Exception as e:
-            print(f"Error in get_comparisons: {str(e)}")
+            logger.error(f"Error in get_comparisons: {str(e)}")
             return jsonify([])

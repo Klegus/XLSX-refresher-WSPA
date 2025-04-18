@@ -1,7 +1,11 @@
 import os, requests
 import os
 import hashlib
-import custom_print
+from shared_utils import get_logger
+
+# Setup logger
+logger = get_logger('LessonPlanDownloader')
+
 class LessonPlanDownloader:
     def __init__(self, username, password, directory="", download_url=None):
         self.username = username
@@ -40,7 +44,7 @@ class LessonPlanDownloader:
             try:
                 response_download = session.get(url_download)
             except requests.exceptions.RequestException as e:
-                print("Error downloading the file")
+                logger.error(f"Error downloading the file: {e}")
                 return False
     
             if response_download.ok:
@@ -55,9 +59,9 @@ class LessonPlanDownloader:
                 checksum = self.calculate_checksum(self.file_save_path)
                 return checksum
             else:
-                print("Error downloading the file")
+                logger.error(f"Error downloading the file: {response_download.status_code}")
         else:
-            print("Error logging in")
+            logger.error(f"Error logging in: {response_login.status_code}")
     
         session.close()
         return None

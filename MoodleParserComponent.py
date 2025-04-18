@@ -8,7 +8,11 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 load_dotenv()
-import custom_print
+from shared_utils import get_logger
+
+# Setup logger
+logger = get_logger('MoodleParser')
+
 @dataclass
 class MoodleActivity:
     id: str
@@ -53,7 +57,7 @@ class MoodleFileParser:
             self.soup = BeautifulSoup(content, 'html.parser')
             return True
         except Exception as e:
-            print(f"Błąd wczytywania pliku: {str(e)}")
+            logger.error(f"Błąd wczytywania pliku: {str(e)}")
             return False
     
     def calculate_checksum(self, element) -> str:
@@ -93,7 +97,7 @@ class MoodleFileParser:
                 }
             return None
         except Exception as e:
-            print(f"Błąd podczas wyodrębniania zawartości etykiety: {str(e)}")
+            logger.error(f"Błąd podczas wyodrębniania zawartości etykiety: {str(e)}")
             return None
 
     def format_with_openrouter(self, text: str) -> str:
@@ -135,11 +139,11 @@ class MoodleFileParser:
                 formatted_text = formatted_text.replace('```html', '').replace('```', '')
                 return formatted_text
             else:
-                print(f"Błąd API OpenRouter: {response.status_code}")
+                logger.error(f"Błąd API OpenRouter: {response.status_code}")
                 return text
 
         except Exception as e:
-            print(f"Błąd formatowania OpenRouter: {str(e)}")
+            logger.error(f"Błąd formatowania OpenRouter: {str(e)}")
             return text
 
     def _extract_activity_info(self, element, position: int) -> MoodleActivity:
@@ -215,7 +219,7 @@ class MoodleFileParser:
         main_region = self.tree.xpath(xpath)
         
         if not main_region:
-            print(f"Nie znaleziono elementu w ścieżce XPath: {xpath}")
+            logger.warning(f"Nie znaleziono elementu w ścieżce XPath: {xpath}")
             return []
         
         activities = []
@@ -260,7 +264,7 @@ class MoodleFileParser:
             new_checksums = current_checksums - existing_checksums
             
             if not new_checksums:
-                print("Wszystkie aktywności już istnieją w bazie")
+                logger.info("Wszystkie aktywności już istnieją w bazie")
                 return True
             
             # Filtruj aktywności które trzeba dodać
@@ -269,7 +273,7 @@ class MoodleFileParser:
                 if activity.checksum in new_checksums
             ]
             
-            print(f"Znaleziono {len(activities_to_add)} nowych aktywności do dodania")
+            logger.info(f"Znaleziono {len(activities_to_add)} nowych aktywności do dodania")
             
             # Znajdź najwyższy sequence_number i position
             last_doc = self.collection.find_one(sort=[('sequence_number', -1)])
@@ -297,10 +301,10 @@ class MoodleFileParser:
                 self.collection.insert_one(activity_dict)
                 next_seq += 1
                 
-            print(f"Pomyślnie dodano {len(activities_to_add)} nowych aktywności")
+            logger.info(f"Pomyślnie dodano {len(activities_to_add)} nowych aktywności")
             return True
         except Exception as e:
-            print(f"Błąd podczas zapisywania do MongoDB: {str(e)}")
+            logger.error(f"Błąd podczas zapisywania do MongoDB: {str(e)}")
             return False
 
     def process_and_save(self):

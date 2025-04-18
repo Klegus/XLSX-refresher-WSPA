@@ -2,21 +2,32 @@ from LessonPlanDownloader import LessonPlanDownloader
 import os, time
 from colorama import init, Style
 from difflib import SequenceMatcher
+from bs4 import BeautifulSoup
+import requests
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+import datetime
+import pytz
+import json
+import pymongo
+from shared_utils import get_logger
 
 
 init(autoreset=True)  
 import pandas as pd
 import openpyxl
 import re
-import pymongo
-from datetime import datetime
-import custom_print
+
+# Setup logger
+logger = get_logger('LessonPlan')
 
 class LessonPlan(LessonPlanDownloader):
     def __init__(self, username, password, mongo_uri, plan_config, directory=""):
         super().__init__(username, password, directory, plan_config["download_url"])
         self.plan_config = plan_config
-        self.collection_name = f"plans_{plan_config['faculty'].replace(' ', '-')}_{plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+        # Replace both spaces and underscores in faculty with hyphens
+        faculty_name = plan_config['faculty'].replace(' ', '-').replace('_', '-')
+        self.collection_name = f"plans_{faculty_name}_{plan_config['name'].lower().replace(' ', '_')}"
         self.sheet_name = plan_config["sheet_name"]
         self.plans_directory = os.path.join(
             os.getenv("PLANS_DIRECTORY", "lesson_plans"),
@@ -37,11 +48,11 @@ class LessonPlan(LessonPlanDownloader):
             try:
                 self.mongo_client = pymongo.MongoClient(mongo_uri)
                 self.db = self.mongo_client[os.getenv("MONGO_DB", "Lesson_dev")]
-                print("Successfully connected to MongoDB")
+                logger.info("Successfully connected to MongoDB")
             except pymongo.errors.ConnectionFailure as e:
-                print(f"Could not connect to MongoDB: {e}")
+                logger.error(f"Could not connect to MongoDB: {e}")
             except Exception as e: 
-                print(f"An error occurred: {e}")
+                logger.error(f"An error occurred: {e}")
         if plan_config.get("groups") is None:
             self.groups = {"cały kierunek": "all"}
         else:
@@ -73,23 +84,25 @@ class LessonPlan(LessonPlanDownloader):
         """Process and save the lesson plan, returns checksum if plan was processed"""
         new_checksum = self.download_file()
         if not new_checksum:
-            print("Failed to download file.")
+            logger.error("Failed to download file.")
             return None
 
         # Check if category is None - if so, only check checksum and save basic info
         if self.schedule_type is None:
             if self.save_to_mongodb:
-                collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+                # Replace both spaces and underscores in faculty with hyphens
+                faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
+                collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
                 collection = self.db[collection_name]
                 
                 # Check if this checksum already exists
                 existing_plan = collection.find_one({"checksum": new_checksum})
                 if existing_plan:
-                    print(f"Plan with checksum {new_checksum} already exists in {collection_name}. Skipping save.")
+                    logger.info(f"Plan with checksum {new_checksum} already exists in {collection_name}. Skipping save.")
                     return False
                 
                 # Save basic plan info without groups
-                current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 message_html = f"""
                 <div class="plan-message">
                     <p>Przepraszamy, ale ten plan nie jest obecnie możliwy do przetworzenia.</p>
@@ -117,7 +130,9 @@ class LessonPlan(LessonPlanDownloader):
 
         if self.save_to_mongodb:
             # Use plan-specific collection
-            collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+            # Replace both spaces and underscores in faculty with hyphens
+            faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
+            collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
             collection = self.db[collection_name]
             # Check MongoDB for changes - exclude discord_config document
             latest_plan = collection.find_one(
@@ -135,18 +150,18 @@ class LessonPlan(LessonPlanDownloader):
             )
 
             if latest_checksum and latest_checksum == new_checksum:
-                print(
+                logger.info(
                     f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum})."
                 )
                 return False
             else:
-                print(
+                logger.info(
                     f"Plan has changed or no previous plan found (old checksum: {latest_checksum}, new checksum: {new_checksum})"
                 )
                 should_process = True
 
         if should_process:
-            print(f"Processing plan for {self.plan_config['name']}")
+            logger.info(f"Processing plan for {self.plan_config['name']}")
 
             try:
                 # Always process the downloaded file
@@ -176,14 +191,14 @@ class LessonPlan(LessonPlanDownloader):
                             #print(f"No data available for group: {group_name}")
                             failed_groups.append(group_name)
                     except Exception as group_error:
-                        print(
+                        logger.error(
                             f"Error processing group {group_name}: {str(group_error)}"
                         )
                         failed_groups.append(group_name)
                         continue
 
                 if failed_groups:
-                    print(f"Failed to process groups: {', '.join(failed_groups)}")
+                    logger.warning(f"Failed to process groups: {', '.join(failed_groups)}")
 
                 # Save to MongoDB if enabled
                 if self.save_to_mongodb and processed_groups:
@@ -192,7 +207,7 @@ class LessonPlan(LessonPlanDownloader):
                 return new_checksum
 
             except Exception as e:
-                print(f"Error processing plan: {str(e)}")
+                logger.error(f"Error processing plan: {str(e)}")
                 import traceback
 
                 traceback.print_exc()
@@ -208,7 +223,7 @@ class LessonPlan(LessonPlanDownloader):
 
     def unmerge_and_fill_data(self):
         if not self.file_save_path:
-            print("No file has been downloaded yet. Please run download_file() first.")
+            logger.error("No file has been downloaded yet. Please run download_file() first.")
             return False
         wb = openpyxl.load_workbook(self.file_save_path)
         ws = wb[self.sheet_name]
@@ -245,7 +260,7 @@ class LessonPlan(LessonPlanDownloader):
 
     def clean_excel_file(self):
         if not self.converted_lesson_plan:
-            print("No converted file found. Please run unmerge_and_fill_data() first.")
+            logger.error("No converted file found. Please run unmerge_and_fill_data() first.")
             return False
 
         file_name, file_extension = os.path.splitext(self.converted_lesson_plan)
@@ -304,14 +319,14 @@ class LessonPlan(LessonPlanDownloader):
             return True
 
         except Exception as e:
-            print(f"An error occurred while cleaning the file: {str(e)}")
+            logger.error(f"An error occurred while cleaning the file: {str(e)}")
             if os.path.exists(temp_file):
                 os.remove(temp_file)
             return False
 
     def find_group_columns(self):
         if not self.converted_lesson_plan:
-            print("No converted file found. Please run unmerge_and_fill_data() first.")
+            logger.error("No converted file found. Please run unmerge_and_fill_data() first.")
             return False
 
         try:
@@ -323,12 +338,12 @@ class LessonPlan(LessonPlanDownloader):
             return self.group_columns
 
         except Exception as e:
-            print(f"An error occurred while finding group columns: {str(e)}")
+            logger.error(f"An error occurred while finding group columns: {str(e)}")
             return None
 
     def find_group_columns_with_similarity(self):
         if not self.converted_lesson_plan:
-            print("No converted file found. Please run unmerge_and_fill_data() first.")
+            logger.error("No converted file found. Please run unmerge_and_fill_data() first.")
             return False
 
         def is_matching_group(text, pattern, similarity_threshold=1.0):
@@ -457,18 +472,18 @@ class LessonPlan(LessonPlanDownloader):
                     group_columns[group_name] = backup_columns[group_name]
                     #(f"Using backup columns for {group_name}: {backup_columns[group_name]}")
                 elif group_name not in group_columns:
-                    print(f"No columns found for {group_name}")
+                    logger.warning(f"No columns found for {group_name}")
 
             self.group_columns = group_columns
             return self.group_columns
 
         except Exception as e:
-            print(f"An error occurred while finding group columns: {str(e)}")
+            logger.error(f"An error occurred while finding group columns: {str(e)}")
             return None
 
     def get_lessons_for_group(self, group_name):
         if not self.converted_lesson_plan:
-            print("No converted file found. Please run unmerge_and_fill_data() first.")
+            logger.error("No converted file found. Please run unmerge_and_fill_data() first.")
             return None
 
         if not self.group_columns:
@@ -612,7 +627,7 @@ class LessonPlan(LessonPlanDownloader):
                     missing_slots.append(slot)
 
             if missing_slots:
-                print(f"Warning: Missing time slots for {group_name}: {missing_slots}")
+                logger.warning(f"Warning: Missing time slots for {group_name}: {missing_slots}")
             if not df_filtered.empty:
                 last_row_time = str(df_filtered.iloc[-1]["Godziny"]).strip()
                 # Sprawdź czy ostatni wiersz nie zawiera godziny
@@ -643,7 +658,7 @@ class LessonPlan(LessonPlanDownloader):
             return df_filtered
 
         except Exception as e:
-            print(
+            logger.error(
                 f"An error occurred while getting lessons for group '{group_name}': {str(e)}"
             )
             import traceback
@@ -653,7 +668,7 @@ class LessonPlan(LessonPlanDownloader):
 
     def save_group_lessons(self, group_name, df):
         if df is None or df.empty:
-            print(f"No data to save for group '{group_name}'.")
+            logger.warning(f"No data to save for group '{group_name}'.")
             return
 
         # Create a directory for group files if it doesn't exist
@@ -677,7 +692,7 @@ class LessonPlan(LessonPlanDownloader):
             #print(f"Lessons for group '{group_name}' saved to {file_path}")
             
         except Exception as e:
-            print(
+            logger.error(
                 f"An error occurred while saving lessons for group '{group_name}': {str(e)}"
             )
 
@@ -693,10 +708,10 @@ class LessonPlan(LessonPlanDownloader):
 
     def convert_to_html_and_save_to_db(self, checksum):
         if not self.group_columns:
-            print("No group columns found. Please run find_group_columns() first.")
+            logger.error("No group columns found. Please run find_group_columns() first.")
             return
 
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Initialize the plans data structure
         plans_data = {
@@ -723,10 +738,10 @@ class LessonPlan(LessonPlanDownloader):
                         #print(f"Successfully processed HTML for group: {group_name}")
                     else:
                         failed_groups.append(group_name)
-                        print(f"No data available for group: {group_name}")
+                        logger.warning(f"No data available for group: {group_name}")
                 except Exception as e:
                     failed_groups.append(group_name)
-                    print(f"Error processing group {group_name}: {str(e)}")
+                    logger.error(f"Error processing group {group_name}: {str(e)}")
                     continue
         else:
             # Handle case where there are no specific groups (entire course)
@@ -738,61 +753,61 @@ class LessonPlan(LessonPlanDownloader):
                     processed_groups.append("cały kierunek")
                     #print("Successfully processed HTML for entire course")
             except Exception as e:
-                print(f"Error processing entire course: {str(e)}")
+                logger.error(f"Error processing entire course: {str(e)}")
 
         # Only save to MongoDB if we have processed at least one group
         if processed_groups:
             if self.save_to_mongodb:
                 try:
                     # Use plan-specific collection
-                    collection_name = f"plans_{self.plan_config['faculty'].replace(' ', '-')}_{self.plan_config['name'].lower().replace(' ', '_').replace('-', '_')}"
+                    # Replace both spaces and underscores in faculty with hyphens
+                    faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
+                    collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
                     collection = self.db[collection_name]
 
                     # Check if this checksum already exists
                     existing_plan = collection.find_one({"checksum": checksum})
                     if existing_plan:
-                        print(
+                        logger.info(
                             f"Plan with checksum {checksum} already exists in {collection_name}. Skipping save."
                         )
                         return
 
                     # Insert the new plan with all groups
                     result = collection.insert_one(plans_data)
-                    print(
+                    logger.info(
                         f"Saved plans to MongoDB collection {collection_name} with id: {result.inserted_id}"
                     )
-                    # Usuwamy zbędny print o przetworzonych grupach
-
 
                     if failed_groups:
-                        print(f"Failed to process groups: {', '.join(failed_groups)}")
+                        logger.warning(f"Failed to process groups: {', '.join(failed_groups)}")
 
                     # Verify the saved data
                     saved_plan = collection.find_one({"_id": result.inserted_id})
                     if saved_plan:
                         saved_groups = list(saved_plan.get("groups", {}).keys())
-                        print(
+                        logger.info(
                             f"Verified saved groups in MongoDB: {', '.join(saved_groups)}"
                         )
                     else:
-                        print("Warning: Could not verify saved data")
+                        logger.warning("Warning: Could not verify saved data")
 
                 except Exception as e:
-                    print(f"Error saving to MongoDB: {str(e)}")
+                    logger.error(f"Error saving to MongoDB: {str(e)}")
                     import traceback
 
                     traceback.print_exc()
 
         # Save to files if enabled
         if self.save_to_file:
-            print("Saving plans to files...")
+            logger.info("Saving plans to files...")
             for group_name in processed_groups:
                 file_name = f"{current_datetime.replace(':', '-')}_{group_name}.pkl"
                 file_path = os.path.join(self.plans_directory, file_name)
                 df = self.get_lessons_for_group(group_name)
                 if df is not None:
                     df.to_pickle(file_path)
-                    print(f"Saved {group_name} plan to file: {file_path}")
+                    logger.info(f"Saved {group_name} plan to file: {file_path}")
 
         return bool(processed_groups)
 
@@ -843,13 +858,13 @@ class LessonPlan(LessonPlanDownloader):
         try:
             checksum = self.process_and_save_plan()
             if checksum:
-                print(f"Successfully completed processing with checksum: {checksum}")
+                logger.info(f"Successfully completed processing with checksum: {checksum}")
             else:
-                print(
+                logger.warning(
                     "Processing completed but no new data was saved (no changes or errors occurred)"
                 )
         except Exception as e:
-            print(f"Error during full action: {str(e)}")
+            logger.error(f"Error during full action: {str(e)}")
             import traceback
 
             traceback.print_exc()

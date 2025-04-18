@@ -20,18 +20,16 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import sentry_sdk
 import asyncio
-import custom_print
+import logging
+
+# Import shared logger
+from shared_utils import configure_root_logger, get_system_config, get_semester_collections
+
+# Setup app-specific logger
+logger = configure_root_logger(logging.INFO)
+
 load_dotenv()
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for tracing.
-    traces_sample_rate=1.0,
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
-    profiles_sample_rate=1.0,
-)
+
 
 app = Flask(__name__)
 
@@ -42,40 +40,69 @@ TEST_TIME = None
 mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client[os.getenv("MONGO_DB")]
-
+PLANS_JSON_URL = os.getenv("PLANS_JSON_URL")
+# Global variable for lesson plan managers
+lesson_plan_managers = {}
 
 from shared_utils import get_system_config, get_semester_collections
 
 
 def get_plans_config():
-    """Get plans configuration from MongoDB"""
-    print("\nAttempting to load plans configuration from MongoDB...")
+    """Get plans configuration from MongoDB or URL"""
+    logger.info("\nAttempting to load plans configuration from MongoDB...")
+    
+    # Try to get from MongoDB first
     config = db.plans_config.find_one({"_id": "plans_json"})
-
-    if not config:
-        print("No plans found in MongoDB. Attempting to import from plans.json...")
-        try:
-            with open("plans.json", "r", encoding="utf-8") as f:
-                plans_data = json.load(f)
-                config = {
-                    "_id": "plans_json",
-                    "plans": plans_data,
-                    "last_updated": datetime.now().isoformat(),
-                }
-                print("Successfully loaded plans from plans.json")
-                result = db.plans_config.insert_one(config)
-                print(
-                    f"Successfully inserted plans into MongoDB with ID: {result.inserted_id}"
-                )
-        except Exception as e:
-            print(f"Error loading plans.json: {e}")
-            return None
-    else:
-        print(
-            f"Found existing plans configuration in MongoDB, last updated: {config.get('last_updated')}"
+    
+    if config and "plans" in config:
+        logger.info(f"Using plans from MongoDB, last updated: {config.get('last_updated')}")
+        return config.get("plans")
+    
+    # If not found in MongoDB, try to fetch from URL
+    logger.info("No plans configuration found in MongoDB, trying URL...")
+    if not PLANS_JSON_URL:
+        logger.warning("PLANS_JSON_URL environment variable not set.")
+        update_system_config({"maintenance_mode": True, "maintenance_reason": "PLANS_JSON_URL not configured"})
+        return None
+    
+    try:
+        # Fetch from URL
+        logger.info(f"Fetching plans from URL: {PLANS_JSON_URL}")
+        response = requests.get(PLANS_JSON_URL, timeout=10)
+        response.raise_for_status()  # Raise exception for HTTP errors
+        
+        plans_data = response.json()
+        
+        # Save to MongoDB
+        config = {
+            "_id": "plans_json",
+            "plans": plans_data,
+            "last_updated": datetime.now().isoformat(),
+            "source": "url"
+        }
+        
+        db.plans_config.update_one(
+            {"_id": "plans_json"},
+            {"$set": config},
+            upsert=True
         )
-
-    return config.get("plans") if config else None
+        
+        logger.info(f"Successfully fetched and stored plans from URL")
+        
+        # If we were in maintenance mode due to plans, exit maintenance mode
+        current_config = get_system_config()
+        if current_config.get("maintenance_mode") and current_config.get("maintenance_reason") == "Plans data unavailable":
+            update_system_config({"maintenance_mode": False, "maintenance_reason": None})
+        
+        return plans_data
+        
+    except Exception as e:
+        logger.error(f"Error fetching plans from URL: {e}")
+        
+        # Enter maintenance mode if we couldn't get plans data
+        logger.warning("No plans data available. Entering maintenance mode.")
+        update_system_config({"maintenance_mode": True, "maintenance_reason": "Plans data unavailable"})
+        return None
 
 
 def update_system_config(updates):
@@ -87,22 +114,25 @@ def update_system_config(updates):
 
 def update_plans_config(plans_data):
     """Update plans configuration in MongoDB"""
-    # Get current plans configuration
-    current_config = db.plans_config.find_one({"_id": "plans_json"})
-    if current_config and "plans" in current_config:
-        current_plans = current_config["plans"]
-        # Update only the plans that are in plans_data
-        for plan_id, plan_data in plans_data.items():
-            current_plans[plan_id] = plan_data
-        plans_to_update = current_plans
-    else:
-        plans_to_update = plans_data
-
-    return db.plans_config.update_one(
+    logger.info(f"Updating plans configuration in MongoDB")
+    logger.debug(f"Plans data type: {type(plans_data)}")
+    logger.info(f"Plans contains {len(plans_data)} plans")
+    
+    # Make sure we're storing the plans correctly in the "plans" field
+    result = db.plans_config.update_one(
         {"_id": "plans_json"},
-        {"$set": {"plans": plans_to_update, "last_updated": datetime.now().isoformat()}},
-        upsert=True,
+        {"$set": {"plans": plans_data, "last_updated": datetime.now().isoformat()}},
+        upsert=True
     )
+    
+    # Verify the update by reading it back
+    updated_config = db.plans_config.find_one({"_id": "plans_json"})
+    if updated_config and "plans" in updated_config:
+        logger.info(f"Updated plans config successfully, now contains {len(updated_config['plans'])} plans")
+    else:
+        logger.warning("WARNING: Failed to verify updated plans configuration!")
+    
+    return result
 
 
 class StatusChecker:
@@ -137,6 +167,7 @@ from routes.plans import init_plan_routes
 from routes.logs import init_log_routes
 from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
+from routes.suggestions import init_suggestion_routes
 
 
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
@@ -213,6 +244,7 @@ init_plan_routes(app, get_semester_collections, db)
 init_log_routes(app, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
+init_suggestion_routes(app, db)
 
 
 def run_flask_app():
@@ -259,9 +291,9 @@ class LessonPlanManager:
             ):
                 try:
                     os.remove(file)
-                    #print(f"Usunięto plik: {file}")
+                    logger.debug(f"Usunięto plik: {file}")
                 except Exception as e:
-                    print(f"Błąd podczas usuwania pliku {file}: {str(e)}")
+                    logger.error(f"Błąd podczas usuwania pliku {file}: {str(e)}")
 
     def get_webhook_url(self):
         """Pobiera URL webhooka z konfiguracji Discord w kolekcji planu"""
@@ -269,11 +301,11 @@ class LessonPlanManager:
             collection = db[self.lesson_plan.collection_name]
             discord_config = collection.find_one({"_id": "discord_config"})
             if discord_config and "webhook_url" in discord_config:
-                print("Pobrano URL webhooka z konfiguracji Discord.")
-                print(f"Webhook URL: {discord_config['webhook_url']}")
+                logger.info("Pobrano URL webhooka z konfiguracji Discord.")
+                logger.debug(f"Webhook URL: {discord_config['webhook_url']}")
                 return discord_config["webhook_url"]
         except Exception as e:
-            print(f"Błąd podczas pobierania webhook URL: {str(e)}")
+            logger.error(f"Błąd podczas pobierania webhook URL: {str(e)}")
         return None
 
     def should_send_webhook(self):
@@ -288,7 +320,7 @@ class LessonPlanManager:
         if latest_plan:
             for group, html_content in latest_plan["groups"].items():
                 self.cached_plans[group] = parse_html_to_dataframe(html_content)
-        #print("Zaktualizowano pamięć podręczną planów lekcji.")
+        logger.debug("Zaktualizowano pamięć podręczną planów lekcji.")
 
     async def check_once(self):
         """Wykonuje pojedynczy cykl sprawdzania planu"""
@@ -303,28 +335,28 @@ class LessonPlanManager:
 
         # Skip checks between 21:00 and 06:00
         if os.getenv("DEV", "false").lower() == "true":
-            print("Dev mode is enabled. Skipping time check.")
+            logger.info("Dev mode is enabled. Skipping time check.")
             is_night_time = False
         else:
             is_night_time = current_hour >= 21 or current_hour < 6
         if is_night_time:
-            print(
+            logger.info(
                 f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
             )
             return
 
         try:
-            print(
+            logger.info(
                 f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
             )
             self.status_checker.update_activity()
             new_checksum = self.lesson_plan.process_and_save_plan()
 
             if new_checksum is None:
-                print("Wystąpił błąd podczas sprawdzania planu.")
+                logger.error("Wystąpił błąd podczas sprawdzania planu.")
             else:
                 if new_checksum:
-                    print("Plan został zaktualizowany")
+                    logger.info("Plan został zaktualizowany")
                     # Check if plan has comparison enabled and comparator is available
                     should_compare = (
                         self.lesson_plan.plan_config.get("compare", False)
@@ -346,7 +378,7 @@ class LessonPlanManager:
 
                             if should_compare:
                                 try:
-                                    print("Comparing plans...")
+                                    logger.info("Comparing plans...")
                                     comparison_result = (
                                         self.lesson_plan_comparator.compare_plans(
                                             self.plan_config
@@ -359,7 +391,7 @@ class LessonPlanManager:
                                             "value": comparison_result
                                         })
                                 except Exception as e:
-                                    print(f"Error during plan comparison: {e}")
+                                    logger.error(f"Error during plan comparison: {e}")
                                     embed["description"] = "Plan zajęć został zaktualizowany.\nWystąpił błąd podczas porównywania zmian."
                             else:
                                 embed["description"] = "Plan zajęć został zaktualizowany."
@@ -369,25 +401,25 @@ class LessonPlanManager:
                             }
 
                             requests.post(webhook_url, json=webhook_data)
-                            print("Wysłano powiadomienie webhook o aktualizacji planu.")
+                            logger.info("Wysłano powiadomienie webhook o aktualizacji planu.")
                         except Exception as e:
-                            print(f"Błąd podczas wysyłania webhooka: {str(e)}")
-                    print("Wykryto i zapisano zmiany w planie.")
+                            logger.error(f"Błąd podczas wysyłania webhooka: {str(e)}")
+                    logger.info("Wykryto i zapisano zmiany w planie.")
                     return True
                     self.update_cached_plans()
-                    print("Zaktualizowano pamięć podręczną planów.")
+                    logger.info("Zaktualizowano pamięć podręczną planów.")
                 else:
-                    print("Nie wykryto zmian w planie.")
+                    logger.info("Nie wykryto zmian w planie.")
 
             self.clean_new_files()
 
         except Exception as e:
-            print(f"\nWystąpił błąd podczas sprawdzania {self.plan_name}: {str(e)}")
+            logger.error(f"\nWystąpił błąd podczas sprawdzania {self.plan_name}: {str(e)}")
             raise
 
     def start(self):
         """Deprecated - use check_once() instead"""
-        print("Warning: start() is deprecated. Use check_once() instead.")
+        logger.warning("Warning: start() is deprecated. Use check_once() instead.")
         self.check_once()
 
 
@@ -396,11 +428,16 @@ lesson_plan = None
 
 
 def get_group_key(group_number):
-    # Wczytaj konfigurację grup z plans.json
-    with open("plans.json", "r", encoding="utf-8") as f:
-        plans_config = json.load(f)
+    # Get configuration from URL via get_plans_config
+    plans_config = get_plans_config()
+    if not plans_config:
+        logger.error("Failed to fetch plans data")
+        return None
 
-    # Pobierz grupy dla informatyka2
+    # Get groups for informatyka2
+    if "informatyka2" not in plans_config:
+        return None
+        
     groups = plans_config["informatyka2"]["groups"]
     group_keys = list(groups.keys())
 
@@ -413,7 +450,7 @@ def get_latest_lesson_plan():
     try:
         return db.plans.find_one(sort=[("timestamp", -1)])
     except Exception as e:
-        print(f"Error fetching the latest lesson plan: {str(e)}")
+        logger.error(f"Error fetching the latest lesson plan: {str(e)}")
         return None
 
 
@@ -472,52 +509,177 @@ def get_collections():
     return jsonify(collections)
 
 
-async def main():
-    print("Starting main.py")
-    check_interval = 600
-
+def compare_plans_config_with_url():
+    """
+    Compare plans configuration in MongoDB with the one from the URL.
+    If differences are detected, delete the last document for each changed plan to force a fresh check.
+    Returns a dict of plan_id: True/False indicating if the plan was changed.
+    """
+    logger.info("\nComparing plans configuration in MongoDB with URL...")
+    
+    # Get the current plans from MongoDB
+    current_config = db.plans_config.find_one({"_id": "plans_json"})
+    if not current_config or "plans" not in current_config:
+        logger.warning("No plans configuration found in MongoDB")
+        return {}
+    
+    current_plans = current_config.get("plans", {})
+    
+    # Skip if URL is not set
+    if not PLANS_JSON_URL:
+        logger.warning("PLANS_JSON_URL environment variable not set, skipping comparison")
+        return {}
+    
     try:
-        print("Loading .env file")
+        # Fetch the latest plans from URL
+        logger.info(f"Fetching plans from URL: {PLANS_JSON_URL}")
+        response = requests.get(PLANS_JSON_URL, timeout=10)
+        response.raise_for_status()
+        
+        url_plans = response.json()
+        
+        # Track which plans changed
+        changed_plans = {}
+        
+        # Compare plans
+        for plan_id, url_plan_config in url_plans.items():
+            if plan_id not in current_plans:
+                logger.info(f"New plan found in URL: {plan_id}")
+                changed_plans[plan_id] = True
+                continue
+                
+            current_plan_config = current_plans[plan_id]
+            
+            # Deep compare the configurations
+            if not configs_are_equal(current_plan_config, url_plan_config):
+                logger.info(f"Configuration changes detected for plan: {plan_id}")
+                
+                # Get the collection name for this plan
+                if plan_id in lesson_plan_managers:
+                    manager = lesson_plan_managers[plan_id]
+                    collection_name = manager.lesson_plan.collection_name
+                    
+                    if collection_name:
+                        # Find and delete the last document
+                        collection = db[collection_name]
+                        last_plan = collection.find_one(
+                            {"_id": {"$ne": "discord_config"}}, 
+                            sort=[("timestamp", -1)]
+                        )
+                        
+                        if last_plan:
+                            collection.delete_one({"_id": last_plan["_id"]})
+                            logger.info(f"Deleted last plan document from {collection_name} to force a fresh check")
+                        else:
+                            logger.info(f"No previous plan documents found in {collection_name}")
+                            
+                changed_plans[plan_id] = True
+            else:
+                # Plan configuration is the same
+                changed_plans[plan_id] = False
+                
+        # Handle plans that are in MongoDB but not in URL
+        for plan_id in current_plans:
+            if plan_id not in url_plans:
+                logger.info(f"Plan {plan_id} exists in MongoDB but not in URL")
+                # We don't need to force a check here as the plan will be ignored
+                changed_plans[plan_id] = False
+        
+        # Update MongoDB with the new plans configuration
+        db.plans_config.update_one(
+            {"_id": "plans_json"},
+            {"$set": {
+                "plans": url_plans,
+                "last_updated": datetime.now().isoformat(),
+                "source": "url"
+            }},
+            upsert=True
+        )
+        
+        logger.info(f"Updated plans configuration in MongoDB with data from URL")
+        return changed_plans
+        
+    except Exception as e:
+        logger.error(f"Error comparing plans configuration: {e}")
+        logger.error(traceback.format_exc())
+        return {}
+
+
+def configs_are_equal(config1, config2):
+    """
+    Compare two plan configurations deeply.
+    Returns True if they are equal, False otherwise.
+    """
+    # Check if the key structure is the same
+    if set(config1.keys()) != set(config2.keys()):
+        return False
+    
+    # Check values for each key
+    for key in config1:
+        # For nested dictionaries, recursively compare
+        if isinstance(config1[key], dict) and isinstance(config2[key], dict):
+            if not configs_are_equal(config1[key], config2[key]):
+                return False
+        # For lists, compare elements
+        elif isinstance(config1[key], list) and isinstance(config2[key], list):
+            if len(config1[key]) != len(config2[key]):
+                return False
+            # If it's a list of dictionaries, compare each dictionary
+            if all(isinstance(item, dict) for item in config1[key]) and all(isinstance(item, dict) for item in config2[key]):
+                for i in range(len(config1[key])):
+                    if i >= len(config2[key]) or not configs_are_equal(config1[key][i], config2[key][i]):
+                        return False
+            # Otherwise compare the lists directly
+            elif config1[key] != config2[key]:
+                return False
+        # For other values, compare directly
+        elif config1[key] != config2[key]:
+            return False
+    
+    return True
+
+
+async def main():
+    logger.info("Starting main.py")
+    check_interval = 600    
+    try:
+        logger.info("Loading .env file")
         load_dotenv()
-        print(".env file loaded successfully")
+        logger.info(".env file loaded successfully")
 
         global lesson_plan, lesson_plan_manager
         username = os.getenv("EMAIL")
         password = os.getenv("PASSWORD")
         mongo_uri = os.getenv("MONGO_URI")
-        openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "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")
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         selected_model = os.getenv("SELECTED_MODEL", "openai/chatgpt-4o-latest")
         
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
         
         if plans_config_doc and "plans" in plans_config_doc:
-            #print("Loading plans configuration from MongoDB...")
+            logger.debug("Loading plans configuration from MongoDB...")
             plans_config = plans_config_doc["plans"]
         else:
-            #print("No plans configuration found in MongoDB. Loading from plans.json...")
-            # Load from plans.json and store in MongoDB
-            with open("plans.json", "r", encoding="utf-8") as f:
-                plans_config = json.load(f)
-                db.plans_config.insert_one({
-                    "_id": "plans_json",
-                    "plans": plans_config,
-                    "last_updated": datetime.now().isoformat()
-                })
+            logger.debug("No plans configuration found in MongoDB. Fetching from URL...")
+            plans_config = get_plans_config()
+            if not plans_config:
+                logger.error("Failed to fetch plans data. Cannot initialize lesson plans.")
+                return False
 
         lesson_plans = {}
         lesson_plan_comparators = {}
-        lesson_plan_managers = {}
+        global lesson_plan_managers
 
         for plan_id, plan_config in plans_config.items():
-            #print(f"Initializing LessonPlan for {plan_config['name']}")
+            logger.debug(f"Initializing LessonPlan for {plan_config['name']}")
             lesson_plans[plan_id] = LessonPlan(
                 username=username,
                 password=password,
                 mongo_uri=mongo_uri,
                 plan_config=plan_config,
             )
-            #print(f"LessonPlan for {plan_config['name']} initialized successfully")
+            logger.debug(f"LessonPlan for {plan_config['name']} initialized successfully")
 
             comparator = None
 
@@ -525,12 +687,12 @@ async def main():
             compare_enabled = plan_config.get("compare", False)
             notify_enabled = plan_config.get("notify", False)
             if compare_enabled or notify_enabled:
-                print(f"\nPlan settings for {plan_config['name']}:")
-                print(f"- Compare enabled: {compare_enabled}")
-                print(f"- Notify enabled: {notify_enabled}")
+                logger.info(f"\nPlan settings for {plan_config['name']}:")
+                logger.info(f"- Compare enabled: {compare_enabled}")
+                logger.info(f"- Notify enabled: {notify_enabled}")
 
             if compare_enabled and openrouter_api_key and selected_model:
-                print(f"Initializing LessonPlanComparator for {plan_config['name']}")
+                logger.info(f"Initializing LessonPlanComparator for {plan_config['name']}")
                 try:
                     comparator = LessonPlanComparator(
                         mongo_uri=mongo_uri,
@@ -538,46 +700,45 @@ async def main():
                         selected_model=selected_model,
                     )
                     lesson_plan_comparators[plan_id] = comparator
-                    #print(
-                    #    f"LessonPlanComparator for {plan_config['name']} initialized successfully"
-                    #)
+                    logger.debug(
+                        f"LessonPlanComparator for {plan_config['name']} initialized successfully"
+                    )
                 except Exception as e:
-                    print(
+                    logger.error(
                         f"Failed to initialize comparator for {plan_config['name']}: {e}"
                     )
                     comparator = None
             else:
                 if compare_enabled:
-                    print(
+                    logger.warning(
                         f"Cannot initialize comparator for {plan_config['name']} - missing required settings:"
                     )
-                    print(
+                    logger.warning(
                         f"- OpenRouter API key: {'Present' if openrouter_api_key else 'Missing'}"
                     )
-                    print(
+                    logger.warning(
                         f"- Selected model: {'Present' if selected_model else 'Missing'}"
                     )
                 else:
-                    print(
+                    logger.debug(
                         f"Skipping LessonPlanComparator initialization for {plan_config['name']} (compare not enabled in plans.json)"
                     )
 
-            #print(f"Initializing LessonPlanManager for {plan_config['name']}")
+            logger.debug(f"Initializing LessonPlanManager for {plan_config['name']}")
             lesson_plan_managers[plan_id] = LessonPlanManager(
                 lesson_plans[plan_id],
                 comparator,
                 working_directory=".",
                 plan_config=plan_config,
             )
-            #print(
-            #    f"LessonPlanManager for {plan_config['name']} initialized successfully"
-            #)
+            logger.debug(
+                f"LessonPlanManager for {plan_config['name']} initialized successfully"
+            )
 
         # Inicjalizacja i uruchomienie Flask
         flask_thread = threading.Thread(target=run_flask_app)
         flask_thread.daemon = True
         flask_thread.start()
-
 
         # Run managers sequentially in the main thread
         try:
@@ -587,121 +748,229 @@ async def main():
                 errors = []
                 cycle_start_time = time.time()
 
-
-                # Refresh plans config from MongoDB
-                plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
-                if plans_config_doc and "plans" in plans_config_doc:
-                    plans_config = plans_config_doc["plans"]
-                
-                for plan_id, manager in lesson_plan_managers.items():
-                    # Update plan config in manager
-                    if plan_id in plans_config:
-                        manager.lesson_plan.plan_config = plans_config[plan_id]
-                        manager.plan_config = plans_config[plan_id]
+                # Start a transaction for the entire check cycle
+                with sentry_sdk.start_transaction(op="check_cycle", name="check_plans_cycle") as transaction:
+                    logger.info("Started Sentry transaction for check cycle")
+                    transaction.set_tag("check_cycle", "true")
                     
-                    plan_name = plans_config[plan_id]["name"]
-                    print(f"\nStarting check cycle for {plan_name}")
+                    # Refresh plans config from MongoDB
+                    plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
+                    if plans_config_doc and "plans" in plans_config_doc:
+                        plans_config = plans_config_doc["plans"]
+                    
+                    # Compare plan configuration with URL and update if needed
+                    # This will also delete last documents for changed plans
+                    logger.info("\nComparing plan configurations with URL...")
+                    with sentry_sdk.start_span(op="compare_configs", description="Compare plans config with URL"):
+                        changed_plans = compare_plans_config_with_url()
+                    
+                    # Reload plans config after potential update
+                    plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
+                    if plans_config_doc and "plans" in plans_config_doc:
+                        plans_config = plans_config_doc["plans"]
+                    
+                    # Check for new plans and create managers for them
+                    for plan_id, plan_config in plans_config.items():
+                        if plan_id not in lesson_plan_managers:
+                            logger.info(f"\nNew plan detected: {plan_config['name']} ({plan_id})")
+                            logger.info(f"Initializing new LessonPlan for {plan_config['name']}")
+                            
+                            # Create new LessonPlan
+                            new_lesson_plan = LessonPlan(
+                                username=username,
+                                password=password,
+                                mongo_uri=mongo_uri,
+                                plan_config=plan_config,
+                            )
+                            
+                            # Check if this plan was previously removed and has a collection
+                            collection_name = new_lesson_plan.collection_name
+                            if collection_name and collection_name in db.list_collection_names():
+                                # Check if there's a removal record
+                                removal_records = list(db[collection_name].find(
+                                    {"event": "plan_removed", "plan_id": plan_id},
+                                    sort=[("timestamp", -1)],
+                                    limit=1
+                                ))
+                                
+                                if removal_records:
+                                    # Plan was previously removed and is now back
+                                    logger.info(f"Plan {plan_config['name']} is being restored - it was previously removed")
+                                    # Add restoration record
+                                    db[collection_name].insert_one({
+                                        "_id": f"restored_{datetime.now().isoformat()}",
+                                        "timestamp": datetime.now(),
+                                        "event": "plan_restored",
+                                        "plan_id": plan_id,
+                                        "plan_name": plan_config['name'],
+                                        "message": "This plan has been restored to the configuration"
+                                    })
+                                    logger.info(f"Added restoration record to collection {collection_name}")
+                            
+                            # Check if comparator is needed
+                            new_comparator = None
+                            compare_enabled = plan_config.get("compare", False)
+                            if compare_enabled and openrouter_api_key and selected_model:
+                                logger.info(f"Initializing LessonPlanComparator for {plan_config['name']}")
+                                try:
+                                    new_comparator = LessonPlanComparator(
+                                        mongo_uri=mongo_uri,
+                                        openrouter_api_key=openrouter_api_key,
+                                        selected_model=selected_model,
+                                    )
+                                except Exception as e:
+                                    logger.error(f"Failed to initialize comparator for {plan_config['name']}: {e}")
+                                    new_comparator = None
+                            
+                            # Create and add new manager
+                            logger.info(f"Initializing LessonPlanManager for {plan_config['name']}")
+                            lesson_plan_managers[plan_id] = LessonPlanManager(
+                                new_lesson_plan,
+                                new_comparator,
+                                working_directory=".",
+                                plan_config=plan_config,
+                            )
+                            logger.info(f"LessonPlanManager for {plan_config['name']} successfully created")
+                    
+                    # Update existing managers with current config
+                    for plan_id, manager in lesson_plan_managers.items():
+                        # Update plan config in manager
+                        if plan_id in plans_config:
+                            manager.lesson_plan.plan_config = plans_config[plan_id]
+                            manager.plan_config = plans_config[plan_id]
+                        
+                        # Check for plans that were removed from config and clean them up
+                        plans_to_remove = []
+                        for plan_id in lesson_plan_managers:
+                            if plan_id not in plans_config:
+                                plans_to_remove.append(plan_id)
+                        
+                        for plan_id in plans_to_remove:
+                            manager = lesson_plan_managers[plan_id]
+                            plan_name = manager.plan_name
+                            logger.info(f"\nRemoving plan that no longer exists in config: {plan_name} ({plan_id})")
+                            
+                            # Get collection name for this plan
+                            collection_name = manager.lesson_plan.collection_name
+                            if collection_name:
+                                # We don't delete the collection to preserve historical data
+                                # but we can mark it as inactive or add a log entry
+                                try:
+                                    db[collection_name].insert_one({
+                                        "_id": f"removed_{datetime.now().isoformat()}",
+                                        "timestamp": datetime.now(),
+                                        "event": "plan_removed",
+                                        "plan_id": plan_id,
+                                        "plan_name": plan_name,
+                                        "message": "This plan was removed from the configuration"
+                                    })
+                                    logger.info(f"Added removal record to collection {collection_name}")
+                                except Exception as e:
+                                    logger.error(f"Error adding removal record: {e}")
+                            
+                            # Remove from managers dictionary
+                            del lesson_plan_managers[plan_id]
+                            logger.info(f"Manager for {plan_name} successfully removed")
+                        
+                        plan_name = plans_config[plan_id]["name"]
+                        logger.info(f"\nStarting check cycle for {plan_name}")
+                        try:
+                            # Start a span for this specific plan check
+                            with sentry_sdk.start_span(op="check_plan", description=f"Check plan: {plan_name}"):
+                                result = await manager.check_once()
+                                successful_checks += 1
+                                if result:
+                                    new_plans += 1
+                        except Exception as e:
+                            error_info = {
+                                "timestamp": datetime.now(),
+                                "error": str(e),
+                                "traceback": traceback.format_exc(),
+                                "plan_name": plan_name,
+                                "type": "plan_check_error"
+                            }
+                            # Store in errors collection
+                            db.errors.insert_one(error_info)
+                            sentry_sdk.capture_exception(e)
+                            errors.append(error_info)
+                            logger.error(f"Error in manager for {plan_name}: {str(e)}")
+                    
+                    # Calculate total execution time for the cycle
+                    cycle_execution_time = round(time.time() - cycle_start_time, 2)
+                    logger.info(f"\nTotal cycle execution time: {cycle_execution_time} seconds")
+                    
+                    # Set transaction data
+                    transaction.set_data("successful_checks", successful_checks)
+                    transaction.set_data("new_plans", new_plans)
+                    transaction.set_data("execution_time", cycle_execution_time)
+                    transaction.set_data("has_errors", bool(errors))
+                    
+                   
+                
+
+                    # Log the check cycle results
+                    log_check_cycle(
+                        successful_checks=successful_checks,
+                        new_plans=new_plans,
+                        errors=errors if errors else None,
+                        execution_time=cycle_execution_time,
+                    )
+
+                    # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
                     try:
-                        result = await manager.check_once()
-                        successful_checks += 1
-                        if result:
-                            new_plans += 1
+                        logger.info("\nSprawdzanie aktywności Moodle...")
+                        with sentry_sdk.start_span(op="moodle_check", description="Check Moodle activities"):
+                            downloader = WebpageDownloader()
+                            moodle_url = os.getenv("MOODLE_URL")
+                            if not moodle_url:
+                                raise ValueError("MOODLE_URL not set in environment variables")
+
+                            saved_file = downloader.save_webpage(moodle_url)
+                            if saved_file:
+                                parser = MoodleFileParser(
+                                    saved_file,
+                                    api_key=openrouter_api_key,
+                                    mongodb_uri=mongo_uri,
+                                )
+
+                                # Parsuj i zapisz aktywności
+                                parser.parse_activities()
+                                parser.save_to_mongodb()
+
+                                # Usuń pobrany plik
+                                try:
+                                    os.remove(saved_file)
+                                    logger.info(f"Usunięto plik tymczasowy: {saved_file}")
+                                except Exception as e:
+                                    logger.error(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
+
                     except Exception as e:
                         error_info = {
                             "timestamp": datetime.now(),
                             "error": str(e),
                             "traceback": traceback.format_exc(),
-                            "plan_name": plan_name,
-                            "type": "plan_check_error"
+                            "type": "moodle_activity_error"
                         }
                         # Store in errors collection
                         db.errors.insert_one(error_info)
                         sentry_sdk.capture_exception(e)
-                        errors.append(error_info)
-                        print(f"Error in manager for {plan_name}: {str(e)}")
+                        logger.error(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
 
-                # Calculate total execution time for the cycle
-                cycle_execution_time = round(time.time() - cycle_start_time, 2)
-                print(f"\nTotal cycle execution time: {cycle_execution_time} seconds")
-
-                # Log the check cycle results
-                log_check_cycle(
-                    successful_checks=successful_checks,
-                    new_plans=new_plans,
-                    errors=errors if errors else None,
-                    execution_time=cycle_execution_time,
-                )
-
-                # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
-                try:
-                    print("\nSprawdzanie aktywności Moodle...")
-                    downloader = WebpageDownloader()
-                    moodle_url = os.getenv("MOODLE_URL")
-                    if not moodle_url:
-                        raise ValueError("MOODLE_URL not set in environment variables")
-
-                    saved_file = downloader.save_webpage(moodle_url)
-                    if saved_file:
-                        parser = MoodleFileParser(
-                            saved_file,
-                            api_key=openrouter_api_key,
-                            mongodb_uri=mongo_uri,
-                        )
-
-                        # Parsuj i zapisz aktywności
-                        parser.parse_activities()
-                        parser.save_to_mongodb()
-
-                        # Usuń pobrany plik
-                        try:
-                            os.remove(saved_file)
-                            print(f"Usunięto plik tymczasowy: {saved_file}")
-                        except Exception as e:
-                            print(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
-
-                except Exception as e:
-                    error_info = {
-                        "timestamp": datetime.now(),
-                        "error": str(e),
-                        "traceback": traceback.format_exc(),
-                        "type": "moodle_activity_error"
-                    }
-                    # Store in errors collection
-                    db.errors.insert_one(error_info)
-                    print(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
-
-                print(
+                logger.info(
                     f"\nWszystkie zadania zakończone. Oczekiwanie {check_interval} sekund przed następnym cyklem..."
                 )
                 time.sleep(check_interval)
 
         except KeyboardInterrupt:
-            print("\nShutting down gracefully...")
+            logger.warning("\nShutting down gracefully...")
         except Exception as e:
-            print(f"Fatal error: {str(e)}")
+            logger.critical(f"Fatal error: {str(e)}")
+            logger.error(traceback.format_exc())
 
-        print("Initializing LessonPlanComparator")
-        lesson_plan_comparator = LessonPlanComparator(
-            mongo_uri=mongo_uri,
-            openrouter_api_key=openrouter_api_key,
-            selected_model=selected_model,
-        )
-        print("LessonPlanComparator initialized successfully")
-
-        print("Initializing LessonPlanManager")
-        lesson_plan_manager = LessonPlanManager(
-            lesson_plan,
-            lesson_plan_comparator,
-            working_directory=".",
-        )
-        print("LessonPlanManager initialized successfully")
-
-        print("Starting LessonPlanManager")
-        lesson_plan_manager.start()
     except Exception as e:
-        print(f"An error occurred in main.py: {str(e)}")
-        print("Traceback:")
-        print(traceback.format_exc())
+        logger.critical(f"An error occurred in main.py: {str(e)}")
+        logger.error("Traceback:")
+        logger.error(traceback.format_exc())
 
 
 if __name__ == "__main__":
