@@ -1,6 +1,4 @@
-# Lesson Plan Manager
-
-![Lesson Plan Manager Logo](https://via.placeholder.com/150)
+# Lesson Plan Manager - Backend
 
 ## Table of Contents
 - [Overview](#overview)
@@ -47,8 +45,8 @@ Lesson Plan Manager is a Python application designed to automate the tracking an
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/lesson-plan-manager.git # Replace with your repo URL
-    cd lesson-plan-manager
+    git clone https://github.com/Klegus/XLSX-refresher-WSPA.git # Replace with your repo URL
+    cd XLSX-refresher-WSPA
     ```
 
 2.  **Install dependencies**:
