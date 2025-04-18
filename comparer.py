@@ -3,6 +3,10 @@ init(autoreset=True)
 import requests
 from datetime import datetime
 from pymongo import MongoClient
+from shared_utils import get_logger
+
+# Setup logger
+logger = get_logger('comparer')
 
 class LessonPlanComparator:
     def __init__(self, mongo_uri, openrouter_api_key, selected_model):
@@ -12,23 +16,28 @@ class LessonPlanComparator:
         self.openrouter_api_url = "https://openrouter.ai/api/v1/chat/completions"
         self.selected_model = selected_model
 
-    def get_last_two_plans(self, plan_name):
-        collection_name = f"plans_{plan_name.lower().replace(' ', '_').replace('-', '_')}"
-        print(f"\n{Fore.CYAN}Debugowanie get_last_two_plans:{Style.RESET_ALL}")
-        print(f"- Szukam planów w kolekcji: {collection_name}")
+    def get_last_two_plans(self, plan_config):
+        # Replace both spaces and underscores in faculty with hyphens
+        faculty_name = plan_config['faculty'].replace(' ', '-').replace('_', '-')
+        collection_name = f"plans_{faculty_name}_{plan_config['name'].lower().replace(' ', '_')}"
+        
+        logger.debug(f"\nDebugging get_last_two_plans:")
+        logger.debug(f"- Szukam planów w kolekcji: {collection_name}")
         
         collection = self.db[collection_name]
         plans = list(collection.find().sort("timestamp", -1).limit(2))
         
-        print(f"- Znaleziono planów: {len(plans)}")
+        logger.debug(f"- Znaleziono planów: {len(plans)}")
         if plans:
-            print("- Daty znalezionych planów:")
+            logger.debug("- Daty znalezionych planów:")
             for i, plan in enumerate(plans):
-                print(f"  {i+1}. {plan.get('timestamp', 'brak daty')}")
+                logger.debug(f"  {i+1}. {plan.get('timestamp', 'brak daty')}")
         
         if len(plans) < 2:
-            print(f"{Fore.YELLOW}Nie znaleziono wystarczającej liczby planów do porównania w kolekcji {collection_name}.{Style.RESET_ALL}")
-            print(f"- Wymagane są minimum 2 plany, znaleziono: {len(plans)}")
+            logger.warning(f"Nie znaleziono wystarczającej liczby planów do porównania w kolekcji {collection_name}.")
+            logger.debug(f"- Wymagane są minimum 2 plany, znaleziono: {len(plans)}")
+            if plans:  # Jeśli jest przynajmniej jeden plan
+                return plans[0], None
             return None, None
             
         # Upewnij się, że plans[0] to najnowszy plan, a plans[1] to poprzedni
@@ -78,10 +87,10 @@ class LessonPlanComparator:
             response.raise_for_status()
             return response.json()['choices'][0]['message']['content'].strip()
         except requests.exceptions.RequestException as e:
-            print(f"{Fore.RED}Błąd API dla grupy {group}: {e}{Style.RESET_ALL}")
+            logger.error(f"Błąd API dla grupy {group}: {e}")
             return f"Nie udało się porównać planów dla grupy {group} z powodu błędu API."
         except (KeyError, IndexError) as e:
-            print(f"Błąd w przetwarzaniu odpowiedzi API dla grupy {group}: {e}")
+            logger.error(f"Błąd w przetwarzaniu odpowiedzi API dla grupy {group}: {e}")
             return f"Wystąpił problem z przetwarzaniem odpowiedzi dla grupy {group}."
 
     def save_comparison_results(self, newer_plan, older_plan, comparison_results):
@@ -96,51 +105,72 @@ class LessonPlanComparator:
             "results": comparison_results
         }
         
-        collection_name = f"comparisons_{newer_plan['plan_name'].lower().replace(' ', '_').replace('-', '_')}"
+        collection_name = f"comparisons_{newer_plan['plan_name'].lower().replace(' ', '_')}"
         collection = self.db[collection_name]
         result = collection.insert_one(comparison_document)
-        print(f"Wyniki porównania dla {newer_plan['plan_name']} zapisane w bazie danych z ID: {result.inserted_id}")
+        logger.info(f"Wyniki porównania dla {newer_plan['plan_name']} zapisane w bazie danych z ID: {result.inserted_id}")
         return result.inserted_id
 
-    def compare_plans(self, collection_name):
-        newer_plan, older_plan = self.get_last_two_plans(collection_name)
-        if not newer_plan or not older_plan:
-            return f"Nie można porównać planów w kolekcji {collection_name} - brak wystarczającej liczby planów."
+    def compare_plans(self, plan_config):
+        """Porównuje obecny plan z poprzednim planem z bazy danych"""
+        # Pobierz dwa ostatnie plany z bazy danych
+        # Replace both spaces and underscores in faculty with hyphens
+        faculty_name = plan_config['faculty'].replace(' ', '-').replace('_', '-')
+        collection_name = f"plans_{faculty_name}_{plan_config['name'].lower().replace(' ', '_')}"
+        
+        try:
+            logger.debug(f"- Szukam planów w kolekcji: {collection_name}")
+            
+            collection = self.db[collection_name]
+            
+            # Pobierz dwa ostatnie plany
+            plans = list(collection.find({"_id": {"$ne": "discord_config"}}).sort("timestamp", -1).limit(2))
+            
+            if len(plans) < 2:
+                logger.warning(f"Nie znaleziono wystarczającej liczby planów do porównania w kolekcji {collection_name}.")
+                return None
 
-        print(f"Używany model: {self.selected_model}")
-        print(f"Porównywanie planów z dat: Nowszy {newer_plan['timestamp']}, Starszy {older_plan['timestamp']}")
+            # Nowszy plan to pierwszy element (sortowanie malejące po timestamp)
+            newer_plan = plans[0]
+            older_plan = plans[1]
 
-        all_groups = set(newer_plan['groups'].keys()) | set(older_plan['groups'].keys())
+            logger.debug(f"- Porównuję plany z {newer_plan['timestamp']} i {older_plan['timestamp']}")
 
-        comparison_results = {}
-        for group in all_groups:
-            print(f"Porównywanie planów dla grupy {group}...")
-            comparison_results[group] = self.compare_plans_for_group(newer_plan, older_plan, group)
+            # Znajdź różnice
+            return self._find_differences(newer_plan, older_plan)
+        except Exception as e:
+            logger.error(f"Błąd podczas porównywania planów: {str(e)}")
+            return None
 
-        comparison_id = self.save_comparison_results(newer_plan, older_plan, comparison_results)
+    def save_comparison(self, newer_plan, older_plan, comparison):
+        """Zapisuje wynik porównania do bazy danych"""
+        try:
+            comparison_doc = {
+                "timestamp": datetime.now(),
+                "newer_plan_id": str(newer_plan["_id"]),
+                "older_plan_id": str(older_plan["_id"]),
+                "newer_plan_timestamp": newer_plan["timestamp"],
+                "older_plan_timestamp": older_plan["timestamp"],
+                "comparison": comparison
+            }
+            
+            # Zapisz w kolekcji dla tego konkretnego planu
+            collection_name = f"comparisons_{newer_plan['plan_name'].lower().replace(' ', '_')}"
+            collection = self.db[collection_name]
+            
+            result = collection.insert_one(comparison_doc)
+            logger.info(f"Zapisano porównanie planów do bazy danych z ID: {result.inserted_id}")
+        except Exception as e:
+            logger.error(f"Błąd podczas zapisywania porównania planów: {str(e)}")
 
-        # Filtrowanie i formatowanie wyników
-        filtered_output = f"Porównanie planów:\nNowszy z {newer_plan['timestamp']}\nStarszy z {older_plan['timestamp']}\nUżywany model: {self.selected_model}\nID porównania w bazie: {comparison_id}\n\n"
-        changes_found = False
-
-        for group, result in comparison_results.items():
-            if result.strip() != "Brak różnic":
-                changes_found = True
-                filtered_output += f"Grupa: {group}\n"
-                filtered_output += f"{result}\n\n"
-                print(f"\nWynik porównania dla grupy {group}:")
-                print(result)
-
-        if not changes_found:
-            filtered_output += "Brak różnic dla wszystkich grup.\n"
-
-        # Zapisywanie do pliku
-        filename = f"plan_comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(filtered_output)
-
-        print(f"\nWyniki porównania zapisano w pliku: {filename}")
-        print(f"Wyniki porównania zapisano również w bazie danych z ID: {comparison_id}")
-
-        # Zwracanie przefiltrowanych wyników
-        return filtered_output
+    def get_last_comparison(self, plan_config):
+        """Pobiera ostatnie porównanie z bazy danych"""
+        try:
+            # Sprawdź czy istnieją przynajmniej dwa plany
+            # Replace both spaces and underscores in faculty with hyphens
+            faculty_name = plan_config['faculty'].replace(' ', '-').replace('_', '-')
+            collection_name = f"plans_{faculty_name}_{plan_config['name'].lower().replace(' ', '_')}"
+            return f"Nie znaleziono żadnych planów w kolekcji {collection_name}."
+        except Exception as e:
+            logger.error(f"Błąd podczas pobierania porównania planów: {str(e)}")
+            return None

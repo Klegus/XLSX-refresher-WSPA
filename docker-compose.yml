@@ -1,9 +1,0 @@
-version: '3.12'
-
-services:
-  lesson-plan-manager:
-    build: .
-    volumes:
-      - ./data:/app/data
-    env_file:
-      - .env

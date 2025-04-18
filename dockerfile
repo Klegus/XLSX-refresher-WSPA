@@ -10,8 +10,11 @@ RUN apt-get update && apt-get install -y gcc
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
-COPY . .
+# Copy application files but exclude plans.json
+COPY *.py ./
+COPY routes/ routes/
+COPY templates/ templates/
+#COPY mypy.ini ./
 
 # Final stage
 FROM python:3.12-slim

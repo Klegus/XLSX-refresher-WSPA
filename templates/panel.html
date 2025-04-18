@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .status-badge {
+            font-size: 1.2em;
+            padding: 0.5em 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5" id="mainContainer">
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <input type="text" class="form-control" id="planSearch" placeholder="Search plans...">
+        </div>
+        <h1 class="mb-4">System Administration Panel</h1>
+        
+        <!-- Status Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">System Status</h2>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-success status-badge" id="statusBadge">Active</span>
+                        <p class="text-muted mt-2" id="lastCheck">Last check: </p>
+                        <p class="text-danger mt-2" id="maintenanceReason" style="display: none;"></p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="maintenanceMode">
+                        <label class="form-check-label" for="maintenanceMode">Maintenance Mode</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Check Interval Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Check Interval Settings</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="checkInterval" class="form-label">Check Interval (seconds)</label>
+                    <input type="number" class="form-control" id="checkInterval" min="60" step="60">
+                </div>
+                <button class="btn btn-primary" onclick="updateInterval()">Update Interval</button>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">System Logs</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Successful Checks</th>
+                                <th>New Plans</th>
+                                <th>Has Errors</th>
+                                <th>Execution Time (s)</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTable">
+                            <!-- Logs will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plans Management Section -->
+        <div class="card mb-4" id="plansSection">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Plans Management</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h3 class="h5">Current Plans</h3>
+                    <div id="currentPlans" class="list-group mb-3">
+                        <!-- Plans will be loaded here -->
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h3 class="h5">Add New Plan</h3>
+                    <div class="mb-3">
+                        <label for="planId" class="form-label">Plan ID (e.g. informatyka2st1-1)</label>
+                        <input type="text" class="form-control" id="planId">
+                    </div>
+                    <div class="mb-3">
+                        <label for="planJson" class="form-label">Plan Configuration (JSON)</label>
+                        <textarea class="form-control" id="planJson" rows="10"></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="addPlan()">Add Plan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions Section -->
+        <div class="card mb-4" id="suggestionsSection">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">User Suggestions</h2>
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="loadSuggestions('all')">All</button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="loadSuggestions('pending')">Pending</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="loadSuggestions('approved')">Approved</button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="loadSuggestions('rejected')">Rejected</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="suggestionsList" class="mb-3">
+                    <!-- Suggestions will be loaded here -->
+                    <div class="d-flex justify-content-center align-items-center py-4" id="suggestionsLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="noSuggestions" class="text-center py-4 d-none">
+                        <p class="text-muted">No suggestions found.</p>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <button class="btn btn-sm btn-outline-primary" onclick="previousSuggestionsPage()">Previous</button>
+                    <span id="suggestionsPagination">Page 1</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="nextSuggestionsPage()">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Plan Modal -->
+    <div class="modal fade" id="editPlanModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Plan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="editPlanJson" rows="15"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="savePlanEdit()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentEditPlanName = null;
+        // Error display function
+        function showErrors(errors) {
+            const errorMessages = errors.map(error => 
+                `Plan: ${error.plan_name}\nError: ${error.error_message}\n\nStacktrace:\n${error.traceback}`
+            ).join('\n\n-------------------\n\n');
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Error Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <pre class="text-danger" style="white-space: pre-wrap;">${errorMessages}</pre>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            modal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            const searchInput = document.getElementById('planSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const plans = document.querySelectorAll('#currentPlans .list-group-item');
+                    
+                    plans.forEach(plan => {
+                        const planName = plan.querySelector('h5')?.textContent.toLowerCase() || '';
+                        const planUrl = plan.querySelector('small')?.textContent.toLowerCase() || '';
+                        const matches = planName.includes(searchTerm) || planUrl.includes(searchTerm);
+                        plan.style.display = matches ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        function checkMaintenanceMode() {
+            const maintenanceCheckbox = document.getElementById('maintenanceMode');
+            const plansSection = document.getElementById('plansSection');
+            const checkIntervalCard = document.querySelector('.card:nth-child(2)');
+            const suggestionsSection = document.getElementById('suggestionsSection');
+            
+            if (!maintenanceCheckbox || !plansSection || !checkIntervalCard) {
+                console.warn('Required elements for maintenance mode not found');
+                return;
+            }
+            
+            const isMaintenanceMode = maintenanceCheckbox.checked;
+            console.log(`checkMaintenanceMode called, maintenance mode is: ${isMaintenanceMode}`);
+            
+            plansSection.style.display = isMaintenanceMode ? 'none' : 'block';
+            checkIntervalCard.style.display = isMaintenanceMode ? 'none' : 'block';
+            if (suggestionsSection) {
+                suggestionsSection.style.display = isMaintenanceMode ? 'none' : 'block';
+            }
+        }
+
+        function loadLogs() {
+            const logsTable = document.getElementById('logsTable');
+            if (!logsTable) {
+                console.warn('Logs table element not found');
+                return;
+            }
+
+            fetch('/api/logs')
+                .then(response => response.json())
+                .then(logs => {
+                    logsTable.innerHTML = '';
+                    logs.forEach(log => {
+                        const row = document.createElement('tr');
+                        const hasErrors = log.has_errors;
+                        row.innerHTML = `
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td>${log.successful_checks}</td>
+                            <td>${log.new_plans}</td>
+                            <td><span class="badge ${hasErrors ? 'bg-danger' : 'bg-success'}">${hasErrors ? 'Yes' : 'No'}</span></td>
+                            <td>${log.execution_time || 'N/A'}</td>
+                            <td>
+                                ${hasErrors ? `
+                                    <button class="btn btn-sm btn-outline-danger" onclick='showErrors(${JSON.stringify(log.errors)})'>
+                                        Show Errors
+                                    </button>
+                                ` : '-'}
+                            </td>
+                        `;
+                        logsTable.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error loading logs:', error));
+        }
+
+        function editPlan(name, plan) {
+            currentEditPlanName = name;
+            document.getElementById('editPlanJson').value = JSON.stringify(plan, null, 2);
+            new bootstrap.Modal(document.getElementById('editPlanModal')).show();
+        }
+
+        function savePlanEdit() {
+            const planJson = document.getElementById('editPlanJson').value;
+            try {
+                const planData = JSON.parse(planJson);
+                fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plans_config: {
+                            [currentEditPlanName]: planData
+                        }
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.error || 'Error updating plan');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    bootstrap.Modal.getInstance(document.getElementById('editPlanModal')).hide();
+                    
+                    // Show a message that the plan is being checked
+                    alert('Plan updated successfully. Triggering plan check...');
+                    
+                    // If we got an updated plan name, trigger a check for that plan
+                    if (data.updated_plan) {
+                        checkPlan(data.updated_plan);
+                    } else {
+                        loadPlans();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating plan:', error);
+                    alert(`Error updating plan: ${error.message}`);
+                });
+            } catch (e) {
+                alert('Invalid JSON format: ' + e.message);
+            }
+        }
+
+        function checkPlan(planId) {
+            // Show loading indicator
+            const loadingModal = createLoadingModal('Checking plan...');
+            document.body.appendChild(loadingModal);
+            const bsLoadingModal = new bootstrap.Modal(loadingModal);
+            bsLoadingModal.show();
+
+            console.log(`Checking plan with ID: ${planId}`);
+
+            fetch(`/api/check-plan/${planId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        const error = new Error(errData.error || 'Error checking plan');
+                        // Check if there's a suggestion in the error message
+                        if (errData.error && errData.error.includes('Did you mean')) {
+                            const suggestionMatch = errData.error.match(/Did you mean one of these: ([^?]+)\?/);
+                            if (suggestionMatch && suggestionMatch[1]) {
+                                error.suggestions = suggestionMatch[1].split(', ');
+                            }
+                        }
+                        throw error;
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading indicator
+                bsLoadingModal.hide();
+                loadingModal.remove();
+                
+                if (data.changes_detected) {
+                    alert('Plan checked successfully! Changes detected and updated.');
+                } else {
+                    alert('Plan checked successfully! No changes detected.');
+                }
+                
+                // Reload plans list
+                loadPlans();
+                
+                // Reload logs to show the new check
+                loadLogs();
+            })
+            .catch(error => {
+                // Hide loading indicator
+                bsLoadingModal.hide();
+                loadingModal.remove();
+                
+                console.error('Error checking plan:', error);
+                
+                if (error.suggestions && error.suggestions.length > 0) {
+                    const suggestionsText = error.suggestions.map(s => 
+                        `<button class="btn btn-sm btn-outline-primary mt-2 me-2" onclick="checkPlan('${s}')">${s}</button>`
+                    ).join('');
+                    
+                    const errorModal = document.createElement('div');
+                    errorModal.className = 'modal fade';
+                    errorModal.innerHTML = `
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Plan Check Error</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-danger">${error.message}</p>
+                                    <p>Did you mean one of these plans?</p>
+                                    <div class="d-flex flex-wrap">${suggestionsText}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(errorModal);
+                    const bsErrorModal = new bootstrap.Modal(errorModal);
+                    bsErrorModal.show();
+                    errorModal.addEventListener('hidden.bs.modal', () => {
+                        document.body.removeChild(errorModal);
+                    });
+                } else {
+                    alert(`Error checking plan: ${error.message}`);
+                }
+                
+                // Still reload plans to show updated configuration
+                loadPlans();
+            });
+        }
+
+        function createLoadingModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center p-4">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mb-0">${message}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return modal;
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSearch();
+            initializeMaintenanceMode();
+            loadStatus();
+            loadConfig();
+            loadPlans();
+            loadLogs();
+            checkMaintenanceMode();
+            loadSuggestions('pending'); // Load pending suggestions by default
+        });
+
+        // Refresh status every 30 seconds
+        setInterval(loadStatus, 30000);
+
+        function loadStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Status data received:', data);
+                    const statusBadge = document.getElementById('statusBadge');
+                    const lastCheck = document.getElementById('lastCheck');
+                    const maintenanceMode = document.getElementById('maintenanceMode');
+                    const maintenanceReason = document.getElementById('maintenanceReason');
+                    
+                    if (statusBadge) {
+                        const isActive = data.active !== false;
+                        statusBadge.textContent = isActive && !data.maintenance_mode ? 'Active' : 'Inactive';
+                        statusBadge.className = `badge status-badge ${isActive && !data.maintenance_mode ? 'bg-success' : 'bg-danger'}`;
+                    }
+                    
+                    if (lastCheck && data.last_activity) {
+                        lastCheck.textContent = `Last activity: ${data.last_activity}`;
+                    }
+                    
+                    if (maintenanceMode) {
+                        console.log(`Setting maintenance checkbox to: ${data.maintenance_mode}`);
+                        maintenanceMode.checked = !!data.maintenance_mode; // Ensure boolean value
+                    }
+                    
+                    if (maintenanceReason) {
+                        if (data.maintenance_mode && data.maintenance_reason) {
+                            maintenanceReason.textContent = `Reason: ${data.maintenance_reason}`;
+                            maintenanceReason.style.display = 'block';
+                        } else {
+                            maintenanceReason.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update UI visibility based on maintenance mode
+                    checkMaintenanceMode();
+                })
+                .catch(error => console.error('Error loading status:', error));
+        }
+
+        function loadConfig() {
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(data => {
+                    const intervalInput = document.getElementById('checkInterval');
+                    if (intervalInput) {
+                        intervalInput.value = data.system_config.check_interval;
+                    }
+                })
+                .catch(error => console.error('Error loading config:', error));
+        }
+
+        function loadPlans() {
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(data => {
+                    const plansContainer = document.getElementById('currentPlans');
+                    if (!plansContainer) {
+                        console.warn('Plans container not found');
+                        return;
+                    }
+                    
+                    plansContainer.innerHTML = '';
+                    
+                    if (data.plans_config) {
+                        Object.entries(data.plans_config).forEach(([name, plan]) => {
+                            const planElement = document.createElement('div');
+                            planElement.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            planElement.innerHTML = `
+                                <div>
+                                    <h5 class="mb-1">${name}</h5>
+                                    <small class="text-muted">URL: ${plan.download_url || 'N/A'}</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary btn-sm me-2" onclick="editPlan('${name}', ${JSON.stringify(plan).replace(/"/g, '&quot;')})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deletePlan('${name}')">Delete</button>
+                                </div>
+                            `;
+                            plansContainer.appendChild(planElement);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading plans:', error));
+        }
+
+        function updateInterval() {
+            const interval = document.getElementById('checkInterval').value;
+            fetch('/api/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    system_config: {
+                        check_interval: parseInt(interval)
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Check interval updated successfully');
+                loadConfig();
+            })
+            .catch(error => alert('Error updating check interval'));
+        }
+
+        // Refresh logs every minute
+        setInterval(loadLogs, 60000);
+
+        function initializeMaintenanceMode() {
+            const maintenanceCheckbox = document.getElementById('maintenanceMode');
+            if (maintenanceCheckbox) {
+                maintenanceCheckbox.addEventListener('change', function(e) {
+                    const isChecked = e.target.checked;
+                    console.log(`Maintenance mode checkbox changed to: ${isChecked}`);
+                    
+                    checkMaintenanceMode();
+                    
+                    // Use the dedicated maintenance-toggle endpoint
+                    fetch('/api/maintenance-toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            maintenance_mode: isChecked
+                        })
+                    })
+                    .then(response => {
+                        console.log(`Response status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Maintenance toggle response:', data);
+                        if (data.success) {
+                            console.log(`Maintenance mode ${data.new_state ? 'enabled' : 'disabled'}`);
+                        } else {
+                            console.error('Failed to toggle maintenance mode:', data.error);
+                            // Revert checkbox state if there was an error
+                            maintenanceCheckbox.checked = !isChecked;
+                        }
+                        // Force refresh status to update UI correctly
+                        setTimeout(loadStatus, 500);
+                    })
+                    .catch(error => {
+                        console.error('Error updating maintenance mode:', error);
+                        alert('Error updating maintenance mode');
+                        // Revert checkbox state if there was an error
+                        maintenanceCheckbox.checked = !isChecked;
+                    });
+                });
+            }
+        }
+
+
+        function addPlan() {
+            const planId = document.getElementById('planId').value;
+            const planJson = document.getElementById('planJson').value;
+            
+            if (!planId) {
+                alert('Please enter a Plan ID');
+                return;
+            }
+            
+            try {
+                const planData = JSON.parse(planJson);
+                fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plans_config: {
+                            [planId]: planData
+                        }
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.error || 'Error adding plan');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Plan added successfully. Triggering plan check...');
+                    document.getElementById('planJson').value = '';
+                    
+                    // If we got an updated plan name, trigger a check for that plan
+                    if (data.updated_plan) {
+                        checkPlan(data.updated_plan);
+                    } else if (planId) {
+                        // Otherwise use the planId directly
+                        checkPlan(planId);
+                    } else {
+                        loadPlans();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding plan:', error);
+                    alert(`Error adding plan: ${error.message}`);
+                });
+            } catch (e) {
+                alert('Invalid JSON format: ' + e.message);
+            }
+        }
+
+        function deletePlan(planName) {
+            if (confirm(`Are you sure you want to delete plan "${planName}"?`)) {
+                fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plans_config: {
+                            [planName]: null
+                        }
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.error || 'Error deleting plan');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Plan deleted successfully');
+                    loadPlans();
+                })
+                .catch(error => {
+                    console.error('Error deleting plan:', error);
+                    alert(`Error deleting plan: ${error.message}`);
+                });
+            }
+        }
+
+        // Suggestions variables
+        let currentSuggestionsPage = 0;
+        let suggestionsPerPage = 10;
+        let currentSuggestionsFilter = 'pending';
+        let totalSuggestions = 0;
+
+        function loadSuggestions(status = null) {
+            if (status) {
+                currentSuggestionsFilter = status;
+                currentSuggestionsPage = 0;
+            }
+            
+            const skip = currentSuggestionsPage * suggestionsPerPage;
+            const statusParam = currentSuggestionsFilter !== 'all' ? `&status=${currentSuggestionsFilter}` : '';
+            
+            document.getElementById('suggestionsLoading').classList.remove('d-none');
+            document.getElementById('noSuggestions').classList.add('d-none');
+            
+            fetch(`/api/suggestions?skip=${skip}&limit=${suggestionsPerPage}${statusParam}`)
+                .then(response => response.json())
+                .then(data => {
+                    const suggestionsList = document.getElementById('suggestionsList');
+                    totalSuggestions = data.total;
+                    
+                    // Clear existing suggestions except loading and no suggestions elements
+                    Array.from(suggestionsList.children).forEach(child => {
+                        if (child.id !== 'suggestionsLoading' && child.id !== 'noSuggestions') {
+                            suggestionsList.removeChild(child);
+                        }
+                    });
+                    
+                    document.getElementById('suggestionsLoading').classList.add('d-none');
+                    
+                    if (data.suggestions.length === 0) {
+                        document.getElementById('noSuggestions').classList.remove('d-none');
+                    } else {
+                        // Add new suggestions
+                        data.suggestions.forEach(suggestion => {
+                            const suggestionElement = createSuggestionElement(suggestion);
+                            suggestionsList.insertBefore(suggestionElement, document.getElementById('suggestionsLoading'));
+                        });
+                    }
+                    
+                    // Update pagination
+                    updateSuggestionsPagination();
+                })
+                .catch(error => {
+                    console.error('Error loading suggestions:', error);
+                    document.getElementById('suggestionsLoading').classList.add('d-none');
+                    alert('Error loading suggestions');
+                });
+        }
+        
+        function createSuggestionElement(suggestion) {
+            const date = new Date(suggestion.created_at);
+            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+            
+            const card = document.createElement('div');
+            card.className = 'card mb-3 suggestion-card';
+            card.setAttribute('data-id', suggestion.id);
+            
+            // Set border color based on status
+            if (suggestion.status === 'approved') {
+                card.classList.add('border-success');
+            } else if (suggestion.status === 'rejected') {
+                card.classList.add('border-danger');
+            } else {
+                card.classList.add('border-warning');
+            }
+            
+            // Create status badge
+            let statusBadgeClass = 'bg-warning';
+            if (suggestion.status === 'approved') statusBadgeClass = 'bg-success';
+            if (suggestion.status === 'rejected') statusBadgeClass = 'bg-danger';
+            
+            card.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge ${statusBadgeClass}">${suggestion.status.toUpperCase()}</span>
+                        <small class="text-muted">${formattedDate}</small>
+                    </div>
+                    <p class="card-text">${suggestion.content}</p>
+                    ${suggestion.status === 'pending' ? `
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button class="btn btn-sm btn-success" onclick="updateSuggestionStatus('${suggestion.id}', 'approved')">Approve</button>
+                        <button class="btn btn-sm btn-danger" onclick="updateSuggestionStatus('${suggestion.id}', 'rejected')">Reject</button>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function updateSuggestionStatus(id, status) {
+            fetch(`/api/suggestions/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadSuggestions(); // Reload current page
+                } else {
+                    alert(`Error: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating suggestion status:', error);
+                alert('Error updating suggestion status');
+            });
+        }
+        
+        function updateSuggestionsPagination() {
+            const totalPages = Math.ceil(totalSuggestions / suggestionsPerPage);
+            document.getElementById('suggestionsPagination').textContent = 
+                `Page ${currentSuggestionsPage + 1} of ${totalPages || 1}`;
+        }
+        
+        function nextSuggestionsPage() {
+            const totalPages = Math.ceil(totalSuggestions / suggestionsPerPage);
+            if (currentSuggestionsPage < totalPages - 1) {
+                currentSuggestionsPage++;
+                loadSuggestions();
+            }
+        }
+        
+        function previousSuggestionsPage() {
+            if (currentSuggestionsPage > 0) {
+                currentSuggestionsPage--;
+                loadSuggestions();
+            }
+        }
+    </script>
+</body>
+</html>

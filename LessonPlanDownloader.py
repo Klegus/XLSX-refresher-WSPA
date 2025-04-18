@@ -1,6 +1,10 @@
 import os, requests
 import os
 import hashlib
+from shared_utils import get_logger
+
+# Setup logger
+logger = get_logger('LessonPlanDownloader')
 
 class LessonPlanDownloader:
     def __init__(self, username, password, directory="", download_url=None):
@@ -31,33 +35,33 @@ class LessonPlanDownloader:
         headers = {'anchor': ''}
     
         session = requests.Session()
-        print("Downloading file from PUW")
+        #print("Downloading file from PUW")
         response_login = session.post(url_login, headers=headers, data=payload)
         
         if response_login.ok:
-            print("Login successful")
+            #print("Login successful")
     
             try:
                 response_download = session.get(url_download)
             except requests.exceptions.RequestException as e:
-                print("Error downloading the file")
+                logger.error(f"Error downloading the file: {e}")
                 return False
     
             if response_download.ok:
-                print("File downloaded successfully")
+                #print("File downloaded successfully")
     
                 with open(file_save_path, 'wb') as file:
                     file.write(response_download.content)
                 self.file_save_path = os.path.abspath(file_save_path)
-                print(f"File saved path = {self.file_save_path}")
+                #print(f"File saved path = {self.file_save_path}")
                 
                 # Calculate and return checksum
                 checksum = self.calculate_checksum(self.file_save_path)
                 return checksum
             else:
-                print("Error downloading the file")
+                logger.error(f"Error downloading the file: {response_download.status_code}")
         else:
-            print("Error logging in")
+            logger.error(f"Error logging in: {response_login.status_code}")
     
         session.close()
         return None
