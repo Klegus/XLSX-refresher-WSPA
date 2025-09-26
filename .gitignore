@@ -19,3 +19,5 @@ plans-sem3.json
 plans.json
 test.html
 
+/.venv
+/lesson_plans

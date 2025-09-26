@@ -35,7 +35,22 @@ class LessonPlan(LessonPlanDownloader):
         )
         os.makedirs(self.plans_directory, exist_ok=True)
         self.converted_lesson_plan = None
-        self.groups = plan_config["groups"]
+        # Handle both old (string) and new (dict) formats for groups
+        self.groups = {}
+        self.group_column_counts = {}  # Store expected column counts for mixed plans
+        raw_groups = plan_config["groups"]
+        for key, value in raw_groups.items():
+            if isinstance(value, dict):
+                # New format: {"identifier": "...", "columns": N}
+                self.groups[key] = value["identifier"]
+                self.group_column_counts[key] = value.get("columns", None)
+            else:
+                # Old format: just a string identifier
+                self.groups[key] = value
+                self.group_column_counts[key] = None
+
+        # Store mixed flag for MongoDB
+        self.is_mixed = plan_config.get("mixed", False)
         self.group_columns = {}
         self.save_to_mongodb = os.getenv("SAVE_TO_MONGODB", "true").lower() == "true"
         self.save_to_file = os.getenv("SAVE_TO_FILE", "true").lower() == "true"
@@ -56,7 +71,14 @@ class LessonPlan(LessonPlanDownloader):
         if plan_config.get("groups") is None:
             self.groups = {"cały kierunek": "all"}
         else:
-            self.groups = plan_config["groups"]
+            # Handle both old and new formats here too
+            raw_groups = plan_config["groups"]
+            self.groups = {}
+            for key, value in raw_groups.items():
+                if isinstance(value, dict):
+                    self.groups[key] = value["identifier"]
+                else:
+                    self.groups[key] = value
 
         self.group_columns = {}
 
@@ -79,6 +101,285 @@ class LessonPlan(LessonPlanDownloader):
         headers = headers[:num_columns]
 
         return headers
+
+    def detect_weekday_columns(self, excel_file, sheet_name):
+        """Dynamically detect which columns represent which weekdays by scanning headers"""
+        import openpyxl
+
+        wb = openpyxl.load_workbook(excel_file, read_only=True)
+        ws = wb[sheet_name]
+
+        # Day patterns to search for (case-insensitive)
+        day_patterns = {
+            'PONIEDZIAŁEK': 'Poniedziałek',
+            'PONIEDZIALEK': 'Poniedziałek',  # Without Polish characters
+            'WTOREK': 'Wtorek',
+            'ŚRODA': 'Środa',
+            'SRODA': 'Środa',  # Without Polish characters
+            'CZWARTEK': 'Czwartek',
+            'PIĄTEK': 'Piątek',
+            'PIATEK': 'Piątek',  # Without Polish characters
+            'SOBOTA': 'Sobota',
+            'NIEDZIELA': 'Niedziela'
+        }
+
+        # Search for day headers in first 10 rows (sometimes headers are lower)
+        day_column_map = {}  # {column_index: day_name}
+
+        # Track which columns have been found
+        found_days = set()
+
+        for row_idx in range(1, 11):  # Check more rows
+            row = ws[row_idx]
+            for col_idx, cell in enumerate(row, 1):  # Start from 1 to match Excel column numbering
+                if cell.value and isinstance(cell.value, str):
+                    value = str(cell.value).upper().strip()
+
+                    # Check if this cell contains a day name
+                    for pattern, day_name in day_patterns.items():
+                        if pattern in value or value == pattern:
+                            # Found a day header
+                            if col_idx not in day_column_map:
+                                day_column_map[col_idx] = day_name
+                                found_days.add(day_name)
+                                logger.info(f"Detected {day_name} in Excel column {col_idx} (row {row_idx})")
+                                break  # Stop checking patterns for this cell
+
+        # Log summary
+        if day_column_map:
+            logger.info(f"Successfully detected {len(day_column_map)} day columns")
+            logger.info(f"Day column mapping: {day_column_map}")
+        else:
+            logger.warning("No day headers detected in Excel file")
+
+        wb.close()
+        return day_column_map
+
+    def expand_to_full_week_mixed(self, df_filtered, column_indices, expected_columns=None):
+        """
+        Expand DataFrame for mixed plans to include all weekdays.
+        Missing days will have EMPTY columns, not duplicated data.
+        Uses column count information to determine exact placement.
+
+        Args:
+            df_filtered: DataFrame with actual data
+            column_indices: Excel column indices where data was found
+            expected_columns: Expected number of columns for this group (from plans.json)
+        """
+        import pandas as pd
+
+        # Define weekdays for each schedule type
+        weekdays_map = {
+            "st": ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
+            "nst": ["Piątek", "Sobota", "Niedziela"],
+            "nst-online": ["Sobota", "Niedziela"]
+        }
+        weekdays = weekdays_map.get(self.schedule_type, weekdays_map["st"])
+
+        # Get the expected number of columns for this group
+        actual_col_count = len(column_indices) - 1  # Exclude time column
+        logger.info(f"Group has {actual_col_count} actual columns (excluding time)")
+
+        # If expected columns is specified, validate and limit
+        if expected_columns and actual_col_count > expected_columns:
+            logger.warning(f"Found {actual_col_count} columns but expected {expected_columns}. Using first {expected_columns} columns.")
+            # Limit to expected columns + time column
+            column_indices = column_indices[:expected_columns + 1]
+            actual_col_count = expected_columns
+
+        # Try to detect which columns correspond to which days
+        detected_days = {}
+        try:
+            if hasattr(self, 'converted_lesson_plan') and self.converted_lesson_plan:
+                all_detected_days = self.detect_weekday_columns(self.converted_lesson_plan, self.sheet_name)
+
+                # Filter to only include columns we're actually using
+                for col_idx in column_indices[1:]:  # Skip time column
+                    if col_idx in all_detected_days:
+                        detected_days[col_idx] = all_detected_days[col_idx]
+                        logger.info(f"Column {col_idx} contains data for {all_detected_days[col_idx]}")
+
+                if detected_days:
+                    logger.info(f"Successfully mapped {len(detected_days)} columns to weekdays")
+                else:
+                    logger.warning("No weekday headers found for the data columns")
+        except Exception as e:
+            logger.warning(f"Could not detect weekdays dynamically: {e}")
+
+        # If detection failed, use positional mapping based on column positions
+        # CRITICAL: Only use positional mapping if day detection completely failed
+        if not detected_days and actual_col_count > 0:
+            logger.warning(f"Day detection failed! Falling back to positional mapping for {actual_col_count} columns")
+            logger.warning(f"Column indices (excluding time): {column_indices[1:]}")
+            logger.warning("CAUTION: Positional mapping may be incorrect for sheets with non-standard layouts!")
+
+            # For st (standard) schedules with 5 weekdays
+            if len(weekdays) == 5:
+                # Map based on Excel column position to weekday
+                # Excel columns typically follow pattern:
+                # Col 0: Time
+                # Col 1: Monday (or first group Monday)
+                # Col 2: Tuesday (or first group Tuesday)
+                # Col 3: Wednesday (or first group Wednesday)
+                # Col 4: Thursday (or first group Thursday)
+                # Col 5: Friday (or first group Friday)
+                # Col 6: Monday (second group Monday) etc.
+
+                for col_idx in column_indices[1:]:  # Skip time column
+                    # Subtract 1 because column 0 is time, column 1 is first data column
+                    # Then use modulo 5 to find day of week
+                    day_index = (col_idx - 1) % 5
+
+                    # Map to weekday
+                    if day_index < len(weekdays):
+                        detected_days[col_idx] = weekdays[day_index]
+                        logger.info(f"Column {col_idx} -> {weekdays[day_index]} (position {day_index})")
+
+                # Special handling for specific patterns
+                if actual_col_count == 3:
+                    # Check if it's the common Tue/Thu/Fri pattern
+                    # This happens when columns are at positions like 3,5,6 (indices for Tue,Thu,Fri)
+                    cols_list = list(column_indices[1:])
+
+                    # Calculate day indices for each column
+                    day_indices = [(c - 1) % 5 for c in cols_list]
+                    logger.info(f"3-column pattern detected. Day indices: {day_indices}")
+
+                    # Common patterns:
+                    # [1, 3, 4] = Tue, Thu, Fri
+                    # [0, 2, 4] = Mon, Wed, Fri
+                    # [1, 2, 3] = Tue, Wed, Thu
+
+                    # Already mapped correctly above, just log for verification
+                    mapped_days = [detected_days.get(c, "?") for c in cols_list]
+                    logger.info(f"Mapped to days: {mapped_days}")
+
+            elif len(weekdays) == 3:
+                # For nst (non-standard) with 3 weekdays (Fri, Sat, Sun)
+                for i, col_idx in enumerate(column_indices[1:]):
+                    if i < len(weekdays):
+                        detected_days[col_idx] = weekdays[i]
+                        logger.info(f"Column {col_idx} -> {weekdays[i]}")
+
+            # Log the final mapping
+            logger.info(f"Final day mapping: {detected_days}")
+
+        # Create new DataFrame with all weekdays
+        new_df = pd.DataFrame()
+
+        # Always keep the time column
+        new_df["Godziny"] = df_filtered.iloc[:, 0]
+
+        # Map existing columns to their detected days (no duplication!)
+        column_to_day = {}
+
+        # Use detected days if available
+        if detected_days:
+            logger.info(f"Using detected day mapping: {detected_days}")
+            for idx, col_idx in enumerate(column_indices[1:], 1):  # Skip time column
+                if col_idx in detected_days:
+                    day = detected_days[col_idx]
+                    if day not in column_to_day:  # Prevent duplicate mapping
+                        column_to_day[day] = df_filtered.iloc[:, idx]
+                        logger.info(f"Column {col_idx} (df index {idx}) mapped to {day} (from header detection)")
+                    else:
+                        logger.warning(f"Day {day} already mapped, skipping column {col_idx}")
+                else:
+                    logger.warning(f"Column {col_idx} not in detected days mapping")
+        else:
+            logger.warning("No detected days available, data may be placed incorrectly")
+
+        # Add columns for all weekdays
+        for day in weekdays:
+            if day in column_to_day:
+                # Use existing data for this day
+                new_df[day] = column_to_day[day]
+                logger.info(f"Added data for {day}")
+            else:
+                # Create empty column for missing day - CRUCIAL!
+                new_df[day] = pd.Series([""] * len(new_df), dtype=object)
+                logger.info(f"Added EMPTY column for {day}")
+
+        logger.info(f"Expanded from {len(df_filtered.columns)} to {len(new_df.columns)} columns")
+        logger.info(f"Days with data: {list(column_to_day.keys())}")
+        logger.info(f"Empty days: {[d for d in weekdays if d not in column_to_day]}")
+
+        return new_df
+
+    def expand_to_full_week(self, df_filtered, column_indices):
+        """
+        Original expand function for normal (non-mixed) plans.
+        This function was originally intended for normal plans where a group
+        might be missing some day columns that need to be filled in.
+        """
+
+        # Define weekdays for each schedule type
+        weekdays_map = {
+            "st": ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"],
+            "nst": ["Piątek", "Sobota", "Niedziela"],
+            "nst-online": ["Sobota", "Niedziela"]
+        }
+
+        weekdays = weekdays_map.get(self.schedule_type, weekdays_map["st"])
+        num_days = len(weekdays)
+
+        # Create a new DataFrame with all weekdays
+        import pandas as pd
+        new_df = pd.DataFrame()
+
+        # Always keep the time column
+        new_df["Godziny"] = df_filtered.iloc[:, 0]
+
+        # Try to detect weekday columns dynamically first
+        day_column_map = {}
+        try:
+            if hasattr(self, 'converted_lesson_plan') and self.converted_lesson_plan:
+                detected_days = self.detect_weekday_columns(self.converted_lesson_plan, self.sheet_name)
+                # Map our column indices to detected days
+                for col_idx in column_indices[1:]:
+                    if col_idx in detected_days:
+                        day_column_map[col_idx] = detected_days[col_idx]
+                        logger.info(f"Column {col_idx} detected as {detected_days[col_idx]}")
+        except Exception as e:
+            logger.warning(f"Could not detect weekdays dynamically: {e}")
+
+        # If dynamic detection failed or incomplete, use pattern-based mapping
+        if not day_column_map:
+            logger.info("Using pattern-based day mapping")
+            for col_idx in column_indices[1:]:  # Skip time column
+                # Common patterns: 2-6 (Mon-Fri), 11-15 (Mon-Fri), etc.
+                # Base column for groups typically starts at 2
+                base_col = 2
+                # Find which "week group" this column belongs to
+                week_group = (col_idx - base_col) // num_days
+                position_in_week = (col_idx - base_col) % num_days
+
+                if 0 <= position_in_week < len(weekdays):
+                    day_name = weekdays[position_in_week]
+                    day_column_map[col_idx] = day_name
+                    logger.debug(f"Column {col_idx} mapped to {day_name} (pattern-based)")
+
+        # Now create the full week DataFrame
+        column_data_map = {}  # Map day names to data
+        for idx, col_idx in enumerate(column_indices[1:], 1):  # Skip time column
+            if col_idx in day_column_map:
+                day = day_column_map[col_idx]
+                if day not in column_data_map:
+                    column_data_map[day] = []
+                column_data_map[day].append(df_filtered.iloc[:, idx])
+
+        # Add columns for all weekdays
+        for day in weekdays:
+            if day in column_data_map:
+                # If we have multiple columns for the same day, use the first one
+                # (this handles cases where a day appears multiple times)
+                new_df[day] = column_data_map[day][0]
+            else:
+                # No data for this day - add empty column
+                new_df[day] = pd.Series([None] * len(new_df), dtype=object)
+
+        logger.info(f"Expanded from {len(column_indices)} columns to {len(new_df.columns)} columns (full week)")
+        return new_df
 
     def process_and_save_plan(self):
         """Process and save the lesson plan, returns checksum if plan was processed"""
@@ -331,9 +632,18 @@ class LessonPlan(LessonPlanDownloader):
 
         try:
             df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
-            for key, value in self.groups.items():
-                columns = df.columns[df.isin([value]).any()].tolist()
+            for key, identifier in self.groups.items():
+                # Use the full identifier (with \n characters) for searching
+                columns = df.columns[df.isin([identifier]).any()].tolist()
                 self.group_columns[key] = columns
+
+                # Log if column count doesn't match expected for mixed plans
+                if hasattr(self, 'is_mixed') and self.is_mixed and hasattr(self, 'group_column_counts'):
+                    expected = self.group_column_counts.get(key)
+                    if expected:
+                        actual = len(columns)
+                        if actual != expected:
+                            logger.warning(f"Group '{key}': Expected {expected} columns, found {actual}")
 
             return self.group_columns
 
@@ -377,6 +687,12 @@ class LessonPlan(LessonPlanDownloader):
             """
             Sprawdza czy znalezione kolumny są prawidłowe dla danego typu planu
             """
+            # For mixed plans, don't enforce strict column count
+            if hasattr(self, 'is_mixed') and self.is_mixed:
+                logger.info(f"Mixed plan - accepting {len(columns)} columns without strict verification")
+                # Just ensure we have at least some columns and they're not all numbered
+                return len(columns) > 0 and not all("Column_" in col for col in columns)
+
             expected_columns = {
                 "st": 6,  # Godziny + 5 dni
                 "nst": 4,  # Godziny + 3 dni
@@ -481,7 +797,7 @@ class LessonPlan(LessonPlanDownloader):
             logger.error(f"An error occurred while finding group columns: {str(e)}")
             return None
 
-    def get_lessons_for_group(self, group_name):
+    def get_lessons_for_group(self, group_name, expected_columns=None):
         if not self.converted_lesson_plan:
             logger.error("No converted file found. Please run unmerge_and_fill_data() first.")
             return None
@@ -587,9 +903,21 @@ class LessonPlan(LessonPlanDownloader):
             # Remove rows where all group columns (excluding time column) are NaN
             df_filtered = df_filtered.dropna(subset=df_filtered.columns[1:], how="all")
 
-            # Get appropriate headers
-            headers = self.get_schedule_headers(len(df_filtered.columns))
-            df_filtered.columns = headers
+            # For mixed plans, expand to full week with EMPTY columns for missing days
+            if hasattr(self, 'is_mixed') and self.is_mixed:
+                # Pass group name to get expected columns if available
+                expected_cols = None
+                if hasattr(self, 'group_column_counts') and group_name in self.group_column_counts:
+                    expected_cols = self.group_column_counts[group_name]
+                    logger.info(f"Group {group_name} expected to have {expected_cols} columns")
+
+                # Expand DataFrame to include all weekdays with empty columns
+                df_filtered = self.expand_to_full_week_mixed(df_filtered, columns_to_extract, expected_cols)
+                logger.info(f"Mixed plan expanded to full week: {list(df_filtered.columns)}")
+            else:
+                # For normal plans, use sequential headers
+                headers = self.get_schedule_headers(len(df_filtered.columns))
+                df_filtered.columns = headers
 
             # Reset index
             df_filtered = df_filtered.reset_index(drop=True)
@@ -721,6 +1049,13 @@ class LessonPlan(LessonPlanDownloader):
             "category": self.schedule_type,
             "groups": {},
         }
+
+        # Add mixed flag if this is a mixed plan
+        if hasattr(self, 'is_mixed') and self.is_mixed:
+            plans_data["mixed"] = True
+            # Also store column counts for frontend
+            if hasattr(self, 'group_column_counts'):
+                plans_data["group_column_info"] = self.group_column_counts
 
         processed_groups = []
         failed_groups = []

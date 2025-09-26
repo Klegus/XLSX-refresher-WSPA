@@ -62,8 +62,40 @@ def get_plans_config():
     logger.info("No plans configuration found in MongoDB, trying URL...")
     if not PLANS_JSON_URL:
         logger.warning("PLANS_JSON_URL environment variable not set.")
-        update_system_config({"maintenance_mode": True, "maintenance_reason": "PLANS_JSON_URL not configured"})
-        return None
+        logger.info("Attempting to load from local plans.json file...")
+
+        # Try to load from local file as fallback
+        try:
+            import json
+            local_file = os.path.join(os.path.dirname(__file__), 'plans.json')
+            if os.path.exists(local_file):
+                with open(local_file, 'r', encoding='utf-8') as f:
+                    plans_data = json.load(f)
+
+                # Save to MongoDB for future use
+                config = {
+                    "_id": "plans_json",
+                    "plans": plans_data,
+                    "last_updated": datetime.now().isoformat(),
+                    "source": "local_file"
+                }
+
+                db.plans_config.update_one(
+                    {"_id": "plans_json"},
+                    {"$set": config},
+                    upsert=True
+                )
+
+                logger.info(f"Successfully loaded {len(plans_data)} plans from local file")
+                return plans_data
+            else:
+                logger.error(f"Local plans.json file not found at {local_file}")
+                update_system_config({"maintenance_mode": True, "maintenance_reason": "No plans.json found"})
+                return None
+        except Exception as e:
+            logger.error(f"Failed to load local plans.json: {e}")
+            update_system_config({"maintenance_mode": True, "maintenance_reason": f"Error loading plans.json: {e}"})
+            return None
     
     try:
         # Fetch from URL
@@ -248,7 +280,8 @@ init_suggestion_routes(app, db)
 
 
 def run_flask_app():
-    app.run(host="0.0.0.0", port=80)
+    port = int(os.getenv("PORT", "5005"))
+    app.run(host="0.0.0.0", port=port)
 
 
 class LessonPlanManager:
@@ -324,7 +357,6 @@ class LessonPlanManager:
 
     async def check_once(self):
         """Wykonuje pojedynczy cykl sprawdzania planu"""
-        os.system('clear')
         # Reload plan config from DB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
         if plans_config_doc and "plans" in plans_config_doc:

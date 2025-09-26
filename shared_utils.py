@@ -101,6 +101,8 @@ def get_semester_collections():
                     "timestamp": latest_plan["timestamp"],
                     "category": category,
                     "faculty": faculty,
+                    # Include mixed flag if it exists in the document
+                    "mixed": latest_plan.get("mixed", False),
                 }
     return collections_data
 
