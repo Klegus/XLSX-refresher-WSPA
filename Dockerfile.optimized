@@ -1,0 +1,145 @@
+# ===========================================
+# Zoptymalizowany Dockerfile dla Flask Backend
+# ===========================================
+
+# --- Build Stage ---
+FROM python:3.12-slim as builder
+
+# Ustaw zmienne środowiskowe dla Pythona
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=120
+
+WORKDIR /app
+
+# Zainstaluj zależności systemowe w jednej warstwie
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Najpierw skopiuj tylko requirements.txt (lepsze cache'owanie)
+COPY requirements.txt .
+
+# Utwórz wirtualne środowisko i zainstaluj zależności
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Upgrade pip i zainstaluj wheel dla szybszej instalacji
+RUN pip install --upgrade pip wheel
+
+# Zainstaluj wszystkie zależności na raz (lepsze cache'owanie)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# --- Runtime Stage ---
+FROM python:3.12-slim as runtime
+
+# Ustaw zmienne środowiskowe
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    PYTHONPATH=/app
+
+WORKDIR /app
+
+# Zainstaluj tylko niezbędne biblioteki runtime
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    # Dla pandas/numpy
+    libgomp1 \
+    # Dla timezone
+    tzdata \
+    # Curl do healthchecków
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Skopiuj wirtualne środowisko z buildera
+COPY --from=builder /opt/venv /opt/venv
+
+# Utwórz użytkownika non-root
+RUN useradd -m -u 1000 -s /bin/bash appuser && \
+    mkdir -p /app/logs /app/temp && \
+    chown -R appuser:appuser /app
+
+# Skopiuj kod aplikacji
+COPY --chown=appuser:appuser *.py ./
+COPY --chown=appuser:appuser routes/ routes/
+COPY --chown=appuser:appuser templates/ templates/
+
+# Przełącz na użytkownika non-root
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:80/api/status || exit 1
+
+# Port
+EXPOSE 80
+
+# Komenda startowa
+CMD ["python", "-u", "main.py"]
+
+# ===========================================
+# Alternatywna wersja z Alpine (jeszcze mniejsza)
+# ===========================================
+
+# FROM python:3.12-alpine as alpine-builder
+#
+# ENV PYTHONDONTWRITEBYTECODE=1 \
+#     PYTHONUNBUFFERED=1
+#
+# WORKDIR /app
+#
+# # Zainstaluj zależności dla kompilacji
+# RUN apk add --no-cache --virtual .build-deps \
+#     gcc \
+#     musl-dev \
+#     libffi-dev \
+#     openssl-dev \
+#     python3-dev \
+#     && apk add --no-cache \
+#     libstdc++ \
+#     libgomp
+#
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir --upgrade pip && \
+#     pip install --no-cache-dir -r requirements.txt
+#
+# # Usuń zależności budowania
+# RUN apk del .build-deps
+#
+# FROM python:3.12-alpine as alpine-runtime
+#
+# ENV PYTHONDONTWRITEBYTECODE=1 \
+#     PYTHONUNBUFFERED=1
+#
+# WORKDIR /app
+#
+# # Tylko runtime dependencies
+# RUN apk add --no-cache \
+#     libstdc++ \
+#     libgomp \
+#     curl \
+#     tzdata
+#
+# # Kopiuj z buildera
+# COPY --from=alpine-builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+#
+# # Utwórz użytkownika
+# RUN adduser -D -h /app -s /bin/sh appuser
+#
+# COPY --chown=appuser:appuser *.py ./
+# COPY --chown=appuser:appuser routes/ routes/
+# COPY --chown=appuser:appuser templates/ templates/
+#
+# USER appuser
+#
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+#     CMD curl -f http://localhost:80/api/status || exit 1
+#
+# EXPOSE 80
+# CMD ["python", "-u", "main.py"]

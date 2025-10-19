@@ -21,9 +21,10 @@ from bs4 import BeautifulSoup
 import sentry_sdk
 import asyncio
 import logging
+import sys
 
 # Import shared logger
-from shared_utils import configure_root_logger, get_system_config, get_semester_collections
+from shared_utils import configure_root_logger, get_system_config, get_semester_collections, log_cycle_summary, log_plan_header
 
 # Setup app-specific logger
 logger = configure_root_logger(logging.INFO)
@@ -379,16 +380,17 @@ class LessonPlanManager:
 
         try:
             logger.info(
-                f"\n--- Starting new check for {self.plan_name} at {datetime.now()} ---"
+                f"Starting check",
+                extra={"plan_name": self.plan_name, "operation": "check"}
             )
             self.status_checker.update_activity()
             new_checksum = self.lesson_plan.process_and_save_plan()
 
             if new_checksum is None:
-                logger.error("Wystąpił błąd podczas sprawdzania planu.")
+                logger.error("Error checking plan", extra={"plan_name": self.plan_name})
             else:
                 if new_checksum:
-                    logger.info("Plan został zaktualizowany")
+                    logger.info("Plan updated", extra={"plan_name": self.plan_name, "checksum": new_checksum})
                     # Check if plan has comparison enabled and comparator is available
                     should_compare = (
                         self.lesson_plan.plan_config.get("compare", False)
@@ -410,7 +412,7 @@ class LessonPlanManager:
 
                             if should_compare:
                                 try:
-                                    logger.info("Comparing plans...")
+                                    logger.info("Comparing plans...", extra={"plan_name": self.plan_name})
                                     comparison_result = (
                                         self.lesson_plan_comparator.compare_plans(
                                             self.plan_config
@@ -423,7 +425,7 @@ class LessonPlanManager:
                                             "value": comparison_result
                                         })
                                 except Exception as e:
-                                    logger.error(f"Error during plan comparison: {e}")
+                                    logger.error(f"Error during plan comparison: {e}", extra={"plan_name": self.plan_name})
                                     embed["description"] = "Plan zajęć został zaktualizowany.\nWystąpił błąd podczas porównywania zmian."
                             else:
                                 embed["description"] = "Plan zajęć został zaktualizowany."
@@ -433,20 +435,20 @@ class LessonPlanManager:
                             }
 
                             requests.post(webhook_url, json=webhook_data)
-                            logger.info("Wysłano powiadomienie webhook o aktualizacji planu.")
+                            logger.info("Webhook sent", extra={"plan_name": self.plan_name})
                         except Exception as e:
-                            logger.error(f"Błąd podczas wysyłania webhooka: {str(e)}")
-                    logger.info("Wykryto i zapisano zmiany w planie.")
+                            logger.error(f"Error sending webhook: {str(e)}", extra={"plan_name": self.plan_name})
+                    logger.info("Changes detected and saved", extra={"plan_name": self.plan_name})
                     return True
                     self.update_cached_plans()
-                    logger.info("Zaktualizowano pamięć podręczną planów.")
+                    logger.info("Cache updated", extra={"plan_name": self.plan_name})
                 else:
-                    logger.info("Nie wykryto zmian w planie.")
+                    logger.info("No changes detected", extra={"plan_name": self.plan_name})
 
             self.clean_new_files()
 
         except Exception as e:
-            logger.error(f"\nWystąpił błąd podczas sprawdzania {self.plan_name}: {str(e)}")
+            logger.error(f"Error during check: {str(e)}", extra={"plan_name": self.plan_name})
             raise
 
     def start(self):
@@ -864,19 +866,18 @@ async def main():
                             )
                             logger.info(f"LessonPlanManager for {plan_config['name']} successfully created")
                     
-                    # Update existing managers with current config
+                    logger.info(f"Starting check cycle for {len(lesson_plan_managers)} plans")
+
                     for plan_id, manager in lesson_plan_managers.items():
-                        # Update plan config in manager
                         if plan_id in plans_config:
                             manager.lesson_plan.plan_config = plans_config[plan_id]
                             manager.plan_config = plans_config[plan_id]
-                        
-                        # Check for plans that were removed from config and clean them up
+
                         plans_to_remove = []
                         for plan_id in lesson_plan_managers:
                             if plan_id not in plans_config:
                                 plans_to_remove.append(plan_id)
-                        
+
                         for plan_id in plans_to_remove:
                             manager = lesson_plan_managers[plan_id]
                             plan_name = manager.plan_name
@@ -900,14 +901,12 @@ async def main():
                                 except Exception as e:
                                     logger.error(f"Error adding removal record: {e}")
                             
-                            # Remove from managers dictionary
                             del lesson_plan_managers[plan_id]
                             logger.info(f"Manager for {plan_name} successfully removed")
-                        
+
                         plan_name = plans_config[plan_id]["name"]
-                        logger.info(f"\nStarting check cycle for {plan_name}")
+                        log_plan_header(plan_name, plan_id, "check")
                         try:
-                            # Start a span for this specific plan check
                             with sentry_sdk.start_span(op="check_plan", description=f"Check plan: {plan_name}"):
                                 result = await manager.check_once()
                                 successful_checks += 1
@@ -926,12 +925,21 @@ async def main():
                             sentry_sdk.capture_exception(e)
                             errors.append(error_info)
                             logger.error(f"Error in manager for {plan_name}: {str(e)}")
-                    
-                    # Calculate total execution time for the cycle
+
                     cycle_execution_time = round(time.time() - cycle_start_time, 2)
-                    logger.info(f"\nTotal cycle execution time: {cycle_execution_time} seconds")
-                    
-                    # Set transaction data
+
+                    total_plans = len(lesson_plan_managers)
+                    next_check = datetime.now() + timedelta(seconds=check_interval)
+
+                    log_cycle_summary(
+                        duration=cycle_execution_time,
+                        plans_checked=successful_checks,
+                        total_plans=total_plans,
+                        changes_detected=new_plans,
+                        errors_count=len(errors),
+                        next_check_time=next_check.strftime('%Y-%m-%d %H:%M:%S')
+                    )
+
                     transaction.set_data("successful_checks", successful_checks)
                     transaction.set_data("new_plans", new_plans)
                     transaction.set_data("execution_time", cycle_execution_time)
@@ -948,9 +956,8 @@ async def main():
                         execution_time=cycle_execution_time,
                     )
 
-                    # Po sprawdzeniu wszystkich planów, sprawdź aktywności Moodle
                     try:
-                        logger.info("\nSprawdzanie aktywności Moodle...")
+                        logger.info("Checking Moodle activities", extra={"operation": "moodle_check"})
                         with sentry_sdk.start_span(op="moodle_check", description="Check Moodle activities"):
                             downloader = WebpageDownloader()
                             moodle_url = os.getenv("MOODLE_URL")
@@ -969,12 +976,11 @@ async def main():
                                 parser.parse_activities()
                                 parser.save_to_mongodb()
 
-                                # Usuń pobrany plik
                                 try:
                                     os.remove(saved_file)
-                                    logger.info(f"Usunięto plik tymczasowy: {saved_file}")
+                                    logger.debug(f"Removed temporary file", extra={"file_path": saved_file})
                                 except Exception as e:
-                                    logger.error(f"Błąd podczas usuwania pliku {saved_file}: {str(e)}")
+                                    logger.error(f"Error removing file: {str(e)}", extra={"file_path": saved_file})
 
                     except Exception as e:
                         error_info = {
@@ -983,13 +989,13 @@ async def main():
                             "traceback": traceback.format_exc(),
                             "type": "moodle_activity_error"
                         }
-                        # Store in errors collection
                         db.errors.insert_one(error_info)
                         sentry_sdk.capture_exception(e)
-                        logger.error(f"Błąd podczas przetwarzania aktywności Moodle: {str(e)}")
+                        logger.error(f"Error processing Moodle activities: {str(e)}", extra={"operation": "moodle_check"})
 
                 logger.info(
-                    f"\nWszystkie zadania zakończone. Oczekiwanie {check_interval} sekund przed następnym cyklem..."
+                    f"All tasks completed. Waiting {check_interval} seconds before next cycle",
+                    extra={"check_interval": check_interval}
                 )
                 time.sleep(check_interval)
 

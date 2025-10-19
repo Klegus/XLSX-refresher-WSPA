@@ -21,3 +21,10 @@ test.html
 
 /.venv
 /lesson_plans
+/group_lessons
+plans.json
+plans-full.json
+unmerged_downloaded_file.xlsx
+logs/backend.log
+fix_zero_columns.py
+downloaded_file.xlsx

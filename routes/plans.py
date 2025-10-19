@@ -48,12 +48,18 @@ def init_plan_routes(app, get_semester_collections, db):
                         if any(isinstance(v, str) and '<table' in v for v in groups.values()):
                             groups = {k: k for k in groups.keys()}
 
+                    # Convert mixed to boolean (handle string "true"/"false" from MongoDB)
+                    mixed_value = data.get("mixed", False)
+                    if isinstance(mixed_value, str):
+                        mixed_bool = mixed_value.lower() == "true"
+                    else:
+                        mixed_bool = bool(mixed_value)
+
                     plan_data = {
                         "id": collection_name,
                         "name": data["plan_name"],
                         "groups": groups,
-                        # First try to get mixed flag directly from the data
-                        "mixed": data.get("mixed", False)
+                        "mixed": mixed_bool
                     }
 
                     # If mixed flag is not in data, try to find it in plans_config

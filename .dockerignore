@@ -1,12 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+.mypy_cache/
+
+# Testy
+test_*.py
+tests/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Git
+.git/
+.gitignore
 .github/
-.aider*
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+docker-build-push.sh
+
+# Dokumentacja
+*.md
+docs/
+README*
+
+# Środowisko
+.env
+.env*
+!.env.example
+
+# Logi i cache
+*.log
+logs/
+temp/
+tmp/
+
+# Pliki konfiguracyjne
+mypy.ini
+.flake8
 .bandit*
 .codecov*
-.env*
-.gitignore
 .safety-policy.yml
-mypy.ini
+.aider*
+
+# Pliki projektu
 plans-old.json
 public-keys.json
-readme.md
 test.html
+*.bak
+*.backup
+
+# Security
+*.pem
+*.key
+*.crt

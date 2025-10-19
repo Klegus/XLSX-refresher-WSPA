@@ -39,6 +39,10 @@ class LessonPlan(LessonPlanDownloader):
         self.groups = {}
         self.group_column_counts = {}  # Store expected column counts for mixed plans
         raw_groups = plan_config["groups"]
+
+        # Also check for groups_column_info at the top level (alternative format)
+        groups_column_info = plan_config.get("groups_column_info", {})
+
         for key, value in raw_groups.items():
             if isinstance(value, dict):
                 # New format: {"identifier": "...", "columns": N}
@@ -47,7 +51,8 @@ class LessonPlan(LessonPlanDownloader):
             else:
                 # Old format: just a string identifier
                 self.groups[key] = value
-                self.group_column_counts[key] = None
+                # Try to get column count from groups_column_info if available
+                self.group_column_counts[key] = groups_column_info.get(key, None)
 
         # Store mixed flag for MongoDB
         self.is_mixed = plan_config.get("mixed", False)
@@ -142,7 +147,7 @@ class LessonPlan(LessonPlanDownloader):
                             if col_idx not in day_column_map:
                                 day_column_map[col_idx] = day_name
                                 found_days.add(day_name)
-                                logger.info(f"Detected {day_name} in Excel column {col_idx} (row {row_idx})")
+                                logger.info(f"Detected {day_name} in Excel column {col_idx} (row {row_idx}, pattern: '{pattern}', cell value: '{cell.value}')")
                                 break  # Stop checking patterns for this cell
 
         # Log summary
@@ -276,25 +281,43 @@ class LessonPlan(LessonPlanDownloader):
         # Use detected days if available
         if detected_days:
             logger.info(f"Using detected day mapping: {detected_days}")
-            for idx, col_idx in enumerate(column_indices[1:], 1):  # Skip time column
-                if col_idx in detected_days:
-                    day = detected_days[col_idx]
+            logger.info(f"DataFrame has {len(df_filtered.columns)} columns")
+            logger.info(f"column_indices[1:] (Excel columns) = {column_indices[1:]}")
+
+            # CRITICAL FIX: When we do df.iloc[:, [0, 5, 14, 19]], the resulting DataFrame
+            # has columns at indices [0, 1, 2, 3], NOT [0, 5, 14, 19]!
+            # We need to map: Excel column → DataFrame column index → Day name
+
+            for df_col_idx, excel_col_idx in enumerate(column_indices[1:], 1):  # Start from 1 to skip time column
+                logger.info(f"Processing: DataFrame col_idx={df_col_idx}, Excel col_idx={excel_col_idx}")
+
+                if excel_col_idx in detected_days:
+                    day = detected_days[excel_col_idx]
+
+                    # Log sample data from this DataFrame column
+                    sample_data = df_filtered.iloc[:3, df_col_idx].tolist() if len(df_filtered) >= 3 else df_filtered.iloc[:, df_col_idx].tolist()
+                    logger.info(f"  Excel column {excel_col_idx} -> DataFrame column index {df_col_idx}")
+                    logger.info(f"  Detected as day: {day}")
+                    logger.info(f"  Sample data from df_filtered.iloc[:, {df_col_idx}]: {sample_data}")
+
                     if day not in column_to_day:  # Prevent duplicate mapping
-                        column_to_day[day] = df_filtered.iloc[:, idx]
-                        logger.info(f"Column {col_idx} (df index {idx}) mapped to {day} (from header detection)")
+                        column_to_day[day] = df_filtered.iloc[:, df_col_idx]
+                        logger.info(f"  ✓ Mapped DataFrame column {df_col_idx} to weekday '{day}'")
                     else:
-                        logger.warning(f"Day {day} already mapped, skipping column {col_idx}")
+                        logger.warning(f"Day {day} already mapped, skipping Excel column {excel_col_idx}")
                 else:
-                    logger.warning(f"Column {col_idx} not in detected days mapping")
+                    logger.warning(f"Excel column {excel_col_idx} not in detected days mapping")
         else:
             logger.warning("No detected days available, data may be placed incorrectly")
 
         # Add columns for all weekdays
+        logger.info(f"Creating final DataFrame with weekdays: {weekdays}")
         for day in weekdays:
             if day in column_to_day:
                 # Use existing data for this day
+                sample_final = column_to_day[day].iloc[:3].tolist() if len(column_to_day[day]) >= 3 else column_to_day[day].tolist()
                 new_df[day] = column_to_day[day]
-                logger.info(f"Added data for {day}")
+                logger.info(f"Added data for {day}, sample: {sample_final}")
             else:
                 # Create empty column for missing day - CRUCIAL!
                 new_df[day] = pd.Series([""] * len(new_df), dtype=object)
@@ -424,7 +447,7 @@ class LessonPlan(LessonPlanDownloader):
                 }
                 
                 result = collection.insert_one(plans_data)
-                #print(f"Saved basic plan info to MongoDB collection {collection_name} with id: {result.inserted_id}")
+                logger.info(f"Saved basic plan info to MongoDB collection", extra={"collection": collection_name, "doc_id": str(result.inserted_id)})
             return new_checksum
 
         should_process = True
@@ -480,16 +503,22 @@ class LessonPlan(LessonPlanDownloader):
 
                 # Process each group
                 for group_name in groups_to_process:
-                    #print(f"\nProcessing group: {group_name}")
                     try:
                         df_group = self.get_lessons_for_group(group_name)
                         if df_group is not None and not df_group.empty:
                             # Save group data
                             self.save_group_lessons(group_name, df_group)
                             processed_groups.append(group_name)
-                            #print(f"Successfully processed group: {group_name}")
                         else:
-                            #print(f"No data available for group: {group_name}")
+                            logger.warning(
+                                f"No data available for group - DataFrame is empty",
+                                extra={
+                                    "group_name": group_name,
+                                    "plan_name": self.plan_config.get('name'),
+                                    "has_columns": group_name in self.group_columns,
+                                    "column_count": len(self.group_columns.get(group_name, []))
+                                }
+                            )
                             failed_groups.append(group_name)
                     except Exception as group_error:
                         logger.error(
@@ -499,7 +528,15 @@ class LessonPlan(LessonPlanDownloader):
                         continue
 
                 if failed_groups:
-                    logger.warning(f"Failed to process groups: {', '.join(failed_groups)}")
+                    logger.warning(
+                        f"Failed to process groups",
+                        extra={
+                            "failed_groups": failed_groups,
+                            "plan_name": self.plan_config.get('name'),
+                            "total_groups": len(groups_to_process),
+                            "successful_groups": len(processed_groups)
+                        }
+                    )
 
                 # Save to MongoDB if enabled
                 if self.save_to_mongodb and processed_groups:
@@ -547,7 +584,6 @@ class LessonPlan(LessonPlanDownloader):
         self.converted_lesson_plan = os.path.join(dir_path, new_file_name)
 
         wb.save(self.converted_lesson_plan)
-        #print(f"Unmerged file saved as: {self.converted_lesson_plan}{Style.RESET_ALL}")
         return True
 
     @staticmethod
@@ -616,7 +652,6 @@ class LessonPlan(LessonPlanDownloader):
                     else:
                         raise
 
-            #print(f"Cleaned file saved as: {self.converted_lesson_plan}")
             return True
 
         except Exception as e:
@@ -671,49 +706,50 @@ class LessonPlan(LessonPlanDownloader):
             text_normalized = normalize_text(text)
             pattern_normalized = normalize_text(pattern)
 
-            # 1. Najpierw sprawdź dokładne dopasowanie
             if text_normalized == pattern_normalized:
-                #print(f"Exact match found after normalization for '{text}' and '{pattern}'")
                 return True
 
-            # 2. Jeśli nie ma dokładnego dopasowania, sprawdź podobieństwo
             similarity = SequenceMatcher(
                 None, text_normalized, pattern_normalized
             ).ratio()
-            #print(f"Comparing '{text}' with '{pattern}' - Similarity: {similarity}")
             return similarity >= similarity_threshold
 
         def verify_columns(columns, schedule_type):
             """
             Sprawdza czy znalezione kolumny są prawidłowe dla danego typu planu
             """
-            # For mixed plans, don't enforce strict column count
             if hasattr(self, 'is_mixed') and self.is_mixed:
-                logger.info(f"Mixed plan - accepting {len(columns)} columns without strict verification")
-                # Just ensure we have at least some columns and they're not all numbered
+                logger.debug(
+                    f"Mixed plan - accepting columns without strict verification",
+                    extra={
+                        "column_count": len(columns),
+                        "schedule_type": schedule_type
+                    }
+                )
                 return len(columns) > 0 and not all("Column_" in col for col in columns)
 
             expected_columns = {
-                "st": 6,  # Godziny + 5 dni
-                "nst": 4,  # Godziny + 3 dni
-                "nst-online": 3,  # Godziny + 2 dni
+                "st": 6,
+                "nst": 4,
+                "nst-online": 3,
             }
 
-            # Sprawdź liczbę kolumn
-            if len(columns) != expected_columns.get(schedule_type, 6):
+            expected = expected_columns.get(schedule_type, 6)
+            found = len(columns)
+
+            if found != expected:
                 return False
 
-            # Sprawdź czy nie ma kolumn numerowanych
-            return not any("Column_" in col for col in columns)
+            has_numbered = any("Column_" in col for col in columns)
+            if has_numbered:
+                return False
+
+            return True
 
         try:
             df = pd.read_excel(self.converted_lesson_plan, sheet_name=self.sheet_name)
-            #print("\nSearching for group columns...")
-            #print("Available columns:", df.columns.tolist())
 
-            # Jeśli mamy grupę "cały kierunek", używamy poprzedniej logiki
             if len(self.groups) == 1 and "cały kierunek" in self.groups:
-                #print("Processing entire course without group division")
                 days = {
                     "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
                     "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
@@ -748,9 +784,7 @@ class LessonPlan(LessonPlanDownloader):
             backup_columns = {}
 
             for group_name, group_identifier in self.groups.items():
-                #print(f"\nProcessing group: {group_name} (identifier: {group_identifier})")
 
-                # Szukamy od dokładnego dopasowania do minimalnego progu
                 for similarity_threshold in [x / 100.0 for x in range(100, 84, -1)]:
                     matching_columns = []
                     used_columns = set()
@@ -759,7 +793,6 @@ class LessonPlan(LessonPlanDownloader):
                         if column in used_columns:
                             continue
 
-                        #print(f"\nChecking column: {column}")
                         unique_values = df[column].dropna().unique()
 
                         for value in unique_values:
@@ -768,27 +801,30 @@ class LessonPlan(LessonPlanDownloader):
                             ):
                                 matching_columns.append(column)
                                 used_columns.add(column)
-                                #print(f"Found matching column: {column}")
                                 break
 
                     if matching_columns:
-                        # Jeśli znaleźliśmy kolumny, sprawdź czy są prawidłowe
                         if verify_columns(matching_columns, self.schedule_type):
                             group_columns[group_name] = matching_columns
-                            #print(f"Found valid columns for {group_name}: {matching_columns}")
                             break
                         else:
-                            # Zachowaj jako backup jeśli jeszcze nie mamy
                             if group_name not in backup_columns:
                                 backup_columns[group_name] = matching_columns
-                                #print(f"Saving backup columns for {group_name}: {matching_columns}")
 
-                # Jeśli nie znaleźliśmo prawidłowych kolumn, użyj backup
                 if group_name not in group_columns and group_name in backup_columns:
                     group_columns[group_name] = backup_columns[group_name]
-                    #(f"Using backup columns for {group_name}: {backup_columns[group_name]}")
+                    logger.info(f"Using backup columns", extra={"group_name": group_name, "columns": backup_columns[group_name]})
                 elif group_name not in group_columns:
-                    logger.warning(f"No columns found for {group_name}")
+                    logger.warning(
+                        f"No columns found for group",
+                        extra={
+                            "group_name": group_name,
+                            "identifier": group_identifier,
+                            "plan_name": self.plan_config.get('name'),
+                            "schedule_type": self.schedule_type,
+                            "available_columns": len(df.columns)
+                        }
+                    )
 
             self.group_columns = group_columns
             return self.group_columns
@@ -806,13 +842,12 @@ class LessonPlan(LessonPlanDownloader):
             self.find_group_columns_with_similarity()
 
         try:
-            #print(f"\nReading Excel file for group: {group_name}")
             df = pd.read_excel(
                 self.converted_lesson_plan, sheet_name=self.sheet_name, header=None
             )
 
             if group_name not in self.group_columns:
-                #print(f"Group '{group_name}' not found.")
+                logger.warning(f"Group not found in columns", extra={"group_name": group_name})
                 return None
 
             # Extract column numbers from the column names
@@ -823,18 +858,13 @@ class LessonPlan(LessonPlanDownloader):
                         col_number = int(col_name.split(".")[-1])
                         group_col_indices.append(col_number)
                 except ValueError as e:
-                    #print(f"Warning: Could not parse column number from {col_name}: {e}")
                     continue
 
             if not group_col_indices:
-                #print(f"Could not extract column numbers for group {group_name}")
+                logger.warning(f"Could not extract column numbers", extra={"group_name": group_name})
                 return None
 
-            #print(f"Found column indices for {group_name}: {group_col_indices}")
-
-            # Add time column (always first column) and sort indices
             columns_to_extract = [0] + sorted(group_col_indices)
-            #print(f"Columns to extract: {columns_to_extract}")
 
             # Extract columns
             df_filtered = df.iloc[:, columns_to_extract].copy()
@@ -922,9 +952,8 @@ class LessonPlan(LessonPlanDownloader):
             # Reset index
             df_filtered = df_filtered.reset_index(drop=True)
 
-            # Final validation of the data
             if df_filtered.empty:
-                #print(f"Warning: No data found for group {group_name}")
+                logger.warning(f"No data found for group", extra={"group_name": group_name})
                 return None
 
             # Verify that we have all expected time slots
@@ -958,7 +987,6 @@ class LessonPlan(LessonPlanDownloader):
                 logger.warning(f"Warning: Missing time slots for {group_name}: {missing_slots}")
             if not df_filtered.empty:
                 last_row_time = str(df_filtered.iloc[-1]["Godziny"]).strip()
-                # Sprawdź czy ostatni wiersz nie zawiera godziny
                 if not any(
                     time_pattern in last_row_time
                     for time_pattern in [
@@ -980,9 +1008,7 @@ class LessonPlan(LessonPlanDownloader):
                         "2030-",
                     ]
                 ):
-                    # Usuń ostatni wiersz
                     df_filtered = df_filtered.iloc[:-1]
-                    #print(f"Removed last row with non-time value: {last_row_time}")
             return df_filtered
 
         except Exception as e:
@@ -1010,19 +1036,19 @@ class LessonPlan(LessonPlanDownloader):
         file_path = os.path.join(group_dir, file_name)
 
         try:
+            # Sanitize sheet name - Excel doesn't allow: : / \ ? * [ ]
+            sheet_name = group_name
+            for char in [':', '/', '\\', '?', '*', '[', ']']:
+                sheet_name = sheet_name.replace(char, '_')
             # Truncate sheet name to 31 characters
-            sheet_name = group_name[:31]
+            sheet_name = sheet_name[:31]
 
             # Save the DataFrame to an Excel file
             with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
                 df.to_excel(writer, index=False, sheet_name=sheet_name)
 
-            #print(f"Lessons for group '{group_name}' saved to {file_path}")
-            
         except Exception as e:
-            logger.error(
-                f"An error occurred while saving lessons for group '{group_name}': {str(e)}"
-            )
+            logger.debug(f"Could not save group lessons to file: {str(e)}")
 
     @staticmethod
     def get_column_letter(column_number):
@@ -1064,13 +1090,11 @@ class LessonPlan(LessonPlanDownloader):
         if self.groups:
             for group_name in self.groups.keys():
                 try:
-                    #print(f"\nProcessing group: {group_name}")
                     df = self.get_lessons_for_group(group_name)
                     if df is not None and not df.empty:
                         html = self.generate_html_table(df)
                         plans_data["groups"][group_name] = html
                         processed_groups.append(group_name)
-                        #print(f"Successfully processed HTML for group: {group_name}")
                     else:
                         failed_groups.append(group_name)
                         logger.warning(f"No data available for group: {group_name}")
@@ -1086,7 +1110,7 @@ class LessonPlan(LessonPlanDownloader):
                     html = self.generate_html_table(df)
                     plans_data["groups"]["cały kierunek"] = html
                     processed_groups.append("cały kierunek")
-                    #print("Successfully processed HTML for entire course")
+                    logger.info("Successfully processed HTML for entire course")
             except Exception as e:
                 logger.error(f"Error processing entire course: {str(e)}")
 
