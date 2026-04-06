@@ -1014,6 +1014,10 @@ async def main():
                         sentry_sdk.capture_exception(e)
                         logger.error(f"Error processing Moodle activities: {str(e)}", extra={"operation": "moodle_check"})
 
+                # Clear download cache between cycles
+                from LessonPlanDownloader import _download_cache
+                _download_cache.clear()
+
                 logger.info(
                     f"All tasks completed. Waiting {check_interval} seconds before next cycle",
                     extra={"check_interval": check_interval}

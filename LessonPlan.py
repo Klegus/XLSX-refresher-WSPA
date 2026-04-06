@@ -604,12 +604,27 @@ class LessonPlan(LessonPlanDownloader):
                     )
 
                 # Save to MongoDB if enabled
-                if self.save_to_mongodb and processed_groups:
-                    self.convert_to_html_and_save_to_db(
-                        new_checksum,
-                        precomputed_group_data=processed_group_data,
-                        failed_groups=failed_groups,
-                    )
+                if self.save_to_mongodb:
+                    if processed_groups:
+                        self.convert_to_html_and_save_to_db(
+                            new_checksum,
+                            precomputed_group_data=processed_group_data,
+                            failed_groups=failed_groups,
+                        )
+                    else:
+                        # No groups processed but still save checksum to avoid re-processing
+                        faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
+                        collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
+                        collection = self.db[collection_name]
+                        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        collection.insert_one({
+                            "timestamp": current_datetime,
+                            "checksum": new_checksum,
+                            "plan_name": self.plan_config["name"],
+                            "category": self.schedule_type,
+                            "groups": {"cały kierunek": "<p>Plan nie zawiera danych do wyświetlenia.</p>"},
+                        })
+                        logger.info(f"Saved empty plan with checksum to prevent re-processing")
 
                 return new_checksum
 
