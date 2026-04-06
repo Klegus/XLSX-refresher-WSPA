@@ -237,7 +237,10 @@ def init_config_routes(app, get_system_config, get_plans_config, update_system_c
         try:
             logger.info(f"Check requested for plan: {plan_id}")
             # Import after function definition to avoid circular imports
-            from main import lesson_plan_managers
+            try:
+                from main import lesson_plan_managers
+            except ImportError:
+                return jsonify({"success": False, "error": "Plan checking unavailable from admin panel. Use the main backend."}), 503
             
             # Check if plan_id exists in managers
             if plan_id not in lesson_plan_managers:

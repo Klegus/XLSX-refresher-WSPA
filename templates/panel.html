@@ -54,6 +54,38 @@
             </div>
         </div>
 
+        <!-- Database Management Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Zarządzanie bazą danych</h2>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-3">
+                    <div>
+                        <h5 class="h6">Reset semestru</h5>
+                        <p class="text-muted small mb-2">Wyczyść dane planów i aktywności (do nowego semestru).</p>
+                        <button class="btn btn-danger btn-sm" onclick="purgeDatabase()">
+                            Wyczyść bazę (plany + aktywności)
+                        </button>
+                    </div>
+                    <div>
+                        <h5 class="h6">Pełny reset</h5>
+                        <p class="text-muted small mb-2">Wyczyść wszystko łącznie z konfiguracją plans.json.</p>
+                        <button class="btn btn-outline-danger btn-sm" onclick="purgeDatabaseFull()">
+                            Pełny reset bazy
+                        </button>
+                    </div>
+                    <div>
+                        <h5 class="h6">Force check</h5>
+                        <p class="text-muted small mb-2">Wyłącz maintenance i wymuś sprawdzenie planów.</p>
+                        <button class="btn btn-primary btn-sm" onclick="forceCheck()">
+                            Uruchom sprawdzanie
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Moodle Scanner Section -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -837,6 +869,48 @@
                 loadSuggestions();
             }
         }
+        // ─── Database Management ──────────────────────────────
+        function purgeDatabase() {
+            if (!confirm('Na pewno wyczyścić dane planów i aktywności? Ta operacja jest nieodwracalna!')) return;
+            fetch('/api/purge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plans: true, activities: true, config: false })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.success ? 'Baza wyczyszczona! Użyj "Skanuj Moodle" aby załadować nowe plany.' : 'Błąd: ' + data.error);
+                loadPlans();
+            })
+            .catch(err => alert('Błąd: ' + err));
+        }
+
+        function purgeDatabaseFull() {
+            if (!confirm('UWAGA: Wyczyścisz CAŁĄ bazę łącznie z konfiguracją plans.json!\nCzy na pewno?')) return;
+            if (!confirm('Ostatnie ostrzeżenie - po tym będziesz musiał ponownie skanować Moodle i załadować wszystkie plany.')) return;
+            fetch('/api/purge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plans: true, activities: true, config: true })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.success ? 'Pełny reset wykonany!' : 'Błąd: ' + data.error);
+                loadPlans();
+            })
+            .catch(err => alert('Błąd: ' + err));
+        }
+
+        function forceCheck() {
+            fetch('/api/force-check', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.success ? data.message : 'Błąd: ' + data.error);
+                loadStatus();
+            })
+            .catch(err => alert('Błąd: ' + err));
+        }
+
         // ─── Moodle Scanner ─────────────────────────────────
         let scanPollInterval = null;
 

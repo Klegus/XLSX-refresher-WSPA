@@ -195,13 +195,9 @@ status_checker = StatusChecker()
 
 # Import route modules
 from routes.status import init_status_routes
-from routes.config import init_config_routes
 from routes.plans import init_plan_routes
-from routes.logs import init_log_routes
 from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
-from routes.suggestions import init_suggestion_routes
-from routes.scanner import init_scanner_routes
 
 
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
@@ -264,22 +260,11 @@ def log_check_result(total_plans, plans_checked, changes_detected):
 
 
 
-# Initialize routes
+# Initialize routes (public API only - admin panel runs separately)
 init_status_routes(app, status_checker, get_system_config)
-init_config_routes(
-    app,
-    get_system_config,
-    get_plans_config,
-    update_system_config,
-    update_plans_config,
-    db,
-)
 init_plan_routes(app, get_semester_collections, db)
-init_log_routes(app, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
-init_suggestion_routes(app, db)
-init_scanner_routes(app, get_plans_config, update_plans_config)
 
 
 def run_flask_app():
@@ -534,10 +519,6 @@ def parse_html_to_dataframe(html_content):
 
     return pd.DataFrame(data, columns=headers)
 
-
-@app.route("/panel")
-def show_panel():
-    return Response(open("templates/panel.html").read(), mimetype="text/html")
 
 @app.route("/api/collections")
 def get_collections():
