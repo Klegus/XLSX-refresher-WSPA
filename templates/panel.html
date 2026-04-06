@@ -54,6 +54,26 @@
             </div>
         </div>
 
+        <!-- Moodle Scanner Section -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">Moodle Plan Scanner</h2>
+                <button class="btn btn-warning btn-sm" id="startScanBtn" onclick="startMoodleScan()">
+                    Skanuj Moodle
+                </button>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-2">Skanuje "Strefa studenta" na PUW, pobiera pliki .xlsx, porównuje z aktualnymi planami.</p>
+                <div id="scanStatus" style="display:none;">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" id="scanSpinner"></div>
+                        <span id="scanProgressText">Uruchamianie...</span>
+                    </div>
+                </div>
+                <div id="scanResults" style="display:none;"></div>
+            </div>
+        </div>
+
         <!-- Logs Section -->
         <div class="card mb-4">
             <div class="card-header">
@@ -816,6 +836,140 @@
                 currentSuggestionsPage--;
                 loadSuggestions();
             }
+        }
+        // ─── Moodle Scanner ─────────────────────────────────
+        let scanPollInterval = null;
+
+        function startMoodleScan() {
+            document.getElementById('startScanBtn').disabled = true;
+            document.getElementById('scanStatus').style.display = 'block';
+            document.getElementById('scanResults').style.display = 'none';
+            document.getElementById('scanSpinner').style.display = '';
+            document.getElementById('scanProgressText').textContent = 'Uruchamianie...';
+
+            fetch('/api/scanner/start', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert(data.error);
+                        document.getElementById('startScanBtn').disabled = false;
+                        return;
+                    }
+                    scanPollInterval = setInterval(pollScanStatus, 3000);
+                })
+                .catch(err => {
+                    alert('Błąd: ' + err);
+                    document.getElementById('startScanBtn').disabled = false;
+                });
+        }
+
+        function pollScanStatus() {
+            fetch('/api/scanner/status')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('scanProgressText').textContent = data.progress || data.status;
+
+                    if (data.status === 'done') {
+                        clearInterval(scanPollInterval);
+                        document.getElementById('scanSpinner').style.display = 'none';
+                        document.getElementById('startScanBtn').disabled = false;
+                        if (data.result) renderScanResults(data.result);
+                    } else if (data.status === 'error') {
+                        clearInterval(scanPollInterval);
+                        document.getElementById('scanSpinner').style.display = 'none';
+                        document.getElementById('startScanBtn').disabled = false;
+                        document.getElementById('scanProgressText').textContent = 'Błąd: ' + data.error;
+                    }
+                });
+        }
+
+        function renderScanResults(r) {
+            const container = document.getElementById('scanResults');
+            container.style.display = 'block';
+
+            let html = `<p><strong>Rok ${r.year}, semestr ${r.semester}</strong> —
+                znaleziono ${r.total_scraped} planów (aktualnie w bazie: ${r.total_current})</p>`;
+
+            const hasChanges = r.new_count > 0 || r.changed_count > 0 || r.removed_count > 0;
+
+            if (!hasChanges) {
+                html += '<div class="alert alert-success">Brak zmian - wszystkie plany aktualne!</div>';
+                container.innerHTML = html;
+                return;
+            }
+
+            // New plans
+            if (r.new_count > 0) {
+                html += `<h5 class="text-success mt-3">Nowe plany (${r.new_count})</h5>
+                    <div class="list-group mb-2">`;
+                for (const [key, name] of Object.entries(r.new)) {
+                    html += `<label class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2 scan-add" value="${key}" checked>
+                        <strong>${key}</strong> — ${name}
+                    </label>`;
+                }
+                html += '</div>';
+            }
+
+            // Changed plans
+            if (r.changed_count > 0) {
+                html += `<h5 class="text-warning mt-3">Zmienione plany (${r.changed_count})</h5>
+                    <div class="list-group mb-2">`;
+                for (const [key, fields] of Object.entries(r.changed)) {
+                    html += `<label class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2 scan-update" value="${key}" checked>
+                        <strong>${key}</strong> — zmienione: ${fields.join(', ')}
+                    </label>`;
+                }
+                html += '</div>';
+            }
+
+            // Removed plans
+            if (r.removed_count > 0) {
+                html += `<h5 class="text-danger mt-3">Usunięte z Moodle (${r.removed_count})</h5>
+                    <div class="list-group mb-2">`;
+                for (const [key, name] of Object.entries(r.removed)) {
+                    html += `<label class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2 scan-remove" value="${key}">
+                        <strong>${key}</strong> — ${name}
+                    </label>`;
+                }
+                html += '</div>';
+            }
+
+            html += `<button class="btn btn-primary mt-3" onclick="applyScanResults()">
+                Zastosuj zaznaczone zmiany
+            </button>`;
+
+            container.innerHTML = html;
+        }
+
+        function applyScanResults() {
+            const add = [...document.querySelectorAll('.scan-add:checked')].map(el => el.value);
+            const update = [...document.querySelectorAll('.scan-update:checked')].map(el => el.value);
+            const remove = [...document.querySelectorAll('.scan-remove:checked')].map(el => el.value);
+
+            if (add.length + update.length + remove.length === 0) {
+                alert('Nie zaznaczono żadnych zmian');
+                return;
+            }
+
+            fetch('/api/scanner/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ add, update, remove })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('scanResults').style.display = 'none';
+                    loadPlans();
+                } else {
+                    alert('Błąd: ' + data.error);
+                }
+            })
+            .catch(err => alert('Błąd: ' + err));
         }
     </script>
 </body>

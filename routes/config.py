@@ -1,5 +1,6 @@
 from flask import jsonify, request
 import asyncio
+import threading
 from shared_utils import get_logger
 
 # Setup logger
@@ -264,17 +265,7 @@ def init_config_routes(app, get_system_config, get_plans_config, update_system_c
                     }), 500
             else:
                 manager = lesson_plan_managers[plan_id]
-            
-            # Run check in background
-            logger.info(f"Starting check for plan {plan_id}")
-            asyncio.create_task(run_check())
-            
-            # Return immediate success response
-            return jsonify({
-                "success": True,
-                "message": f"Check initiated for plan {plan_id}"
-            })
-            
+
             # Define async function for running check
             async def run_check():
                 try:
@@ -286,6 +277,21 @@ def init_config_routes(app, get_system_config, get_plans_config, update_system_c
                         logger.info(f"Plan check for {plan_id} completed with no changes")
                 except Exception as e:
                     logger.error(f"Error during plan check: {str(e)}")
+
+            def run_check_in_background():
+                try:
+                    asyncio.run(run_check())
+                except Exception as e:
+                    logger.error(f"Background check failed for plan {plan_id}: {str(e)}")
+
+            # Run check in background thread and return immediately
+            logger.info(f"Starting check for plan {plan_id}")
+            threading.Thread(target=run_check_in_background, daemon=True).start()
+
+            return jsonify({
+                "success": True,
+                "message": f"Check initiated for plan {plan_id}"
+            })
                     
         except Exception as e:
             logger.error(f"Error initiating plan check: {str(e)}")

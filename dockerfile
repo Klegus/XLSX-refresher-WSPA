@@ -36,11 +36,11 @@ RUN pip install --no-cache-dir --timeout=120 --retries=5 \
     boto3==1.35.77 \
     watchtower==2.0.1
 
-# Copy application files but exclude plans.json
+# Copy application files
 COPY *.py ./
+COPY *.json ./
 COPY routes/ routes/
 COPY templates/ templates/
-#COPY mypy.ini ./
 
 # Final stage
 FROM python:3.12-slim

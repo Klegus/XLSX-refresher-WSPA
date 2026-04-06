@@ -89,6 +89,9 @@ AWS_REGION=eu-west-1                 # Your AWS region
 LOG_TO_FILE=true                     # Set to true to enable file logging
 LOG_DIR=logs                         # Directory to store log files
 
+# Excel Processing Optimization (Optional)
+CLEAN_EXCEL_FILE=false               # Enable only when specific plans require aggressive cleanup
+
 # Pushover Notifications for Suggestions (Optional)
 PUSHOVER_KEY=your_pushover_api_token_or_user_key
 PUSHOVER_USER=your_pushover_user_key # Only needed if PUSHOVER_KEY is an app token
@@ -131,6 +134,43 @@ This will:
 2.  Initialize managers for each lesson plan defined in the configuration.
 3.  Start the Flask server for API endpoints (typically on port 80, check `main.py`).
 4.  Begin the main loop, periodically checking for plan updates, Moodle activity updates, and performing comparisons.
+
+## Test Stack (Docker Compose)
+
+For isolated local testing, use the dedicated test stack (`MongoDB + backend`) from this repository root:
+
+```bash
+docker compose -f docker-compose.test.yml up -d --build
+```
+
+Useful commands:
+
+```bash
+# follow logs
+docker compose -f docker-compose.test.yml logs -f
+
+# quick API smoke check
+curl -sS http://localhost:5006/api/status
+curl -sS http://localhost:5006/api/config
+
+# stop stack
+docker compose -f docker-compose.test.yml down
+```
+
+Or use helper script:
+
+```bash
+./scripts/test-stack.sh up
+./scripts/test-stack.sh status
+./scripts/test-stack.sh smoke
+./scripts/test-stack.sh logs
+./scripts/test-stack.sh down
+```
+
+Notes:
+- The test stack uses `.env.test` and MongoDB database `Lesson_test`.
+- Mongo is pre-seeded with a minimal `system_config` and empty `plans_config`.
+- No production credentials are required.
 
 ## API Endpoints
 

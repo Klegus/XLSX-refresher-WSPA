@@ -1,0 +1,41 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: wspa-mongo-test
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: Lesson_test
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_test_data:/data/db
+      - ./docker/test-mongo-init.js:/docker-entrypoint-initdb.d/test-mongo-init.js:ro
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 }).ok' | mongosh --quiet mongodb://localhost:27017/admin | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: wspa-backend-test
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    env_file:
+      - .env.test
+    ports:
+      - "5006:80"
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:80/api/status', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mongo_test_data:

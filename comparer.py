@@ -3,6 +3,7 @@ init(autoreset=True)
 import requests
 from datetime import datetime
 from pymongo import MongoClient
+import os
 from shared_utils import get_logger
 
 # Setup logger
@@ -11,10 +12,48 @@ logger = get_logger('comparer')
 class LessonPlanComparator:
     def __init__(self, mongo_uri, openrouter_api_key, selected_model):
         self.client = MongoClient(mongo_uri)
-        self.db = self.client['Lesson']
+        self.db = self.client[os.getenv("MONGO_DB", "Lesson_dev")]
         self.openrouter_api_key = openrouter_api_key
         self.openrouter_api_url = "https://openrouter.ai/api/v1/chat/completions"
         self.selected_model = selected_model
+
+    def _find_differences(self, newer_plan, older_plan):
+        """Compare all common groups and return a compact summary string."""
+        if not newer_plan or not older_plan:
+            return None
+
+        newer_groups = newer_plan.get("groups", {})
+        older_groups = older_plan.get("groups", {})
+        common_groups = sorted(set(newer_groups.keys()) & set(older_groups.keys()))
+
+        if not common_groups:
+            logger.warning("Brak wspólnych grup do porównania.")
+            return None
+
+        comparison_results = {}
+        changed_groups = {}
+
+        for group in common_groups:
+            result = self.compare_plans_for_group(newer_plan, older_plan, group)
+            if not result:
+                continue
+            comparison_results[group] = result
+            if result.strip().lower() != "brak różnic":
+                changed_groups[group] = result
+
+        if comparison_results:
+            try:
+                self.save_comparison_results(newer_plan, older_plan, comparison_results)
+            except Exception as e:
+                logger.error(f"Błąd zapisu wyników porównań: {str(e)}")
+
+        if not changed_groups:
+            return "Brak różnic"
+
+        lines = []
+        for group, diff in changed_groups.items():
+            lines.append(f"• {group}: {diff}")
+        return "\n".join(lines)
 
     def get_last_two_plans(self, plan_config):
         # Replace both spaces and underscores in faculty with hyphens

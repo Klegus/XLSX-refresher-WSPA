@@ -201,6 +201,7 @@ from routes.logs import init_log_routes
 from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
 from routes.suggestions import init_suggestion_routes
+from routes.scanner import init_scanner_routes
 
 
 def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
@@ -278,6 +279,7 @@ init_log_routes(app, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
 init_suggestion_routes(app, db)
+init_scanner_routes(app, get_plans_config, update_plans_config)
 
 
 def run_flask_app():
@@ -675,7 +677,7 @@ def configs_are_equal(config1, config2):
 
 async def main():
     logger.info("Starting main.py")
-    check_interval = 600    
+    check_interval = 900
     try:
         logger.info("Loading .env file")
         load_dotenv()
@@ -687,6 +689,12 @@ async def main():
         mongo_uri = os.getenv("MONGO_URI")
         openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         selected_model = os.getenv("SELECTED_MODEL", "openai/chatgpt-4o-latest")
+
+        # Use the configured check interval from MongoDB/system config.
+        try:
+            check_interval = int(get_system_config().get("check_interval", 900))
+        except (TypeError, ValueError):
+            check_interval = 900
         
         # Check if plans configuration exists in MongoDB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
@@ -777,6 +785,12 @@ async def main():
         # Run managers sequentially in the main thread
         try:
             while True:
+                # Refresh check interval each cycle to reflect runtime config changes.
+                try:
+                    check_interval = int(get_system_config().get("check_interval", check_interval))
+                except (TypeError, ValueError):
+                    logger.warning("Invalid check_interval in system config; using previous value.")
+
                 successful_checks = 0
                 new_plans = 0
                 errors = []
