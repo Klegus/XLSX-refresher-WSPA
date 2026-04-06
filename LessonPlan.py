@@ -1198,6 +1198,26 @@ class LessonPlan(LessonPlanDownloader):
                         )
                         return
 
+                    # Diff with previous version before saving
+                    try:
+                        from plan_differ import diff_plans, save_diff_to_db
+                        latest = collection.find_one(sort=[("_id", -1)])
+                        if latest and latest.get("groups"):
+                            old_groups = latest["groups"]
+                            new_groups = plans_data["groups"]
+                            changes = diff_plans(old_groups, new_groups)
+                            if changes:
+                                save_diff_to_db(
+                                    self.db, collection_name,
+                                    self.plan_config["name"],
+                                    changes,
+                                    latest.get("checksum", ""),
+                                    checksum
+                                )
+                                logger.info(f"Detected {len(changes)} changes in {collection_name}")
+                    except Exception as e:
+                        logger.warning(f"Diff failed (non-critical): {e}")
+
                     # Insert the new plan with all groups
                     result = collection.insert_one(plans_data)
                     logger.info(

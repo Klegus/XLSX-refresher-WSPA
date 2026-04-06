@@ -526,6 +526,32 @@ def get_collections():
     return jsonify(collections)
 
 
+@app.route("/api/changes/<collection_name>")
+def get_plan_changes(collection_name):
+    """Get change history for a specific plan."""
+    limit = int(request.args.get('limit', 10))
+    changes = list(
+        db.plan_changes.find(
+            {"collection": collection_name},
+            {"_id": 0}
+        ).sort("timestamp", -1).limit(limit)
+    )
+    return jsonify({"changes": changes})
+
+
+@app.route("/api/changes")
+def get_all_changes():
+    """Get recent changes across all plans."""
+    limit = int(request.args.get('limit', 20))
+    changes = list(
+        db.plan_changes.find(
+            {},
+            {"_id": 0}
+        ).sort("timestamp", -1).limit(limit)
+    )
+    return jsonify({"changes": changes})
+
+
 def compare_plans_config_with_url():
     """
     Compare plans configuration in MongoDB with the one from the URL.
