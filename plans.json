@@ -1,31 +1,888 @@
-{"informatyka_inf_st_ii": {
-    "name": "Informatyka studia I stopnia st III semestr zimowy - INF st II",
+{
+  "administracja_adm_i_rok_puw_z_stacjonarne": {
+    "name": "Administracja - studia I stopnia - nst puw I - semestr letni - ADM I rok PUW - z stacjonarne",
+    "faculty": "administracja",
+    "groups": {
+      "grupa 1 podzuał wg nazwisk: A-K": "grupa 1\npodzuał wg nazwisk: A-K",
+      "grupa 4 podzuał wg nazwisk: L-Z": "grupa 4\npodzuał wg nazwisk: L-Z"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250155/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM I rok PUW - z. stacjonarne"
+  },
+  "administracja_adm_i_rok_puw_z_on_line": {
+    "name": "Administracja - studia I stopnia - nst puw I - semestr letni - ADM I rok PUW - z on-line",
+    "faculty": "administracja",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250155/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM I rok PUW - z. on-line"
+  },
+  "administracja_adm_ii_rok_puw_z_stacjonarne": {
+    "name": "Administracja - studia I stopnia - nst puw II - semestr letni - ADM II rok PUW - z stacjonarne",
+    "faculty": "administracja",
+    "groups": {
+      "Sp.: Nowoczesna administracja cz. 2": "Sp.: Nowoczesna administracja cz. 2"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250155/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM II rok PUW - z. stacjonarne"
+  },
+  "administracja_adm_ii_rok_puw_z_on_line": {
+    "name": "Administracja - studia I stopnia - nst puw II - semestr letni - ADM II rok PUW - z on-line",
+    "faculty": "administracja",
+    "groups": {
+      "Sp.: Nowoczesna administracja cz. 2": "Sp.: Nowoczesna administracja cz. 2"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250155/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM II rok PUW - z. on-line"
+  },
+  "administracja_adm_iii_puw_z_stacjonarne": {
+    "name": "Administracja - studia I stopnia - nst puw III - semestr letni - ADM III PUW - z stacjonarne",
+    "faculty": "administracja",
+    "groups": {
+      "grupa 1 wg nazwisk: A-K": "grupa 1\nwg nazwisk: A-K",
+      "grupa 2 wg nazwisk: L-Z": "grupa 2\nwg nazwisk: L-Z"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250155/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM III PUW - z. stacjonarne"
+  },
+  "administracja_adm_iii_puw_z_on_line": {
+    "name": "Administracja - studia I stopnia - nst puw III - semestr letni - ADM III PUW - z on-line",
+    "faculty": "administracja",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250155/mod_folder/content/0/Administracja%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM III PUW - z. on-line"
+  },
+  "administracja_studia_magisterskie_adm_muz_i_puw_z_stacjonarne": {
+    "name": "Administracja - studia II stopnia - nst puw I - semestr letni - ADM MUZ I PUW - z stacjonarne",
+    "faculty": "administracja - studia magisterskie",
+    "groups": {
+      "Sp.:Zarządzanie w samorządzie gminnym": "Sp.:Zarządzanie w samorządzie gminnym",
+      "Sp.: Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250161/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM MUZ I PUW - z. stacjonarne"
+  },
+  "administracja_studia_magisterskie_adm_muz_i_puw_z_on_line": {
+    "name": "Administracja - studia II stopnia - nst puw I - semestr letni - ADM MUZ I PUW - z on-line",
+    "faculty": "administracja - studia magisterskie",
+    "groups": {
+      "Sp.: Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym",
+      "Sp.: Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250161/mod_folder/content/0/Administracja%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ADM MUZ I PUW - z. on-line"
+  },
+  "architektura_aru_st_i": {
+    "name": "Architektura - studia I stopnia - st I - semestr letni - ARU st I",
+    "faculty": "architektura",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249592/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ARU st I"
+  },
+  "architektura_aru_st_ii": {
+    "name": "Architektura - studia I stopnia - st II - semestr letni - ARU ST II",
+    "faculty": "architektura",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249592/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ARU ST II"
+  },
+  "architektura_aru_st_iii": {
+    "name": "Architektura - studia I stopnia - st III - semestr letni - ARU st III",
+    "faculty": "architektura",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249592/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ARU st III"
+  },
+  "architektura_aru_st_iv": {
+    "name": "Architektura - studia I stopnia - st IV - semestr letni - ARU st IV",
+    "faculty": "architektura",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249592/mod_folder/content/0/Architektura%20-%20studia%20I%20stopnia%20-%20st%20IV%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ARU st IV"
+  },
+  "architektura_studia_magisterskie_aru_muz_nst_i": {
+    "name": "Architektura - studia II stopnia - st I - semestr letni - ARU MUZ nst I",
+    "faculty": "architektura - studia magisterskie",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249593/mod_folder/content/0/Architektura%20-%20studia%20II%20stopnia%20-%20st%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ARU MUZ nst I"
+  },
+  "finanse_i_rachunkowość_fir_st_ii": {
+    "name": "Finanse i rachunkowość - studia I stopnia - st II - semestr letni - FIR st II",
+    "faculty": "finanse i rachunkowość",
+    "groups": {
+      "Sp.: Rachunkowość i finanse przedsiębiorstw": "Sp.: Rachunkowość i finanse przedsiębiorstw"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250251/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR st II"
+  },
+  "finanse_i_rachunkowość_fir_i_rok_puw_z_stacjonarne": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw I - semestr letni - FIR I rok PUW - z stacjonarne",
+    "faculty": "finanse i rachunkowość",
+    "groups": {
+      "grupa 1 - kolejność wg nazwisk: A-M": "grupa 1 - kolejność wg nazwisk: \nA-M",
+      "grupa 2 - kolejność wg nazwisk: O-Z": "grupa 2 - kolejność wg nazwisk: \nO-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250162/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR I rok PUW - z. stacjonarne"
+  },
+  "finanse_i_rachunkowość_fir_i_rok_puw_z_on_line": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw I - semestr letni - FIR I rok PUW - z on-line",
+    "faculty": "finanse i rachunkowość",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250162/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR I rok PUW - z. on-line"
+  },
+  "finanse_i_rachunkowość_fir_ii_rok_puw_z_stacjonarne": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr letni - FIR II rok PUW - z stacjonarne",
+    "faculty": "finanse i rachunkowość",
+    "groups": {
+      "Sp.: Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk: A-N": "Sp.: Rachunkowość i finanse przedsiębiorstw\ngr.1 - wg. nazwisk: A-N",
+      "Sp.: Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk: O-Z": "Sp.: Rachunkowość i finanse przedsiębiorstw\ngr.2 - wg. nazwisk: O-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250162/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR II rok PUW - z. stacjonarne"
+  },
+  "finanse_i_rachunkowość_fir_ii_rok_puw_z_on_line": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr letni - FIR II rok PUW - z on-line",
+    "faculty": "finanse i rachunkowość",
+    "groups": {
+      "Sp.: Rachunkowość i finanse przedsiębiorstw": "Sp.: Rachunkowość i finanse przedsiębiorstw"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250162/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR II rok PUW - z. on-line"
+  },
+  "finanse_i_rachunkowość_fir_iii_puw_z_stacjonarne": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr letni - FIR III PUW - z stacjonarne",
+    "faculty": "finanse i rachunkowość",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250162/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR III PUW - z. stacjonarne"
+  },
+  "finanse_i_rachunkowość_fir_iii_puw_z_on_line": {
+    "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr letni - FIR III PUW - z on-line",
+    "faculty": "finanse i rachunkowość",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250162/mod_folder/content/0/Finanse%20i%20rachunkowo%C5%9B%C4%87%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "FIR III PUW - z. on-line"
+  },
+  "gospodarka_przestrzenna_gp_ii_rok_puw_z_stacjonarne": {
+    "name": "Gospodarka przestrzenna - studia I stopnia - nst puw II - semestr letni - GP II rok PUW - z stacjonarne",
+    "faculty": "gospodarka przestrzenna",
+    "groups": {
+      "Sp.: Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250163/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "GP II rok PUW - z. stacjonarne"
+  },
+  "gospodarka_przestrzenna_gp_ii_rok_puw_z_on_line": {
+    "name": "Gospodarka przestrzenna - studia I stopnia - nst puw II - semestr letni - GP II rok PUW - z on-line",
+    "faculty": "gospodarka przestrzenna",
+    "groups": {
+      "Sp.: Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250163/mod_folder/content/0/Gospodarka%20przestrzenna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "GP II rok PUW - z. on-line"
+  },
+  "informatyka_inf_st_i": {
+    "name": "Informatyka - studia I stopnia - st I - semestr letni - INF st I",
     "faculty": "informatyka",
     "groups": {
-      "GRUPA 1 kolejność wg nazwisk: A-J": "GRUPA 1\nkolejność wg nazwisk:\nA-J",
-      "GRUPA 2 kolejność wg nazwisk: K-L": "GRUPA 2\nkolejność wg nazwisk:\nK-L",
-      "GRUPA 3 kolejność wg nazwisk: M-R": "GRUPA 3\nkolejność wg nazwisk:\nM-R",
-      "GRUPA 4 kolejność wg nazwisk: S-Z": "GRUPA 4\nkolejność wg nazwisk:\nS-Z",
-      "Sp.: Technologie Webowe i Internet rzeczy grupa 1 podział wg nazwisk: A-K": "Sp.: Technologie Webowe i Internet rzeczy\ngrupa 1\npodział wg nazwisk: A-K",
-      "Technologie Webowe i Internet rzeczy grupa 2 podział wg nazwisk: L-Z": "Technologie Webowe i Internet rzeczy\ngrupa 2\npodział wg nazwisk: L-Z",
-      "Sp.: Technologie mobilne": "Sp.: Technologie mobilne",
+      "gr.1 wg nazwisk: A-Ha": "gr.1\nwg nazwisk: A-Ha",
+      "gr.2 wg nazwisk: Ho-Kor": "gr.2 wg nazwisk:\nHo-Kor",
+      "gr.3 wg nazwisk: Kot-O": "gr.3 wg nazwisk:\nKot-O",
+      "gr.4 wg nazwisk:P-Z": "gr.4\nwg nazwisk:P-Z"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249798/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF st I"
+  },
+  "informatyka_inf_st_ii": {
+    "name": "Informatyka - studia I stopnia - st II - semestr letni - INF st II",
+    "faculty": "informatyka",
+    "groups": {
+      "Sp.: Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i Internet rzeczy",
+      "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja",
       "Sp.: Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
       "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
     },
     "category": "st",
-    "download_url": "https://puw.wspa.pl/pluginfile.php/249798/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20zimowy.xlsx?forcedownload=1",
-    "sheet_name": "INF st II",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249798/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF st II"
+  },
+  "informatyka_inf_st_iii": {
+    "name": "Informatyka - studia I stopnia - st III - semestr letni - INF st III",
+    "faculty": "informatyka",
+    "groups": {
+      "gr.1 wg nazwisk:A-J": "gr.1\nwg nazwisk:A-J",
+      "gr.2 wg nazwisk:K-La": "gr.2\nwg nazwisk:K-La",
+      "gr.3 wg nazwisk:Le-R": "gr.3\nwg nazwisk:Le-R",
+      "gr.4 wg nazwisk:S-Z": "gr.4\nwg nazwisk:S-Z"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249798/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF st III "
+  },
+  "informatyka_inf_nst_ii_z_stacjonarne": {
+    "name": "Informatyka - studia I stopnia - nst II - semestr letni - INF nst II - z stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja",
+      "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza "
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250149/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF nst II - z. stacjonarne"
+  },
+  "informatyka_inf_nst_ii_z_on_line": {
+    "name": "Informatyka - studia I stopnia - nst II - semestr letni - INF nst II - z on-line",
+    "faculty": "informatyka",
+    "groups": {
+      "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja",
+      "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250149/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF nst II - z. on-line"
+  },
+  "informatyka_inf_nst_iii_z_stacjonarne": {
+    "name": "Informatyka - studia I stopnia - nst III - semestr letni - INF nst III - z stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "grupa 1 wg nazwisk": "grupa 1\nwg nazwisk:",
+      "grupa 2 wg nazwisk": "grupa 2\nwg nazwisk:"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250149/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF nst III - z. stacjonarne"
+  },
+  "informatyka_inf_nst_iii_z_on_line": {
+    "name": "Informatyka - studia I stopnia - nst III - semestr letni - INF nst III - z on-line",
+    "faculty": "informatyka",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250149/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF nst III - z. on-line"
+  },
+  "informatyka_inf_i_rok_puw_z_stac": {
+    "name": "Informatyka - studia I stopnia - nst puw I - semestr letni - INF I rok PUW - z stac",
+    "faculty": "informatyka",
+    "groups": {
+      "grupa 1 wg nazwisk: A-D": "grupa 1\nwg nazwisk: A-D",
+      "grupa 2 wg nazwisk: G-K": "grupa 2\nwg nazwisk: G-K",
+      "grupa 3 wg nazwisk: L-R": "grupa 3\nwg nazwisk: L-R",
+      "grupa 4 wg nazwisk: S-Z": "grupa 4\nwg nazwisk: S-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250184/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF I rok PUW - z. stac."
+  },
+  "informatyka_inf_i_rok_puw_z_on_line": {
+    "name": "Informatyka - studia I stopnia - nst puw I - semestr letni - INF I rok PUW - z on-line",
+    "faculty": "informatyka",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250184/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF I rok PUW - z. on-line"
+  },
+  "informatyka_inf_ii_rok_puw_z_stacjonarne": {
+    "name": "Informatyka - studia I stopnia - nst puw II - semestr letni - INF II rok PUW - z stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "Sp.: Bazy danych": "Sp.: Bazy danych",
+      "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja",
+      "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1 wg nazwisk: A-L": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1\nwg nazwisk: A-L",
+      "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2 wg nazwisk: M-Z": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2\nwg nazwisk: M-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250184/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF II rok PUW - z. stacjonarne"
+  },
+  "informatyka_inf_ii_rok_puw_z_on_line": {
+    "name": "Informatyka - studia I stopnia - nst puw II - semestr letni - INF II rok PUW - z on-line",
+    "faculty": "informatyka",
+    "groups": {
+      "Sp.: Bazy danych": "Sp.: Bazy danych",
+      "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja",
+      "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250184/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF II rok PUW - z. on-line"
+  },
+  "informatyka_inf_iii_puw_z_stacjonarne": {
+    "name": "Informatyka - studia I stopnia - nst puw III - semestr letni - INF III PUW - z stacjonarne",
+    "faculty": "informatyka",
+    "groups": {
+      "grupa 1 wg nazwisk: A-J": "grupa 1\nwg nazwisk: A-J",
+      "grupa 2 wg nazwisk: K-O": "grupa 2\nwg nazwisk: K-O",
+      "grupa 3 wg nazwisk: P-Su": "grupa 3\nwg nazwisk: P-Su",
+      "grupa 4 wg nazwisk: Sz-Z": "grupa 4\nwg nazwisk: Sz-Z"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250184/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF III PUW - z. stacjonarne"
+  },
+  "informatyka_inf_iii_puw_z_on_line": {
+    "name": "Informatyka - studia I stopnia - nst puw III - semestr letni - INF III PUW - z on-line",
+    "faculty": "informatyka",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250184/mod_folder/content/0/Informatyka%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF III PUW - z. on-line"
+  },
+  "informatyka_studia_magisterskie_inf_muz_i_puw_z_stac": {
+    "name": "Informatyka - studia II stopnia - nst puw I - semestr letni - INF MUZ I PUW - z stac",
+    "faculty": "informatyka studia magisterskie",
+    "groups": {
+      "M: Sztuczne sieci neuronowe oraz przetwarzanie obrazów medycznych": "M: Sztuczne sieci neuronowe oraz przetwarzanie obrazów medycznych",
+      "M: Cyberbezpieczeństwo": "M: Cyberbezpieczeństwo"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250185/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ I PUW - z. stac."
+  },
+  "informatyka_studia_magisterskie_inf_muz_i_puw_z_on_line": {
+    "name": "Informatyka - studia II stopnia - nst puw I - semestr letni - INF MUZ I PUW - z on-line",
+    "faculty": "informatyka studia magisterskie",
+    "groups": {
+      "Moduł: Sztuczne sieci neuronowe oraz przetwarzanie obrazów medycznych": "Moduł: Sztuczne sieci neuronowe oraz przetwarzanie obrazów medycznych",
+      "Moduł: Cyberbezpieczeństwo": "Moduł: Cyberbezpieczeństwo"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250185/mod_folder/content/0/Informatyka%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "INF MUZ I PUW - z. on-line"
+  },
+  "media_i_dziennikarstwo_mid_st_ii": {
+    "name": "Media i dziennikarstwo - studia I stopnia - st II - semestr letni - MID st II",
+    "faculty": "media i dziennikarstwo",
+    "groups": {
+      "Sp.: Nowe media": "Sp.: Nowe media"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249799/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID st II"
+  },
+  "media_i_dziennikarstwo_mid_st_iii": {
+    "name": "Media i dziennikarstwo - studia I stopnia - st III - semestr letni - MID st III",
+    "faculty": "media i dziennikarstwo",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249799/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID st III"
+  },
+  "media_i_dziennikarstwo_mid_i_rok_puw_z_stacjonarne": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw I - semestr letni - MID I rok PUW - z stacjonarne",
+    "faculty": "media i dziennikarstwo",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250186/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID I rok PUW - z. stacjonarne"
+  },
+  "media_i_dziennikarstwo_mid_i_rok_puw_z_on_line": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw I - semestr letni - MID I rok PUW - z on-line",
+    "faculty": "media i dziennikarstwo",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250186/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID I rok PUW - z. on-line"
+  },
+  "media_i_dziennikarstwo_mid_ii_rok_puw_z_stacjonarny": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr letni - MID II rok PUW - z stacjonarny",
+    "faculty": "media i dziennikarstwo",
+    "groups": {
+      "Sp.: Public relations": "Sp.: Public relations"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250186/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID II rok PUW - z. stacjonarny"
+  },
+  "media_i_dziennikarstwo_mid_ii_rok_puw_z_on_line": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr letni - MID II rok PUW - z on-line",
+    "faculty": "media i dziennikarstwo",
+    "groups": {
+      "Sp.: Public relations": "Sp.: Public relations"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250186/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID II rok PUW - z. on-line"
+  },
+  "media_i_dziennikarstwo_mid_iii_rok_puw_z_stacjonarny": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr letni - MID III rok PUW - zstacjonarny",
+    "faculty": "media i dziennikarstwo",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250186/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID III rok PUW - z.stacjonarny"
+  },
+  "media_i_dziennikarstwo_mid_iii_rok_puw_z_on_line": {
+    "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr letni - MID III rok PUW - z on-line",
+    "faculty": "media i dziennikarstwo",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250186/mod_folder/content/0/Media%20i%20dziennikarstwo%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "MID III rok PUW - z. on-line"
+  },
+  "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_ii": {
+    "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst II - semestr letni - PG J nst II",
+    "faculty": "pedagogika przedszkolna i wczesnoszkolna",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249591/mod_folder/content/0/Pedagogika%20przedszkolna%20i%20wczesnoszkolna%20-%20studia%20jednolite%20magisterskie%20-%20nst%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PG J nst II"
+  },
+  "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_iv": {
+    "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst IV - semestr letni - PG J nst IV",
+    "faculty": "pedagogika przedszkolna i wczesnoszkolna",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249591/mod_folder/content/0/Pedagogika%20przedszkolna%20i%20wczesnoszkolna%20-%20studia%20jednolite%20magisterskie%20-%20nst%20IV%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PG J nst IV"
+  },
+  "pielęgniarstwo_pie_st_i": {
+    "name": "Pielęgniarstwo - studia I stopnia - st I - semestr 2 - letni - PIE ST I",
+    "faculty": "pielęgniarstwo",
+    "groups": {
+      "Grupa 1 podział wg nazwisk: A-B": "Grupa 1\npodział wg nazwisk: \nA-B",
+      "Grupa 2 podział wg nazwisk: C-Dzid": "Grupa 2\npodział wg nazwisk: \nC-Dzid",
+      "Grupa 3 podział wg nazwisk: Dzib-Kie": "Grupa 3\npodział wg nazwisk: \nDzib-Kie",
+      "Grupa 4 podział wg nazwisk: Kif-Kro": "Grupa 4\npodział wg nazwisk: \nKif-Kro",
+      "Grupa 5 podział wg nazwisk: Kró-Mar": "Grupa 5\npodział wg nazwisk: \nKró-Mar",
+      "Grupa 6 podział wg nazwisk: Mas-Mz": "Grupa 6\npodział wg nazwisk: \nMas-Mz",
+      "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+      "Grupa 8 podział wg nazwisk: Sax-Śmi": "Grupa 8\npodział wg nazwisk: \nSax-Śmi",
+      "Grupa 9 podział wg nazwisk: Śmj-Z": "Grupa 9\npodział wg nazwisk: \nŚmj-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%202%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PIE ST I"
+  },
+  "pielęgniarstwo_pie_st_i_zj_1_2_9_12": {
+    "name": "Pielęgniarstwo - studia I stopnia - st I - semestr 2 - letni - PIE st I zj1,2,9,12",
+    "faculty": "pielęgniarstwo",
+    "groups": {
+      "Grupy 1-9": "Grupy 1-9"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%202%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PIE st I zj.1,2,9,12"
+  },
+  "pielęgniarstwo_pie_st_zajecia_praktyczne": {
+    "name": "Pielęgniarstwo - studia I stopnia - st I - semestr 2 - letni - PIE ST zajecia praktyczne",
+    "faculty": "pielęgniarstwo",
+    "groups": {
+      "Grupa 1 podział wg nazwisk: A-B": "Grupa 1\npodział wg nazwisk: \nA-B",
+      "Grupa 2 podział wg nazwisk: C-Dzid": "Grupa 2\npodział wg nazwisk: \nC-Dzid",
+      "Grupa 3 podział wg nazwisk: Dzib-Kie": "Grupa 3\npodział wg nazwisk: \nDzib-Kie",
+      "Grupa 4 podział wg nazwisk: Kif-Kro": "Grupa 4\npodział wg nazwisk: \nKif-Kro",
+      "Grupa 5 podział wg nazwisk: Kró-Mar": "Grupa 5\npodział wg nazwisk: \nKró-Mar",
+      "Grupa 6 podział wg nazwisk: Mas-Mz": "Grupa 6\npodział wg nazwisk: \nMas-Mz",
+      "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+      "Grupa 8 podział wg nazwisk: Sax-Śmi": "Grupa 8\npodział wg nazwisk: \nSax-Śmi",
+      "Grupa 9 podział wg nazwisk: Śmj-Z": "Grupa 9\npodział wg nazwisk: \nŚmj-Z"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%202%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PIE ST zajecia praktyczne"
+  },
+  "pielęgniarstwo_pie_st_ii_zj_1_8": {
+    "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - letni - PIE ST II zj 1-8",
+    "faculty": "pielęgniarstwo",
+    "groups": {
+      "Grupa 1 podział wg nazwisk": "Grupa 1\npodział wg nazwisk: \n",
+      "Grupa 2 podział wg nazwisk": "Grupa 2\npodział wg nazwisk: \n",
+      "Grupa 3 podział wg nazwisk": "Grupa 3\npodział wg nazwisk: \n",
+      "Grupa 4 podział wg nazwisk": "Grupa 4\npodział wg nazwisk: \n",
+      "Grupa 5 podział wg nazwisk": "Grupa 5\npodział wg nazwisk: \n",
+      "Grupa 6 podział wg nazwisk": "Grupa 6\npodział wg nazwisk: \n"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%203%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PIE ST II zj. 1-8"
+  },
+  "pielęgniarstwo_zajecia_praktyczne": {
+    "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - letni - zajecia praktyczne",
+    "faculty": "pielęgniarstwo",
+    "groups": {
+      "Grupa 1 podział wg nazwisk": "Grupa 1\npodział wg nazwisk: \n",
+      "Grupa 2 podział wg nazwisk": "Grupa 2\npodział wg nazwisk: \n",
+      "Grupa 3 podział wg nazwisk": "Grupa 3\npodział wg nazwisk: \n",
+      "Grupa 4 podział wg nazwisk": "Grupa 4\npodział wg nazwisk: \n",
+      "Grupa 5 podział wg nazwisk": "Grupa 5\npodział wg nazwisk: \n",
+      "Grupa 6 podział wg nazwisk": "Grupa 6\npodział wg nazwisk: \n"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%203%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "zajecia praktyczne"
+  },
+  "pielęgniarstwo_pie_st_ii": {
+    "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 4 - letni - PIE st II",
+    "faculty": "pielęgniarstwo",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%204%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PIE st II"
+  },
+  "pielęgniarstwo_pie_st_iii": {
+    "name": "Pielęgniarstwo - studia I stopnia - st III - semestr 6 - letni - PIE st III",
+    "faculty": "pielęgniarstwo",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249594/mod_folder/content/0/Piel%C4%99gniarstwo%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%206%20-%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PIE st III"
+  },
+  "praca_socjalna_ps_i_rok_puw_z_stacjonarne": {
+    "name": "Praca socjalna - studia I stopnia - nst puw I - semestr letni - PS I rok PUW - z stacjonarne",
+    "faculty": "praca socjalna",
+    "groups": {
+      "grupa 1 - kolejność wg nazwisk: A-Kl": "grupa 1 - kolejność wg nazwisk: \nA-Kl",
+      "grupa 2 - kolejność wg nazwisk: Ko-Z": "grupa 2 - kolejność wg nazwisk: \nKo-Z"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250190/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PS I rok PUW - z. stacjonarne"
+  },
+  "praca_socjalna_ps_i_rok_puw_z_online": {
+    "name": "Praca socjalna - studia I stopnia - nst puw I - semestr letni - PS I rok PUW - z online",
+    "faculty": "praca socjalna",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250190/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PS I rok PUW - z. online"
+  },
+  "praca_socjalna_ps_ii_rok_puw_z_stacjonarne": {
+    "name": "Praca socjalna - studia I stopnia - nst puw II - semestr letni - PS II rok PUW - z stacjonarne",
+    "faculty": "praca socjalna",
+    "groups": {
+      "Sp.: Ekonomia społeczna i solidarna": "Sp.: Ekonomia społeczna i solidarna",
+      "Sp. Organizator społeczności lokalnej": "Sp.  Organizator społeczności lokalnej"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250190/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PS II rok PUW - z. stacjonarne"
+  },
+  "praca_socjalna_ps_ii_rok_puw_z_on_line": {
+    "name": "Praca socjalna - studia I stopnia - nst puw II - semestr letni - PS II rok PUW - z on-line",
+    "faculty": "praca socjalna",
+    "groups": {
+      "Sp.: Ekonomia społeczna i solidarna": "Sp.: Ekonomia społeczna i solidarna",
+      "Sp. Organizator społeczności lokalnej": "Sp.  Organizator społeczności lokalnej"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250190/mod_folder/content/0/Praca%20socjalna%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PS II rok PUW - z. on-line"
+  },
+  "projektowanie_wnętrz_pw_st_i": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st I - semestr letni - PW st I",
+    "faculty": "projektowanie wnętrz",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249800/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PW st I"
+  },
+  "projektowanie_wnętrz_pw_st_ii": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st II - semestr letni - PW st II",
+    "faculty": "projektowanie wnętrz",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249800/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PW st II"
+  },
+  "projektowanie_wnętrz_pw_st_iii": {
+    "name": "Projektowanie wnętrz - studia I stopnia - st III - semestr letni - PW st III",
+    "faculty": "projektowanie wnętrz",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249800/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PW st III"
+  },
+  "projektowanie_wnętrz_pw_nst_i": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst I - semestr letni - PW nst I",
+    "faculty": "projektowanie wnętrz",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250148/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PW nst I"
+  },
+  "projektowanie_wnętrz_pw_nst_ii": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst II - semestr letni - PW nst II",
+    "faculty": "projektowanie wnętrz",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250148/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PW nst II"
+  },
+  "projektowanie_wnętrz_pw_nst_iii": {
+    "name": "Projektowanie wnętrz - studia I stopnia - nst III - semestr letni - PW nst III",
+    "faculty": "projektowanie wnętrz",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250148/mod_folder/content/0/Projektowanie%20wn%C4%99trz%20-%20studia%20I%20stopnia%20-%20nst%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "PW nst III"
+  },
+  "socjologia_soc_iii_puw_z_stacjonarne": {
+    "name": "Socjologia - studia I stopnia - nst puw III - semestr letni - SOC III PUW - z stacjonarne",
+    "faculty": "socjologia",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250191/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "SOC III PUW - z. stacjonarne"
+  },
+  "socjologia_soc_iii_puw_z_on_line": {
+    "name": "Socjologia - studia I stopnia - nst puw III - semestr letni - SOC III PUW - z on-line",
+    "faculty": "socjologia",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250191/mod_folder/content/0/Socjologia%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "SOC III PUW - z. on-line"
+  },
+  "stosunki_międzynarodowe_stm_st_i": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - st I - semestr letni - STM st I",
+    "faculty": "stosunki międzynarodowe",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249801/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "STM st I"
+  },
+  "stosunki_międzynarodowe_stm_st_ii": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - st II - semestr letni - STM st II",
+    "faculty": "stosunki międzynarodowe",
+    "groups": {
+      "Sp.: Biznes międzynarodowy i współpraca transgraniczna": "Sp.: Biznes międzynarodowy i współpraca transgraniczna"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249801/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "STM st II"
+  },
+  "stosunki_międzynarodowe_stm_st_iii": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - st III - semestr letni - STM st III",
+    "faculty": "stosunki międzynarodowe",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249801/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "STM st III"
+  },
+  "stosunki_międzynarodowe_stm_i_rok_puw_z_stacjonarne": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - nst puw I - semestr letni - STM I rok PUW - z stacjonarne",
+    "faculty": "stosunki międzynarodowe",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250192/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "STM I rok PUW - z. stacjonarne"
+  },
+  "stosunki_międzynarodowe_stm_i_rok_puw_z_online": {
+    "name": "Stosunki międzynarodowe - studia I stopnia - nst puw I - semestr letni - STM I rok PUW - z online",
+    "faculty": "stosunki międzynarodowe",
+    "groups": {},
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250192/mod_folder/content/0/Stosunki%20mi%C4%99dzynarodowe%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "STM I rok PUW - z. online"
+  },
+  "transport_trt_st_ii_z_stacjonarne": {
+    "name": "Transport - studia I stopnia - st II - semestr letni - TRT st II - z stacjonarne",
+    "faculty": "transport",
+    "groups": {
+      "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249802/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "TRT st II - z. stacjonarne"
+  },
+  "transport_trt_st_ii_z_on_line": {
+    "name": "Transport - studia I stopnia - st II - semestr letni - TRT st II - z on-line",
+    "faculty": "transport",
+    "groups": {
+      "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249802/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "TRT st II - z. on-line"
+  },
+  "transport_trt_st_iii": {
+    "name": "Transport - studia I stopnia - st III - semestr letni - TRT st III",
+    "faculty": "transport",
+    "groups": {
+      "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249802/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "TRT st III"
+  },
+  "transport_trt_st_ii_z_stacjonarne_1": {
+    "name": "Transport - studia I stopnia - st II - semestr letni - TRT st II - z stacjonarne",
+    "faculty": "transport",
+    "groups": {
+      "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250147/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "TRT st II - z. stacjonarne"
+  },
+  "transport_trt_st_ii_z_on_line_1": {
+    "name": "Transport - studia I stopnia - st II - semestr letni - TRT st II - z on-line",
+    "faculty": "transport",
+    "groups": {
+      "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250147/mod_folder/content/0/Transport%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "TRT st II - z. on-line"
+  },
+  "zarządzanie_zaz_st_i": {
+    "name": "Zarządzanie - studia I stopnia - st I - semestr letni - ZAZ st I",
+    "faculty": "zarządzanie",
+    "groups": {
+      "grupa 1 podział wg nazwisk: A-K": "grupa 1\npodział wg nazwisk: \nA-K",
+      "grupa 2 podział wg nazwisk: L-Z": "grupa 2\npodział wg nazwisk: \nL-Z"
+    },
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249803/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ st I"
+  },
+  "zarządzanie_zaz_st_ii": {
+    "name": "Zarządzanie - studia I stopnia - st II - semestr letni - ZAZ st II",
+    "faculty": "zarządzanie",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249803/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ st II"
+  },
+  "zarządzanie_zaz_st_iii": {
+    "name": "Zarządzanie - studia I stopnia - st III - semestr letni - ZAZ st III",
+    "faculty": "zarządzanie",
+    "groups": {},
+    "category": "st",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/249803/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20st%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ st III"
+  },
+  "zarządzanie_zaz_i_rok_puw_z_stacjonarne": {
+    "name": "Zarządzanie - studia I stopnia - nst puw I - semestr letni - ZAZ I rok PUW - z stacjonarne",
+    "faculty": "zarządzanie",
+    "groups": {
+      "GR.1 - KOLEJNOŚĆ WG NAZWISK: A-J": "GR.1 - KOLEJNOŚĆ WG NAZWISK:\nA-J",
+      "GR.2 - KOLEJNOŚĆ WG NAZWISK: K-Z": "GR.2 - KOLEJNOŚĆ WG NAZWISK:\nK-Z"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250193/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ I rok PUW - z. stacjonarne"
+  },
+  "zarządzanie_zaz_i_rok_puw_z_on_line": {
+    "name": "Zarządzanie - studia I stopnia - nst puw I - semestr letni - ZAZ I rok PUW - z on-line",
+    "faculty": "zarządzanie",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250193/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ I rok PUW - z. on-line"
+  },
+  "zarządzanie_zaz_ii_rok_puw_z_stacjonarne": {
+    "name": "Zarządzanie - studia I stopnia - nst puw II - semestr letni - ZAZ II rok PUW - z stacjonarne",
+    "faculty": "zarządzanie",
+    "groups": {
+      "Sp.: Zarządzanie firmą": "Sp.: Zarządzanie firmą",
+      "Sp.: Zarządzanie HR": "Sp.: Zarządzanie HR"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250193/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ II rok PUW - z. stacjonarne"
+  },
+  "zarządzanie_zaz_ii_rok_puw_z_on_line": {
+    "name": "Zarządzanie - studia I stopnia - nst puw II - semestr letni - ZAZ II rok PUW - z on-line",
+    "faculty": "zarządzanie",
+    "groups": {
+      "Sp.: Zarządzanie firmą": "Sp.: Zarządzanie firmą",
+      "Sp.: Zarządzanie HR": "Sp.: Zarządzanie HR"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250193/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ II rok PUW - z. on-line"
+  },
+  "zarządzanie_zaz_iii_puw_z_stacjonarne": {
+    "name": "Zarządzanie - studia I stopnia - nst puw III - semestr letni - ZAZ III PUW - z stacjonarne",
+    "faculty": "zarządzanie",
+    "groups": {
+      "Grupa 1 podział wg nazwisk:A-Kos": "Grupa 1\npodział wg nazwisk:A-Kos",
+      "Grupa 2 podział wg nazwisk:Kot-Z": "Grupa 2\npodział wg nazwisk:Kot-Z"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250193/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ III PUW - z. stacjonarne"
+  },
+  "zarządzanie_zaz_iii_puw_z_on_line": {
+    "name": "Zarządzanie - studia I stopnia - nst puw III - semestr letni - ZAZ III PUW - z on-line",
+    "faculty": "zarządzanie",
+    "groups": {},
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250193/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20I%20stopnia%20-%20nst%20puw%20III%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ III PUW - z. on-line"
+  },
+  "zarządzanie_studia_magisterskie_zaz_muz_i_puw_z_stacjonarne": {
+    "name": "Zarządzanie - studia II stopnia - nst puw I - semestr letni - ZAZ MUZ I PUW - z stacjonarne",
+    "faculty": "zarządzanie studia magisterskie",
+    "groups": {
+      "Sp.: E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+      "Sp.: Menedżer HR i coaching biznesowy": "Sp.: Menedżer HR i coaching biznesowy"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250195/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ I PUW - z. stacjonarne"
+  },
+  "zarządzanie_studia_magisterskie_zaz_muz_i_puw_z_on_line": {
+    "name": "Zarządzanie - studia II stopnia - nst puw I - semestr letni - ZAZ MUZ I PUW - z on-line",
+    "faculty": "zarządzanie studia magisterskie",
+    "groups": {
+      "Sp.: E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+      "Sp.: Menedżer HR i coaching biznesowy": "Sp.: Menedżer HR i coaching biznesowy"
+    },
+    "category": "nst",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250195/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20I%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ I PUW - z. on-line"
+  },
+  "zarządzanie_studia_magisterskie_zaz_muz_ii_puw_z_stacjonarne": {
+    "name": "Zarządzanie - studia II stopnia - nst puw II - semestr letni - ZAZ MUZ II PUW - z stacjonarne",
+    "faculty": "zarządzanie studia magisterskie",
+    "groups": {
+      "Sp.: E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+      "Sp.: Menedżer HR i coaching biznesowy": "Sp.: Menedżer HR i coaching biznesowy"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250195/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ II PUW - z. stacjonarne"
+  },
+  "zarządzanie_studia_magisterskie_zaz_muz_ii_puw_z_on_line": {
+    "name": "Zarządzanie - studia II stopnia - nst puw II - semestr letni - ZAZ MUZ II PUW - z on-line",
+    "faculty": "zarządzanie studia magisterskie",
+    "groups": {
+      "Sp.: E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+      "Sp.: Menedżer HR i coaching biznesowy": "Sp.: Menedżer HR i coaching biznesowy"
+    },
+    "category": "nst-online",
+    "download_url": "https://puw.wspa.pl/pluginfile.php/250195/mod_folder/content/0/Zarz%C4%85dzanie%20-%20studia%20II%20stopnia%20-%20nst%20puw%20II%20-%20semestr%20letni.xlsx?forcedownload=1",
+    "sheet_name": "ZAZ MUZ II PUW - z. on-line",
     "mixed": true,
     "groups_column_info": {
-      "GRUPA 1 kolejność wg nazwisk: A-J": 2,
-      "GRUPA 2 kolejność wg nazwisk: K-L": 2,
-      "GRUPA 3 kolejność wg nazwisk: M-R": 2,
-      "GRUPA 4 kolejność wg nazwisk: S-Z": 2,
-      "Sp.: Technologie Webowe i Internet rzeczy grupa 1 podział wg nazwisk: A-K": 3,
-      "Technologie Webowe i Internet rzeczy grupa 2 podział wg nazwisk: L-Z": 3,
-      "Sp.: Technologie mobilne": 3,
-      "Sp.: Grafika komputerowa i projektowanie gier": 3,
-      "Sp.: Cyberbezpieczeństwo i informatyka śledcza": 3
+      "Sp.: E-biznes i nowoczesne formy marketingu": 2,
+      "Sp.: Menedżer HR i coaching biznesowy": 1
     }
   }
 }

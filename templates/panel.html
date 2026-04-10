@@ -108,24 +108,28 @@
 
         <!-- Logs Section -->
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="h4 mb-0">System Logs</h2>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="showAllLogs">
+                    <label class="form-check-label small" for="showAllLogs">Pokaż wszystkie</label>
+                </div>
             </div>
             <div class="card-body">
+                <p class="text-muted small mb-3" id="logsInfo">Domyślnie: tylko logi ze zmianami lub błędami</p>
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Timestamp</th>
-                                <th>Successful Checks</th>
-                                <th>New Plans</th>
-                                <th>Has Errors</th>
-                                <th>Execution Time (s)</th>
-                                <th>Details</th>
+                                <th>Czas</th>
+                                <th>Sprawdzono</th>
+                                <th>Zmiany</th>
+                                <th>Błędy</th>
+                                <th>Czas (s)</th>
+                                <th>Szczegóły</th>
                             </tr>
                         </thead>
                         <tbody id="logsTable">
-                            <!-- Logs will be loaded here -->
                         </tbody>
                     </table>
                 </div>
@@ -283,31 +287,52 @@
 
         function loadLogs() {
             const logsTable = document.getElementById('logsTable');
-            if (!logsTable) {
-                console.warn('Logs table element not found');
-                return;
-            }
+            if (!logsTable) return;
 
-            fetch('/api/logs')
+            const showAll = document.getElementById('showAllLogs')?.checked ? 'true' : 'false';
+            fetch(`/api/logs?all=${showAll}`)
                 .then(response => response.json())
                 .then(logs => {
                     logsTable.innerHTML = '';
-                    logs.forEach(log => {
-                        const row = document.createElement('tr');
+                    const info = document.getElementById('logsInfo');
+                    if (info) {
+                        info.textContent = showAll === 'true'
+                            ? `Wszystkie logi (${logs.length})`
+                            : `Tylko zmiany i błędy (${logs.length})`;
+                    }
+
+                    if (logs.length === 0) {
+                        logsTable.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Brak logów do wyświetlenia</td></tr>';
+                        return;
+                    }
+
+                    logs.forEach((log, idx) => {
                         const hasErrors = log.has_errors;
+                        const hasUpdates = log.new_plans > 0;
+                        const updatedPlans = log.updated_plans || [];
+                        const row = document.createElement('tr');
+
+                        let detailsHtml = '-';
+                        if (hasErrors) {
+                            detailsHtml = `<button class="btn btn-sm btn-outline-danger" onclick='showErrors(${JSON.stringify(log.errors)})'>Błędy</button>`;
+                        }
+                        if (hasUpdates && updatedPlans.length > 0) {
+                            const plansList = updatedPlans.map(p => `<li class="small">${p}</li>`).join('');
+                            detailsHtml = `
+                                <button class="btn btn-sm btn-outline-success" onclick="document.getElementById('plans-${idx}').classList.toggle('d-none')">
+                                    ${updatedPlans.length} plan${updatedPlans.length > 1 ? 'ów' : ''}
+                                </button>
+                                <ul id="plans-${idx}" class="d-none mt-2 mb-0 ps-3" style="list-style:disc">${plansList}</ul>
+                            `;
+                        }
+
                         row.innerHTML = `
-                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td class="small text-nowrap">${new Date(log.timestamp).toLocaleString('pl-PL')}</td>
                             <td>${log.successful_checks}</td>
-                            <td>${log.new_plans}</td>
-                            <td><span class="badge ${hasErrors ? 'bg-danger' : 'bg-success'}">${hasErrors ? 'Yes' : 'No'}</span></td>
-                            <td>${log.execution_time || 'N/A'}</td>
-                            <td>
-                                ${hasErrors ? `
-                                    <button class="btn btn-sm btn-outline-danger" onclick='showErrors(${JSON.stringify(log.errors)})'>
-                                        Show Errors
-                                    </button>
-                                ` : '-'}
-                            </td>
+                            <td>${hasUpdates ? `<span class="badge bg-success">${log.new_plans}</span>` : '0'}</td>
+                            <td>${hasErrors ? '<span class="badge bg-danger">Tak</span>' : '<span class="text-muted">-</span>'}</td>
+                            <td>${log.execution_time || '-'}</td>
+                            <td>${detailsHtml}</td>
                         `;
                         logsTable.appendChild(row);
                     });
@@ -599,6 +624,9 @@
 
         // Refresh logs every minute
         setInterval(loadLogs, 60000);
+
+        // Toggle all logs
+        document.getElementById('showAllLogs')?.addEventListener('change', loadLogs);
 
         function initializeMaintenanceMode() {
             const maintenanceCheckbox = document.getElementById('maintenanceMode');

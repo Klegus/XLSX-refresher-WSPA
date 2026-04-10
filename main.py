@@ -200,7 +200,7 @@ from routes.activities import init_activity_routes
 from routes.comparisons import init_comparison_routes
 
 
-def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None):
+def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_time=None, updated_plan_names=None):
     """Log check cycle results to MongoDB"""
     timestamp = datetime.now()
 
@@ -210,8 +210,9 @@ def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_tim
         "successful_checks": successful_checks,
         "new_plans": new_plans,
         "has_errors": bool(errors),
-        "execution_time": execution_time,  # Time in seconds
+        "execution_time": execution_time,
         "errors": [],
+        "updated_plans": updated_plan_names or [],
     }
 
     # Add error details if any
@@ -800,6 +801,7 @@ async def main():
 
                 successful_checks = 0
                 new_plans = 0
+                updated_plan_names = []
                 errors = []
                 cycle_start_time = time.time()
 
@@ -933,6 +935,7 @@ async def main():
                                 successful_checks += 1
                                 if result:
                                     new_plans += 1
+                                    updated_plan_names.append(plan_name)
                         except Exception as e:
                             error_info = {
                                 "timestamp": datetime.now(),
@@ -975,6 +978,7 @@ async def main():
                         new_plans=new_plans,
                         errors=errors if errors else None,
                         execution_time=cycle_execution_time,
+                        updated_plan_names=updated_plan_names,
                     )
 
                     try:
