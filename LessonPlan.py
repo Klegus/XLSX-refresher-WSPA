@@ -836,12 +836,12 @@ class LessonPlan(LessonPlanDownloader):
             df = self._get_sheet_df(header_none=False)
 
             if len(self.groups) == 1 and "cały kierunek" in self.groups:
-                days = {
+                days_upper = {
                     "st": ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK"],
                     "nst": ["PIĄTEK", "SOBOTA", "NIEDZIELA"],
                     "nst-online": ["SOBOTA", "NIEDZIELA"],
                 }
-                schedule_days = days.get(self.schedule_type, days["st"])
+                schedule_days = days_upper.get(self.schedule_type, days_upper["st"])
 
                 matching_columns = []
                 used_columns = set()
@@ -850,6 +850,14 @@ class LessonPlan(LessonPlanDownloader):
                     if column in used_columns:
                         continue
 
+                    # Check column header name (for named headers)
+                    col_upper = str(column).upper().strip()
+                    if col_upper in schedule_days:
+                        matching_columns.append(column)
+                        used_columns.add(column)
+                        continue
+
+                    # Check cell values (for raw headers)
                     unique_values = df[column].dropna().unique()
                     for value in unique_values:
                         value_str = str(value).upper().strip()
@@ -858,8 +866,15 @@ class LessonPlan(LessonPlanDownloader):
                             used_columns.add(column)
                             break
 
+                # Fallback: if no day names found, take all columns except the first one
+                if not matching_columns:
+                    all_cols = list(df.columns)
+                    if len(all_cols) > 1:
+                        matching_columns = all_cols[1:]
+                        logger.info(f"No day columns found by name, using all {len(matching_columns)} data columns for 'cały kierunek'")
+
                 matching_columns.sort(
-                    key=lambda x: int(x.split(".")[-1]) if "." in x else 0
+                    key=lambda x: int(x.split(".")[-1]) if isinstance(x, str) and "." in x else 0
                 )
                 self.group_columns["cały kierunek"] = matching_columns
                 return self.group_columns
