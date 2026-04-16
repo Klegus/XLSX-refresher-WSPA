@@ -203,12 +203,20 @@ class LessonPlan(LessonPlanDownloader):
             html += f"<th><b>{h}</b></th>\n"
         html += "</tr>\n"
 
+        # Stop words — rows with these indicate end of schedule data
+        stop_words = ['program studiów', 'uwaga', 'uwagi:', 'praktyka zawodowa']
+
         for r in range(data_start, ws.max_row + 1):
             time_val = ws.cell(r, time_col).value
             if not time_val:
                 continue
 
             time_str = str(time_val).strip()
+
+            # Stop if we hit non-schedule content
+            if any(sw in time_str.lower() for sw in stop_words):
+                break
+
             if not any(c.isdigit() for c in time_str):
                 continue
 
@@ -222,8 +230,9 @@ class LessonPlan(LessonPlanDownloader):
             for col_idx, _ in day_cols:
                 cell_val = ws.cell(r, col_idx).value
                 cell_text = str(cell_val).strip() if cell_val else ''
-                # Replace newlines with line breaks for HTML
-                cell_text = cell_text.replace('\n', '\n')
+                # Skip non-schedule content in data cells
+                if cell_text and any(sw in cell_text.lower() for sw in ['egzamin', 'program studiów', 'praktyka zawodowa']):
+                    cell_text = ''
                 html += f"<td>{cell_text}</td>\n"
 
             html += "</tr>\n"
