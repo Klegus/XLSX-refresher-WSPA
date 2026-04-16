@@ -84,10 +84,10 @@ class LessonPlan(LessonPlanDownloader):
                 logger.error(f"Could not connect to MongoDB: {e}")
             except Exception as e: 
                 logger.error(f"An error occurred: {e}")
-        if plan_config.get("groups") is None:
+        if not plan_config.get("groups"):
+            # Empty dict {} or None -> treat as whole faculty
             self.groups = {"cały kierunek": "all"}
         else:
-            # Handle both old and new formats here too
             raw_groups = plan_config["groups"]
             self.groups = {}
             for key, value in raw_groups.items():
@@ -139,6 +139,100 @@ class LessonPlan(LessonPlanDownloader):
                 self.converted_lesson_plan, self.sheet_name
             )
         return self._weekday_column_map_cache or {}
+
+    def _generate_html_direct(self, checksum):
+        """Generate HTML table directly from Excel using openpyxl.
+        Used for plans without groups ('cały kierunek') to bypass the complex pipeline."""
+        import openpyxl as xl
+
+        file_path = self.file_save_path or os.path.join(self.directory or '', 'downloaded_file.xlsx')
+        if not os.path.exists(file_path):
+            return None
+
+        wb = xl.load_workbook(file_path)
+        if self.sheet_name not in wb.sheetnames:
+            wb.close()
+            return None
+
+        ws = wb[self.sheet_name]
+
+        # Find the row with day names (PONIEDZIAŁEK etc.)
+        days_row = None
+        day_names = {
+            'st': ['PONIEDZIAŁEK', 'WTOREK', 'ŚRODA', 'CZWARTEK', 'PIĄTEK'],
+            'nst': ['PIĄTEK', 'SOBOTA', 'NIEDZIELA'],
+            'nst-online': ['SOBOTA', 'NIEDZIELA'],
+        }
+        expected_days = day_names.get(self.schedule_type, day_names['st'])
+
+        for r in range(1, 7):
+            for c in range(1, ws.max_column + 1):
+                v = ws.cell(r, c).value
+                if v and str(v).upper().strip() in expected_days:
+                    days_row = r
+                    break
+            if days_row:
+                break
+
+        if not days_row:
+            wb.close()
+            return None
+
+        # Collect day columns
+        day_cols = []
+        for c in range(1, ws.max_column + 1):
+            v = ws.cell(days_row, c).value
+            if v and str(v).upper().strip() in expected_days:
+                day_cols.append((c, str(v).strip()))
+
+        # Find time column (usually col 1) and data start row (row after days)
+        time_col = 1
+        data_start = days_row + 2  # skip GRUPA row
+
+        # Find GODZ row
+        for r in range(days_row + 1, days_row + 4):
+            v = ws.cell(r, 1).value
+            if v and 'GODZ' in str(v).upper():
+                data_start = r + 1
+                break
+
+        # Build HTML table
+        headers = ['Godziny'] + [name for _, name in day_cols]
+        html = "<table border='1'>\n<tr>\n"
+        for h in headers:
+            html += f"<th><b>{h}</b></th>\n"
+        html += "</tr>\n"
+
+        for r in range(data_start, ws.max_row + 1):
+            time_val = ws.cell(r, time_col).value
+            if not time_val:
+                continue
+
+            time_str = str(time_val).strip()
+            if not any(c.isdigit() for c in time_str):
+                continue
+
+            # Format time with superscript
+            import re
+            time_formatted = re.sub(r'(\d+)(\d{2})', r'\1<sup>\2</sup>', time_str)
+
+            html += "<tr>\n"
+            html += f"<td>{time_formatted}</td>\n"
+
+            for col_idx, _ in day_cols:
+                cell_val = ws.cell(r, col_idx).value
+                cell_text = str(cell_val).strip() if cell_val else ''
+                # Replace newlines with line breaks for HTML
+                cell_text = cell_text.replace('\n', '\n')
+                html += f"<td>{cell_text}</td>\n"
+
+            html += "</tr>\n"
+
+        html += "</table>"
+        wb.close()
+
+        logger.info(f"Generated direct HTML table for 'cały kierunek': {len(headers)-1} days, from row {data_start}")
+        return html
 
     def get_schedule_headers(self, num_columns):
         """Return appropriate headers based on schedule type and actual number of columns"""
@@ -540,6 +634,29 @@ class LessonPlan(LessonPlanDownloader):
         if should_process:
             logger.info(f"Processing plan for {self.plan_config['name']}")
 
+            # Fast path for "cały kierunek" plans — bypass complex pipeline,
+            # read Excel directly with openpyxl and generate HTML table
+            if len(self.groups) == 1 and "cały kierunek" in self.groups:
+                try:
+                    html = self._generate_html_direct(new_checksum)
+                    if html:
+                        if self.save_to_mongodb:
+                            faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
+                            collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
+                            collection = self.db[collection_name]
+                            current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            collection.insert_one({
+                                "timestamp": current_datetime,
+                                "checksum": new_checksum,
+                                "plan_name": self.plan_config["name"],
+                                "category": self.schedule_type,
+                                "groups": {"cały kierunek": html},
+                            })
+                            logger.info(f"Saved 'cały kierunek' plan via direct path to {collection_name}")
+                        return new_checksum
+                except Exception as e:
+                    logger.warning(f"Direct HTML generation failed, falling back to standard pipeline: {e}")
+
             try:
                 self._invalidate_processing_cache()
 
@@ -873,10 +990,22 @@ class LessonPlan(LessonPlanDownloader):
                         matching_columns = all_cols[1:]
                         logger.info(f"No day columns found by name, using all {len(matching_columns)} data columns for 'cały kierunek'")
 
-                matching_columns.sort(
-                    key=lambda x: int(x.split(".")[-1]) if isinstance(x, str) and "." in x else 0
+                # Convert column names to "Unnamed: X" format (index-based)
+                # so get_lessons_for_group can parse them with header_none=True
+                indexed_columns = []
+                all_cols = list(df.columns)
+                for col in matching_columns:
+                    idx = all_cols.index(col) if col in all_cols else None
+                    if idx is not None:
+                        indexed_columns.append(f"Unnamed: {idx}")
+                    else:
+                        indexed_columns.append(col)
+
+                indexed_columns.sort(
+                    key=lambda x: int(x.split(".")[-1]) if isinstance(x, str) and "." in x else (int(x.split(": ")[-1]) if ": " in str(x) else 0)
                 )
-                self.group_columns["cały kierunek"] = matching_columns
+                self.group_columns["cały kierunek"] = indexed_columns
+                logger.info(f"Mapped 'cały kierunek' to columns: {indexed_columns}")
                 return self.group_columns
 
             # Standardowa logika dla zdefiniowanych grup
@@ -949,18 +1078,24 @@ class LessonPlan(LessonPlanDownloader):
                 logger.warning(f"Group not found in columns", extra={"group_name": group_name})
                 return None
 
-            # Extract column numbers from the column names
+            # Extract column numbers from column names
             group_col_indices = []
             for col_name in self.group_columns[group_name]:
+                col_str = str(col_name)
                 try:
-                    if "." in col_name:
-                        col_number = int(col_name.split(".")[-1])
-                        group_col_indices.append(col_number)
-                except ValueError as e:
-                    continue
+                    # "Unnamed: 5" -> 5
+                    if "Unnamed:" in col_str:
+                        group_col_indices.append(int(col_str.split(":")[-1].strip()))
+                        continue
+                    # "Unnamed.5" or similar dotted format -> last number
+                    if "." in col_str:
+                        group_col_indices.append(int(col_str.split(".")[-1]))
+                        continue
+                except (ValueError, IndexError):
+                    pass
 
             if not group_col_indices:
-                logger.warning(f"Could not extract column numbers", extra={"group_name": group_name})
+                logger.warning(f"Could not extract column indices for {group_name}, raw: {self.group_columns[group_name][:3]}")
                 return None
 
             columns_to_extract = [0] + sorted(group_col_indices)
@@ -1075,7 +1210,7 @@ class LessonPlan(LessonPlanDownloader):
                     missing_slots.append(slot)
 
             if missing_slots:
-                logger.warning(f"Warning: Missing time slots for {group_name}: {missing_slots}")
+                logger.debug(f"Missing time slots for {group_name}: {missing_slots}")
             if not df_filtered.empty:
                 last_row_time = str(df_filtered.iloc[-1]["Godziny"]).strip()
                 if not any(

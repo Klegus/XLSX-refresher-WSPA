@@ -20,6 +20,8 @@ RUN pip install --no-cache-dir --timeout=120 \
 COPY admin_app.py ./
 COPY shared_utils.py ./
 COPY moodle_scanner.py ./
+COPY plan_validator.py ./
+COPY plan_differ.py ./
 COPY LessonPlanDownloader.py ./
 COPY routes/ routes/
 COPY templates/ templates/

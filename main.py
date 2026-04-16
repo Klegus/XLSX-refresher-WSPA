@@ -1018,6 +1018,13 @@ async def main():
                         sentry_sdk.capture_exception(e)
                         logger.error(f"Error processing Moodle activities: {str(e)}", extra={"operation": "moodle_check"})
 
+                # Validate all plans after cycle
+                try:
+                    from plan_validator import log_validation_results
+                    log_validation_results(db)
+                except Exception as e:
+                    logger.error(f"Plan validation failed: {e}")
+
                 # Clear download cache between cycles
                 from LessonPlanDownloader import _download_cache
                 _download_cache.clear()

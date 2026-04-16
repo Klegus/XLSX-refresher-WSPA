@@ -183,6 +183,17 @@ def force_check():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@admin_app.route("/api/validate", methods=["GET"])
+def validate_plans():
+    """Run validation on all plans."""
+    try:
+        from plan_validator import validate_all_plans
+        results = validate_all_plans(admin_db)
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def run_admin_app():
     port = int(os.getenv("ADMIN_PORT", "5006"))
     logger.info(f"Starting admin panel on port {port}")
