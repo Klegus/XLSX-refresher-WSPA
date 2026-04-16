@@ -194,6 +194,32 @@ def validate_plans():
         return jsonify({"error": str(e)}), 500
 
 
+@admin_app.route("/api/reprocess-invalid", methods=["POST"])
+def reprocess_invalid():
+    """Delete invalid plan documents so backend re-processes them on next cycle."""
+    try:
+        from plan_validator import validate_all_plans
+        results = validate_all_plans(admin_db)
+
+        cleared = 0
+        cleared_names = []
+        for detail in results.get('details', []):
+            col_name = detail.get('collection')
+            if col_name:
+                admin_db[col_name].delete_many({})
+                cleared += 1
+                cleared_names.append(detail.get('plan', col_name))
+
+        return jsonify({
+            "success": True,
+            "message": f"Wyczyszczono {cleared} kolekcji. Backend przetworzy je ponownie w następnym cyklu.",
+            "cleared": cleared,
+            "plans": cleared_names
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 def run_admin_app():
     port = int(os.getenv("ADMIN_PORT", "5006"))
     logger.info(f"Starting admin panel on port {port}")

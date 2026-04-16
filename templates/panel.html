@@ -1,195 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>WSPA Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .status-badge {
-            font-size: 1.2em;
-            padding: 0.5em 1em;
-        }
+        body { background: #f8f9fa; }
+        .navbar-brand { font-weight: 700; letter-spacing: -0.02em; }
+        .nav-pills .nav-link { color: #6c757d; border-radius: 0.5rem; }
+        .nav-pills .nav-link.active { background: #0d6efd; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .status-dot.active { background: #198754; }
+        .status-dot.inactive { background: #dc3545; }
+        .card { border: none; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-radius: 0.75rem; }
+        .card-header { background: transparent; border-bottom: 1px solid #f0f0f0; font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="container mt-5" id="mainContainer">
-        <!-- Search Bar -->
-        <div class="mb-4">
-            <input type="text" class="form-control" id="planSearch" placeholder="Search plans...">
-        </div>
-        <h1 class="mb-4">System Administration Panel</h1>
-        
-        <!-- Status Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2 class="h4 mb-0">System Status</h2>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">WSPA Admin</a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="text-light small" id="statusBadge">...</span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="maintenanceMode">
+                    <label class="form-check-label text-light small" for="maintenanceMode">Maintenance</label>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge bg-success status-badge" id="statusBadge">Active</span>
-                        <p class="text-muted mt-2" id="lastCheck">Last check: </p>
-                        <p class="text-danger mt-2" id="maintenanceReason" style="display: none;"></p>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="maintenanceMode">
-                        <label class="form-check-label" for="maintenanceMode">Maintenance Mode</label>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Status bar -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <span class="text-muted small" id="lastCheck"></span>
+                    <span class="text-danger small" id="maintenanceReason" style="display:none;"></span>
+                    <div class="ms-auto d-flex gap-2 align-items-center">
+                        <label class="text-muted small mb-0">Interwał (s):</label>
+                        <input type="number" class="form-control form-control-sm" id="checkInterval" min="60" step="60" style="width:90px">
+                        <button class="btn btn-sm btn-outline-primary" onclick="updateInterval()">Zapisz</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Check Interval Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2 class="h4 mb-0">Check Interval Settings</h2>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="checkInterval" class="form-label">Check Interval (seconds)</label>
-                    <input type="number" class="form-control" id="checkInterval" min="60" step="60">
-                </div>
-                <button class="btn btn-primary" onclick="updateInterval()">Update Interval</button>
-            </div>
-        </div>
+        <!-- Tab navigation -->
+        <ul class="nav nav-pills mb-4" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tab-scanner">Skaner Moodle</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-validation">Walidacja</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-plans">Plany <span class="badge bg-secondary" id="plansCount"></span></a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-logs">Logi</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-suggestions">Sugestie</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-database">Baza danych</a></li>
+        </ul>
 
-        <!-- Database Management Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2 class="h4 mb-0">Zarządzanie bazą danych</h2>
-            </div>
-            <div class="card-body">
-                <div class="d-flex flex-wrap gap-3">
-                    <div>
-                        <h5 class="h6">Reset semestru</h5>
-                        <p class="text-muted small mb-2">Wyczyść dane planów i aktywności (do nowego semestru).</p>
-                        <button class="btn btn-danger btn-sm" onclick="purgeDatabase()">
-                            Wyczyść bazę (plany + aktywności)
-                        </button>
+        <!-- Tab content -->
+        <div class="tab-content">
+            <!-- Scanner Tab -->
+            <div class="tab-pane fade show active" id="tab-scanner">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        Moodle Plan Scanner
+                        <button class="btn btn-warning btn-sm" id="startScanBtn" onclick="startMoodleScan()">Skanuj Moodle</button>
                     </div>
-                    <div>
-                        <h5 class="h6">Pełny reset</h5>
-                        <p class="text-muted small mb-2">Wyczyść wszystko łącznie z konfiguracją plans.json.</p>
-                        <button class="btn btn-outline-danger btn-sm" onclick="purgeDatabaseFull()">
-                            Pełny reset bazy
-                        </button>
-                    </div>
-                    <div>
-                        <h5 class="h6">Force check</h5>
-                        <p class="text-muted small mb-2">Wyłącz maintenance i wymuś sprawdzenie planów.</p>
-                        <button class="btn btn-primary btn-sm" onclick="forceCheck()">
-                            Uruchom sprawdzanie
-                        </button>
+                    <div class="card-body">
+                        <p class="text-muted small">Skanuje "Strefa studenta" na PUW, pobiera pliki .xlsx, porównuje z aktualnymi planami w bazie.</p>
+                        <div id="scanStatus" style="display:none;">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" id="scanSpinner"></div>
+                                <span id="scanProgressText">Uruchamianie...</span>
+                            </div>
+                        </div>
+                        <div id="scanResults" style="display:none;"></div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Moodle Scanner Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h2 class="h4 mb-0">Moodle Plan Scanner</h2>
-                <button class="btn btn-warning btn-sm" id="startScanBtn" onclick="startMoodleScan()">
-                    Skanuj Moodle
-                </button>
-            </div>
-            <div class="card-body">
-                <p class="text-muted mb-2">Skanuje "Strefa studenta" na PUW, pobiera pliki .xlsx, porównuje z aktualnymi planami.</p>
-                <div id="scanStatus" style="display:none;">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="spinner-border spinner-border-sm text-primary me-2" id="scanSpinner"></div>
-                        <span id="scanProgressText">Uruchamianie...</span>
+            <!-- Validation Tab -->
+            <div class="tab-pane fade" id="tab-validation">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        Walidacja planów
+                        <button class="btn btn-outline-primary btn-sm" onclick="runValidation()">Sprawdź</button>
                     </div>
-                </div>
-                <div id="scanResults" style="display:none;"></div>
-            </div>
-        </div>
-
-        <!-- Logs Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h2 class="h4 mb-0">System Logs</h2>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="showAllLogs">
-                    <label class="form-check-label small" for="showAllLogs">Pokaż wszystkie</label>
-                </div>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small mb-3" id="logsInfo">Domyślnie: tylko logi ze zmianami lub błędami</p>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Czas</th>
-                                <th>Sprawdzono</th>
-                                <th>Zmiany</th>
-                                <th>Błędy</th>
-                                <th>Czas (s)</th>
-                                <th>Szczegóły</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logsTable">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Plans Management Section -->
-        <div class="card mb-4" id="plansSection">
-            <div class="card-header">
-                <h2 class="h4 mb-0">Plans Management</h2>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <h3 class="h5">Current Plans</h3>
-                    <div id="currentPlans" class="list-group mb-3">
-                        <!-- Plans will be loaded here -->
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <h3 class="h5">Add New Plan</h3>
-                    <div class="mb-3">
-                        <label for="planId" class="form-label">Plan ID (e.g. informatyka2st1-1)</label>
-                        <input type="text" class="form-control" id="planId">
-                    </div>
-                    <div class="mb-3">
-                        <label for="planJson" class="form-label">Plan Configuration (JSON)</label>
-                        <textarea class="form-control" id="planJson" rows="10"></textarea>
-                    </div>
-                    <button class="btn btn-success" onclick="addPlan()">Add Plan</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Suggestions Section -->
-        <div class="card mb-4" id="suggestionsSection">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h2 class="h4 mb-0">User Suggestions</h2>
-                <div class="btn-group">
-                    <button class="btn btn-outline-secondary btn-sm" onclick="loadSuggestions('all')">All</button>
-                    <button class="btn btn-outline-warning btn-sm" onclick="loadSuggestions('pending')">Pending</button>
-                    <button class="btn btn-outline-success btn-sm" onclick="loadSuggestions('approved')">Approved</button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="loadSuggestions('rejected')">Rejected</button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div id="suggestionsList" class="mb-3">
-                    <!-- Suggestions will be loaded here -->
-                    <div class="d-flex justify-content-center align-items-center py-4" id="suggestionsLoading">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                    <div class="card-body">
+                        <div id="validationResults">
+                            <p class="text-muted small">Kliknij "Sprawdź" aby zwalidować wszystkie plany w bazie.</p>
                         </div>
                     </div>
-                    <div id="noSuggestions" class="text-center py-4 d-none">
-                        <p class="text-muted">No suggestions found.</p>
+                </div>
+            </div>
+
+            <!-- Plans Tab -->
+            <div class="tab-pane fade" id="tab-plans">
+                <div class="card" id="plansSection">
+                    <div class="card-header">Zarządzanie planami</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control form-control-sm" id="planSearch" placeholder="Szukaj planów...">
+                        </div>
+                        <div id="currentPlans" class="list-group mb-4"></div>
+                        <hr>
+                        <h6>Dodaj nowy plan</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm" id="planId" placeholder="Plan ID">
+                            </div>
+                            <div class="col-md-8">
+                                <textarea class="form-control form-control-sm" id="planJson" rows="4" placeholder="JSON konfiguracji"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-success btn-sm" onclick="addPlan()">Dodaj plan</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <button class="btn btn-sm btn-outline-primary" onclick="previousSuggestionsPage()">Previous</button>
-                    <span id="suggestionsPagination">Page 1</span>
-                    <button class="btn btn-sm btn-outline-primary" onclick="nextSuggestionsPage()">Next</button>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="tab-pane fade" id="tab-logs">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        System Logs
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="showAllLogs">
+                            <label class="form-check-label small" for="showAllLogs">Pokaż wszystkie</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2" id="logsInfo">Domyślnie: tylko logi ze zmianami lub błędami</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead><tr>
+                                    <th>Czas</th><th>Sprawdzono</th><th>Zmiany</th><th>Błędy</th><th>Czas (s)</th><th>Szczegóły</th>
+                                </tr></thead>
+                                <tbody id="logsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestions Tab -->
+            <div class="tab-pane fade" id="tab-suggestions">
+                <div class="card" id="suggestionsSection">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        Sugestie użytkowników
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick="loadSuggestions('all')">Wszystkie</button>
+                            <button class="btn btn-outline-warning" onclick="loadSuggestions('pending')">Oczekujące</button>
+                            <button class="btn btn-outline-success" onclick="loadSuggestions('approved')">Zatwierdzone</button>
+                            <button class="btn btn-outline-danger" onclick="loadSuggestions('rejected')">Odrzucone</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="suggestionsList">
+                            <div class="d-flex justify-content-center py-4" id="suggestionsLoading">
+                                <div class="spinner-border text-primary spinner-border-sm"></div>
+                            </div>
+                            <div id="noSuggestions" class="text-center py-4 d-none">
+                                <p class="text-muted small">Brak sugestii.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="previousSuggestionsPage()">Poprzednia</button>
+                            <span class="small text-muted" id="suggestionsPagination">Strona 1</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="nextSuggestionsPage()">Następna</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Tab -->
+            <div class="tab-pane fade" id="tab-database">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h6 class="card-title">Reset semestru</h6>
+                                <p class="card-text small text-muted">Wyczyść dane planów i aktywności. Zachowaj konfigurację plans.json.</p>
+                                <button class="btn btn-warning btn-sm" onclick="purgeDatabase()">Wyczyść plany + aktywności</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-danger">
+                            <div class="card-body">
+                                <h6 class="card-title">Pełny reset</h6>
+                                <p class="card-text small text-muted">Wyczyść wszystko łącznie z konfiguracją plans.json.</p>
+                                <button class="btn btn-outline-danger btn-sm" onclick="purgeDatabaseFull()">Pełny reset bazy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h6 class="card-title">Force check</h6>
+                                <p class="card-text small text-muted">Wyłącz maintenance i wymuś sprawdzenie planów.</p>
+                                <button class="btn btn-primary btn-sm" onclick="forceCheck()">Uruchom sprawdzanie</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -200,144 +216,86 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Plan</h5>
+                    <h5 class="modal-title">Edytuj plan</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <textarea class="form-control" id="editPlanJson" rows="15"></textarea>
+                    <textarea class="form-control font-monospace" id="editPlanJson" rows="15" style="font-size:0.8rem"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="savePlanEdit()">Save changes</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="savePlanEdit()">Zapisz</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentEditPlanName = null;
-        // Error display function
+
         function showErrors(errors) {
-            const errorMessages = errors.map(error => 
+            const errorMessages = errors.map(error =>
                 `Plan: ${error.plan_name}\nError: ${error.error_message}\n\nStacktrace:\n${error.traceback}`
-            ).join('\n\n-------------------\n\n');
-            
+            ).join('\n\n---\n\n');
             const modal = document.createElement('div');
             modal.className = 'modal fade';
-            modal.innerHTML = `
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Error Details</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <pre class="text-danger" style="white-space: pre-wrap;">${errorMessages}</pre>
-                        </div>
-                    </div>
-                </div>
-            `;
+            modal.innerHTML = `<div class="modal-dialog modal-lg"><div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Szczegóły błędów</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body"><pre class="text-danger small" style="white-space:pre-wrap">${errorMessages}</pre></div>
+            </div></div>`;
             document.body.appendChild(modal);
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
-            modal.addEventListener('hidden.bs.modal', () => {
-                document.body.removeChild(modal);
+            const m = new bootstrap.Modal(modal);
+            m.show();
+            modal.addEventListener('hidden.bs.modal', () => document.body.removeChild(modal));
+        }
+
+        function initializeSearch() {
+            const input = document.getElementById('planSearch');
+            if (input) input.addEventListener('input', e => {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('#currentPlans .list-group-item').forEach(p => {
+                    const text = (p.querySelector('h6')?.textContent || '').toLowerCase();
+                    p.style.display = text.includes(term) ? '' : 'none';
+                });
             });
         }
 
-        // Search functionality
-        function initializeSearch() {
-            const searchInput = document.getElementById('planSearch');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const plans = document.querySelectorAll('#currentPlans .list-group-item');
-                    
-                    plans.forEach(plan => {
-                        const planName = plan.querySelector('h5')?.textContent.toLowerCase() || '';
-                        const planUrl = plan.querySelector('small')?.textContent.toLowerCase() || '';
-                        const matches = planName.includes(searchTerm) || planUrl.includes(searchTerm);
-                        plan.style.display = matches ? '' : 'none';
-                    });
-                });
-            }
-        }
-
         function checkMaintenanceMode() {
-            const maintenanceCheckbox = document.getElementById('maintenanceMode');
-            const plansSection = document.getElementById('plansSection');
-            const checkIntervalCard = document.querySelector('.card:nth-child(2)');
-            const suggestionsSection = document.getElementById('suggestionsSection');
-            
-            if (!maintenanceCheckbox || !plansSection || !checkIntervalCard) {
-                console.warn('Required elements for maintenance mode not found');
-                return;
-            }
-            
-            const isMaintenanceMode = maintenanceCheckbox.checked;
-            console.log(`checkMaintenanceMode called, maintenance mode is: ${isMaintenanceMode}`);
-            
-            plansSection.style.display = isMaintenanceMode ? 'none' : 'block';
-            checkIntervalCard.style.display = isMaintenanceMode ? 'none' : 'block';
-            if (suggestionsSection) {
-                suggestionsSection.style.display = isMaintenanceMode ? 'none' : 'block';
-            }
+            // No longer hide sections — tabs handle visibility
         }
 
         function loadLogs() {
-            const logsTable = document.getElementById('logsTable');
-            if (!logsTable) return;
-
+            const table = document.getElementById('logsTable');
+            if (!table) return;
             const showAll = document.getElementById('showAllLogs')?.checked ? 'true' : 'false';
             fetch(`/api/logs?all=${showAll}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(logs => {
-                    logsTable.innerHTML = '';
                     const info = document.getElementById('logsInfo');
-                    if (info) {
-                        info.textContent = showAll === 'true'
-                            ? `Wszystkie logi (${logs.length})`
-                            : `Tylko zmiany i błędy (${logs.length})`;
-                    }
-
-                    if (logs.length === 0) {
-                        logsTable.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Brak logów do wyświetlenia</td></tr>';
-                        return;
-                    }
-
+                    if (info) info.textContent = showAll === 'true' ? `Wszystkie (${logs.length})` : `Zmiany i błędy (${logs.length})`;
+                    if (logs.length === 0) { table.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Brak logów</td></tr>'; return; }
+                    table.innerHTML = '';
                     logs.forEach((log, idx) => {
                         const hasErrors = log.has_errors;
                         const hasUpdates = log.new_plans > 0;
-                        const updatedPlans = log.updated_plans || [];
-                        const row = document.createElement('tr');
-
-                        let detailsHtml = '-';
-                        if (hasErrors) {
-                            detailsHtml = `<button class="btn btn-sm btn-outline-danger" onclick='showErrors(${JSON.stringify(log.errors)})'>Błędy</button>`;
+                        const plans = log.updated_plans || [];
+                        let details = '<span class="text-muted">-</span>';
+                        if (hasErrors) details = `<button class="btn btn-sm btn-outline-danger py-0" onclick='showErrors(${JSON.stringify(log.errors)})'>Błędy</button>`;
+                        if (hasUpdates && plans.length > 0) {
+                            const list = plans.map(p => `<li class="small">${p}</li>`).join('');
+                            details = `<button class="btn btn-sm btn-outline-success py-0" onclick="this.nextElementSibling.classList.toggle('d-none')">${plans.length} planów</button><ul class="d-none mt-1 mb-0 ps-3 small" style="list-style:disc">${list}</ul>`;
                         }
-                        if (hasUpdates && updatedPlans.length > 0) {
-                            const plansList = updatedPlans.map(p => `<li class="small">${p}</li>`).join('');
-                            detailsHtml = `
-                                <button class="btn btn-sm btn-outline-success" onclick="document.getElementById('plans-${idx}').classList.toggle('d-none')">
-                                    ${updatedPlans.length} plan${updatedPlans.length > 1 ? 'ów' : ''}
-                                </button>
-                                <ul id="plans-${idx}" class="d-none mt-2 mb-0 ps-3" style="list-style:disc">${plansList}</ul>
-                            `;
-                        }
-
-                        row.innerHTML = `
+                        table.innerHTML += `<tr>
                             <td class="small text-nowrap">${new Date(log.timestamp).toLocaleString('pl-PL')}</td>
                             <td>${log.successful_checks}</td>
                             <td>${hasUpdates ? `<span class="badge bg-success">${log.new_plans}</span>` : '0'}</td>
-                            <td>${hasErrors ? '<span class="badge bg-danger">Tak</span>' : '<span class="text-muted">-</span>'}</td>
+                            <td>${hasErrors ? '<span class="badge bg-danger">!</span>' : '-'}</td>
                             <td>${log.execution_time || '-'}</td>
-                            <td>${detailsHtml}</td>
-                        `;
-                        logsTable.appendChild(row);
+                            <td>${details}</td>
+                        </tr>`;
                     });
-                })
-                .catch(error => console.error('Error loading logs:', error));
+                }).catch(e => console.error('Logs error:', e));
         }
 
         function editPlan(name, plan) {
@@ -347,161 +305,31 @@
         }
 
         function savePlanEdit() {
-            const planJson = document.getElementById('editPlanJson').value;
             try {
-                const planData = JSON.parse(planJson);
-                fetch('/api/config', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        plans_config: {
-                            [currentEditPlanName]: planData
-                        }
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errData => {
-                            throw new Error(errData.error || 'Error updating plan');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
+                const planData = JSON.parse(document.getElementById('editPlanJson').value);
+                fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ plans_config: { [currentEditPlanName]: planData } })
+                }).then(r => r.json()).then(data => {
                     bootstrap.Modal.getInstance(document.getElementById('editPlanModal')).hide();
-                    
-                    // Show a message that the plan is being checked
-                    alert('Plan updated successfully. Triggering plan check...');
-                    
-                    // If we got an updated plan name, trigger a check for that plan
-                    if (data.updated_plan) {
-                        checkPlan(data.updated_plan);
-                    } else {
-                        loadPlans();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating plan:', error);
-                    alert(`Error updating plan: ${error.message}`);
-                });
-            } catch (e) {
-                alert('Invalid JSON format: ' + e.message);
-            }
+                    alert('Plan zaktualizowany');
+                    loadPlans();
+                }).catch(e => alert('Błąd: ' + e.message));
+            } catch (e) { alert('Nieprawidłowy JSON: ' + e.message); }
         }
 
         function checkPlan(planId) {
-            // Show loading indicator
-            const loadingModal = createLoadingModal('Checking plan...');
-            document.body.appendChild(loadingModal);
-            const bsLoadingModal = new bootstrap.Modal(loadingModal);
-            bsLoadingModal.show();
-
-            console.log(`Checking plan with ID: ${planId}`);
-
-            fetch(`/api/check-plan/${planId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        const error = new Error(errData.error || 'Error checking plan');
-                        // Check if there's a suggestion in the error message
-                        if (errData.error && errData.error.includes('Did you mean')) {
-                            const suggestionMatch = errData.error.match(/Did you mean one of these: ([^?]+)\?/);
-                            if (suggestionMatch && suggestionMatch[1]) {
-                                error.suggestions = suggestionMatch[1].split(', ');
-                            }
-                        }
-                        throw error;
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Hide loading indicator
-                bsLoadingModal.hide();
-                loadingModal.remove();
-                
-                if (data.changes_detected) {
-                    alert('Plan checked successfully! Changes detected and updated.');
-                } else {
-                    alert('Plan checked successfully! No changes detected.');
-                }
-                
-                // Reload plans list
-                loadPlans();
-                
-                // Reload logs to show the new check
-                loadLogs();
-            })
-            .catch(error => {
-                // Hide loading indicator
-                bsLoadingModal.hide();
-                loadingModal.remove();
-                
-                console.error('Error checking plan:', error);
-                
-                if (error.suggestions && error.suggestions.length > 0) {
-                    const suggestionsText = error.suggestions.map(s => 
-                        `<button class="btn btn-sm btn-outline-primary mt-2 me-2" onclick="checkPlan('${s}')">${s}</button>`
-                    ).join('');
-                    
-                    const errorModal = document.createElement('div');
-                    errorModal.className = 'modal fade';
-                    errorModal.innerHTML = `
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Plan Check Error</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p class="text-danger">${error.message}</p>
-                                    <p>Did you mean one of these plans?</p>
-                                    <div class="d-flex flex-wrap">${suggestionsText}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(errorModal);
-                    const bsErrorModal = new bootstrap.Modal(errorModal);
-                    bsErrorModal.show();
-                    errorModal.addEventListener('hidden.bs.modal', () => {
-                        document.body.removeChild(errorModal);
-                    });
-                } else {
-                    alert(`Error checking plan: ${error.message}`);
-                }
-                
-                // Still reload plans to show updated configuration
-                loadPlans();
-            });
+            fetch(`/api/check-plan/${planId}`, { method: 'POST', headers: {'Content-Type':'application/json'} })
+                .then(r => r.json())
+                .then(data => { alert(data.success ? 'Sprawdzanie uruchomione' : data.error); loadPlans(); })
+                .catch(e => alert('Błąd: ' + e));
         }
 
-        function createLoadingModal(message) {
-            const modal = document.createElement('div');
-            modal.className = 'modal fade';
-            modal.innerHTML = `
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-body text-center p-4">
-                            <div class="spinner-border text-primary mb-3" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mb-0">${message}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return modal;
+        function createLoadingModal(msg) {
+            const m = document.createElement('div'); m.className = 'modal fade';
+            m.innerHTML = `<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center p-4"><div class="spinner-border text-primary mb-3"></div><p class="mb-0">${msg}</p></div></div></div>`;
+            return m;
         }
 
-        // Initial load
         document.addEventListener('DOMContentLoaded', function() {
             initializeSearch();
             initializeMaintenanceMode();
@@ -509,569 +337,225 @@
             loadConfig();
             loadPlans();
             loadLogs();
-            checkMaintenanceMode();
-            loadSuggestions('pending'); // Load pending suggestions by default
+            loadSuggestions('pending');
         });
 
-        // Refresh status every 30 seconds
         setInterval(loadStatus, 30000);
 
         function loadStatus() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Status data received:', data);
-                    const statusBadge = document.getElementById('statusBadge');
-                    const lastCheck = document.getElementById('lastCheck');
-                    const maintenanceMode = document.getElementById('maintenanceMode');
-                    const maintenanceReason = document.getElementById('maintenanceReason');
-                    
-                    if (statusBadge) {
-                        const isActive = data.active !== false;
-                        statusBadge.textContent = isActive && !data.maintenance_mode ? 'Active' : 'Inactive';
-                        statusBadge.className = `badge status-badge ${isActive && !data.maintenance_mode ? 'bg-success' : 'bg-danger'}`;
-                    }
-                    
-                    if (lastCheck && data.last_activity) {
-                        lastCheck.textContent = `Last activity: ${data.last_activity}`;
-                    }
-                    
-                    if (maintenanceMode) {
-                        console.log(`Setting maintenance checkbox to: ${data.maintenance_mode}`);
-                        maintenanceMode.checked = !!data.maintenance_mode; // Ensure boolean value
-                    }
-                    
-                    if (maintenanceReason) {
-                        if (data.maintenance_mode && data.maintenance_reason) {
-                            maintenanceReason.textContent = `Reason: ${data.maintenance_reason}`;
-                            maintenanceReason.style.display = 'block';
-                        } else {
-                            maintenanceReason.style.display = 'none';
-                        }
-                    }
-                    
-                    // Update UI visibility based on maintenance mode
-                    checkMaintenanceMode();
-                })
-                .catch(error => console.error('Error loading status:', error));
+            fetch('/api/status').then(r => r.json()).then(data => {
+                const dot = document.getElementById('statusDot');
+                const badge = document.getElementById('statusBadge');
+                const maint = document.getElementById('maintenanceMode');
+                const reason = document.getElementById('maintenanceReason');
+                const lastCheck = document.getElementById('lastCheck');
+                const isActive = data.active && !data.maintenance_mode;
+                if (dot) { dot.className = `status-dot ${isActive ? 'active' : 'inactive'}`; }
+                if (badge) badge.textContent = isActive ? 'Aktywny' : 'Nieaktywny';
+                if (maint) maint.checked = !!data.maintenance_mode;
+                if (lastCheck && data.last_activity) lastCheck.textContent = `Ostatnia aktywność: ${data.last_activity}`;
+                if (reason) {
+                    if (data.maintenance_mode && data.maintenance_reason) { reason.textContent = data.maintenance_reason; reason.style.display = ''; }
+                    else reason.style.display = 'none';
+                }
+            }).catch(e => console.error('Status error:', e));
         }
 
         function loadConfig() {
-            fetch('/api/config')
-                .then(response => response.json())
-                .then(data => {
-                    const intervalInput = document.getElementById('checkInterval');
-                    if (intervalInput) {
-                        intervalInput.value = data.system_config.check_interval;
-                    }
-                })
-                .catch(error => console.error('Error loading config:', error));
+            fetch('/api/config').then(r => r.json()).then(data => {
+                const el = document.getElementById('checkInterval');
+                if (el) el.value = data.system_config.check_interval;
+            }).catch(e => console.error('Config error:', e));
         }
 
         function loadPlans() {
-            fetch('/api/config')
-                .then(response => response.json())
-                .then(data => {
-                    const plansContainer = document.getElementById('currentPlans');
-                    if (!plansContainer) {
-                        console.warn('Plans container not found');
-                        return;
-                    }
-                    
-                    plansContainer.innerHTML = '';
-                    
-                    if (data.plans_config) {
-                        Object.entries(data.plans_config).forEach(([name, plan]) => {
-                            const planElement = document.createElement('div');
-                            planElement.className = 'list-group-item d-flex justify-content-between align-items-center';
-                            planElement.innerHTML = `
-                                <div>
-                                    <h5 class="mb-1">${name}</h5>
-                                    <small class="text-muted">URL: ${plan.download_url || 'N/A'}</small>
-                                </div>
-                                <div>
-                                    <button class="btn btn-primary btn-sm me-2" onclick="editPlan('${name}', ${JSON.stringify(plan).replace(/"/g, '&quot;')})">Edit</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deletePlan('${name}')">Delete</button>
-                                </div>
-                            `;
-                            plansContainer.appendChild(planElement);
-                        });
-                    }
-                })
-                .catch(error => console.error('Error loading plans:', error));
+            fetch('/api/config').then(r => r.json()).then(data => {
+                const container = document.getElementById('currentPlans');
+                const countBadge = document.getElementById('plansCount');
+                if (!container) return;
+                container.innerHTML = '';
+                if (!data.plans_config) return;
+                const entries = Object.entries(data.plans_config);
+                if (countBadge) countBadge.textContent = entries.length;
+                entries.forEach(([name, plan]) => {
+                    const el = document.createElement('div');
+                    el.className = 'list-group-item d-flex justify-content-between align-items-center py-2';
+                    el.innerHTML = `<div class="min-w-0"><h6 class="mb-0 small">${name}</h6><small class="text-muted text-truncate d-block" style="max-width:400px">${plan.download_url || ''}</small></div>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-outline-primary" onclick="editPlan('${name}', ${JSON.stringify(plan).replace(/"/g, '&quot;')})">Edytuj</button><button class="btn btn-outline-danger" onclick="deletePlan('${name}')">Usuń</button></div>`;
+                    container.appendChild(el);
+                });
+            }).catch(e => console.error('Plans error:', e));
         }
 
         function updateInterval() {
-            const interval = document.getElementById('checkInterval').value;
-            fetch('/api/config', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    system_config: {
-                        check_interval: parseInt(interval)
-                    }
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('Check interval updated successfully');
-                loadConfig();
-            })
-            .catch(error => alert('Error updating check interval'));
+            const val = document.getElementById('checkInterval').value;
+            fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ system_config: { check_interval: parseInt(val) } })
+            }).then(() => { alert('Interwał zaktualizowany'); loadConfig(); }).catch(e => alert('Błąd'));
         }
 
-        // Refresh logs every minute
         setInterval(loadLogs, 60000);
-
-        // Toggle all logs
         document.getElementById('showAllLogs')?.addEventListener('change', loadLogs);
 
         function initializeMaintenanceMode() {
-            const maintenanceCheckbox = document.getElementById('maintenanceMode');
-            if (maintenanceCheckbox) {
-                maintenanceCheckbox.addEventListener('change', function(e) {
-                    const isChecked = e.target.checked;
-                    console.log(`Maintenance mode checkbox changed to: ${isChecked}`);
-                    
-                    checkMaintenanceMode();
-                    
-                    // Use the dedicated maintenance-toggle endpoint
-                    fetch('/api/maintenance-toggle', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            maintenance_mode: isChecked
-                        })
-                    })
-                    .then(response => {
-                        console.log(`Response status: ${response.status}`);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Maintenance toggle response:', data);
-                        if (data.success) {
-                            console.log(`Maintenance mode ${data.new_state ? 'enabled' : 'disabled'}`);
-                        } else {
-                            console.error('Failed to toggle maintenance mode:', data.error);
-                            // Revert checkbox state if there was an error
-                            maintenanceCheckbox.checked = !isChecked;
-                        }
-                        // Force refresh status to update UI correctly
-                        setTimeout(loadStatus, 500);
-                    })
-                    .catch(error => {
-                        console.error('Error updating maintenance mode:', error);
-                        alert('Error updating maintenance mode');
-                        // Revert checkbox state if there was an error
-                        maintenanceCheckbox.checked = !isChecked;
-                    });
-                });
-            }
-        }
-
-
-        function addPlan() {
-            const planId = document.getElementById('planId').value;
-            const planJson = document.getElementById('planJson').value;
-            
-            if (!planId) {
-                alert('Please enter a Plan ID');
-                return;
-            }
-            
-            try {
-                const planData = JSON.parse(planJson);
-                fetch('/api/config', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        plans_config: {
-                            [planId]: planData
-                        }
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errData => {
-                            throw new Error(errData.error || 'Error adding plan');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert('Plan added successfully. Triggering plan check...');
-                    document.getElementById('planJson').value = '';
-                    
-                    // If we got an updated plan name, trigger a check for that plan
-                    if (data.updated_plan) {
-                        checkPlan(data.updated_plan);
-                    } else if (planId) {
-                        // Otherwise use the planId directly
-                        checkPlan(planId);
-                    } else {
-                        loadPlans();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error adding plan:', error);
-                    alert(`Error adding plan: ${error.message}`);
-                });
-            } catch (e) {
-                alert('Invalid JSON format: ' + e.message);
-            }
-        }
-
-        function deletePlan(planName) {
-            if (confirm(`Are you sure you want to delete plan "${planName}"?`)) {
-                fetch('/api/config', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        plans_config: {
-                            [planName]: null
-                        }
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errData => {
-                            throw new Error(errData.error || 'Error deleting plan');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert('Plan deleted successfully');
-                    loadPlans();
-                })
-                .catch(error => {
-                    console.error('Error deleting plan:', error);
-                    alert(`Error deleting plan: ${error.message}`);
-                });
-            }
-        }
-
-        // Suggestions variables
-        let currentSuggestionsPage = 0;
-        let suggestionsPerPage = 10;
-        let currentSuggestionsFilter = 'pending';
-        let totalSuggestions = 0;
-
-        function loadSuggestions(status = null) {
-            if (status) {
-                currentSuggestionsFilter = status;
-                currentSuggestionsPage = 0;
-            }
-            
-            const skip = currentSuggestionsPage * suggestionsPerPage;
-            const statusParam = currentSuggestionsFilter !== 'all' ? `&status=${currentSuggestionsFilter}` : '';
-            
-            document.getElementById('suggestionsLoading').classList.remove('d-none');
-            document.getElementById('noSuggestions').classList.add('d-none');
-            
-            fetch(`/api/suggestions?skip=${skip}&limit=${suggestionsPerPage}${statusParam}`)
-                .then(response => response.json())
-                .then(data => {
-                    const suggestionsList = document.getElementById('suggestionsList');
-                    totalSuggestions = data.total;
-                    
-                    // Clear existing suggestions except loading and no suggestions elements
-                    Array.from(suggestionsList.children).forEach(child => {
-                        if (child.id !== 'suggestionsLoading' && child.id !== 'noSuggestions') {
-                            suggestionsList.removeChild(child);
-                        }
-                    });
-                    
-                    document.getElementById('suggestionsLoading').classList.add('d-none');
-                    
-                    if (data.suggestions.length === 0) {
-                        document.getElementById('noSuggestions').classList.remove('d-none');
-                    } else {
-                        // Add new suggestions
-                        data.suggestions.forEach(suggestion => {
-                            const suggestionElement = createSuggestionElement(suggestion);
-                            suggestionsList.insertBefore(suggestionElement, document.getElementById('suggestionsLoading'));
-                        });
-                    }
-                    
-                    // Update pagination
-                    updateSuggestionsPagination();
-                })
-                .catch(error => {
-                    console.error('Error loading suggestions:', error);
-                    document.getElementById('suggestionsLoading').classList.add('d-none');
-                    alert('Error loading suggestions');
-                });
-        }
-        
-        function createSuggestionElement(suggestion) {
-            const date = new Date(suggestion.created_at);
-            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-            
-            const card = document.createElement('div');
-            card.className = 'card mb-3 suggestion-card';
-            card.setAttribute('data-id', suggestion.id);
-            
-            // Set border color based on status
-            if (suggestion.status === 'approved') {
-                card.classList.add('border-success');
-            } else if (suggestion.status === 'rejected') {
-                card.classList.add('border-danger');
-            } else {
-                card.classList.add('border-warning');
-            }
-            
-            // Create status badge
-            let statusBadgeClass = 'bg-warning';
-            if (suggestion.status === 'approved') statusBadgeClass = 'bg-success';
-            if (suggestion.status === 'rejected') statusBadgeClass = 'bg-danger';
-            
-            card.innerHTML = `
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="badge ${statusBadgeClass}">${suggestion.status.toUpperCase()}</span>
-                        <small class="text-muted">${formattedDate}</small>
-                    </div>
-                    <p class="card-text">${suggestion.content}</p>
-                    ${suggestion.status === 'pending' ? `
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button class="btn btn-sm btn-success" onclick="updateSuggestionStatus('${suggestion.id}', 'approved')">Approve</button>
-                        <button class="btn btn-sm btn-danger" onclick="updateSuggestionStatus('${suggestion.id}', 'rejected')">Reject</button>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            return card;
-        }
-        
-        function updateSuggestionStatus(id, status) {
-            fetch(`/api/suggestions/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    status: status
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadSuggestions(); // Reload current page
-                } else {
-                    alert(`Error: ${data.message}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating suggestion status:', error);
-                alert('Error updating suggestion status');
+            const cb = document.getElementById('maintenanceMode');
+            if (cb) cb.addEventListener('change', function(e) {
+                fetch('/api/maintenance-toggle', { method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ maintenance_mode: e.target.checked })
+                }).then(r => r.json()).then(data => {
+                    if (!data.success) cb.checked = !e.target.checked;
+                    setTimeout(loadStatus, 500);
+                }).catch(() => { cb.checked = !e.target.checked; alert('Błąd'); });
             });
         }
-        
+
+        function addPlan() {
+            const id = document.getElementById('planId').value;
+            if (!id) { alert('Podaj Plan ID'); return; }
+            try {
+                const data = JSON.parse(document.getElementById('planJson').value);
+                fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ plans_config: { [id]: data } })
+                }).then(r => r.json()).then(() => { alert('Plan dodany'); document.getElementById('planJson').value = ''; loadPlans(); })
+                .catch(e => alert('Błąd: ' + e));
+            } catch (e) { alert('Nieprawidłowy JSON: ' + e.message); }
+        }
+
+        function deletePlan(name) {
+            if (!confirm(`Usunąć plan "${name}"?`)) return;
+            fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ plans_config: { [name]: null } })
+            }).then(r => r.json()).then(() => { alert('Plan usunięty'); loadPlans(); }).catch(e => alert('Błąd'));
+        }
+
+        let currentSuggestionsPage = 0, suggestionsPerPage = 10, currentSuggestionsFilter = 'pending', totalSuggestions = 0;
+
+        function loadSuggestions(status = null) {
+            if (status) { currentSuggestionsFilter = status; currentSuggestionsPage = 0; }
+            const skip = currentSuggestionsPage * suggestionsPerPage;
+            const param = currentSuggestionsFilter !== 'all' ? `&status=${currentSuggestionsFilter}` : '';
+            document.getElementById('suggestionsLoading').classList.remove('d-none');
+            document.getElementById('noSuggestions').classList.add('d-none');
+            fetch(`/api/suggestions?skip=${skip}&limit=${suggestionsPerPage}${param}`)
+                .then(r => r.json()).then(data => {
+                    const list = document.getElementById('suggestionsList');
+                    totalSuggestions = data.total;
+                    Array.from(list.children).forEach(c => { if (c.id !== 'suggestionsLoading' && c.id !== 'noSuggestions') list.removeChild(c); });
+                    document.getElementById('suggestionsLoading').classList.add('d-none');
+                    if (data.suggestions.length === 0) { document.getElementById('noSuggestions').classList.remove('d-none'); }
+                    else data.suggestions.forEach(s => list.insertBefore(createSuggestionElement(s), document.getElementById('suggestionsLoading')));
+                    updateSuggestionsPagination();
+                }).catch(e => { document.getElementById('suggestionsLoading').classList.add('d-none'); });
+        }
+
+        function createSuggestionElement(s) {
+            const dt = new Date(s.created_at).toLocaleString('pl-PL');
+            const colors = { approved: 'success', rejected: 'danger', pending: 'warning' };
+            const card = document.createElement('div');
+            card.className = `card mb-2 border-${colors[s.status] || 'secondary'}`;
+            card.innerHTML = `<div class="card-body py-2 px-3">
+                <div class="d-flex justify-content-between mb-1"><span class="badge bg-${colors[s.status]}">${s.status}</span><small class="text-muted">${dt}</small></div>
+                <p class="card-text small mb-1">${s.content}</p>
+                ${s.status === 'pending' ? `<div class="d-flex gap-1 justify-content-end"><button class="btn btn-sm btn-success py-0" onclick="updateSuggestionStatus('${s.id}','approved')">OK</button><button class="btn btn-sm btn-danger py-0" onclick="updateSuggestionStatus('${s.id}','rejected')">Odrzuć</button></div>` : ''}
+            </div>`;
+            return card;
+        }
+
+        function updateSuggestionStatus(id, status) {
+            fetch(`/api/suggestions/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status }) })
+                .then(r => r.json()).then(d => { if (d.success) loadSuggestions(); else alert(d.message); });
+        }
+
         function updateSuggestionsPagination() {
-            const totalPages = Math.ceil(totalSuggestions / suggestionsPerPage);
-            document.getElementById('suggestionsPagination').textContent = 
-                `Page ${currentSuggestionsPage + 1} of ${totalPages || 1}`;
+            const pages = Math.ceil(totalSuggestions / suggestionsPerPage);
+            document.getElementById('suggestionsPagination').textContent = `Strona ${currentSuggestionsPage + 1} z ${pages || 1}`;
         }
-        
-        function nextSuggestionsPage() {
-            const totalPages = Math.ceil(totalSuggestions / suggestionsPerPage);
-            if (currentSuggestionsPage < totalPages - 1) {
-                currentSuggestionsPage++;
-                loadSuggestions();
-            }
+        function nextSuggestionsPage() { if (currentSuggestionsPage < Math.ceil(totalSuggestions / suggestionsPerPage) - 1) { currentSuggestionsPage++; loadSuggestions(); } }
+        function previousSuggestionsPage() { if (currentSuggestionsPage > 0) { currentSuggestionsPage--; loadSuggestions(); } }
+
+        // ─── Validation ─────────────────────────────────
+        function runValidation() {
+            const c = document.getElementById('validationResults');
+            c.innerHTML = '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm"></div>Walidowanie...</div>';
+            fetch('/api/validate').then(r => r.json()).then(data => {
+                if (data.error) { c.innerHTML = `<div class="alert alert-danger">${data.error}</div>`; return; }
+                let html = `<div class="d-flex gap-2 mb-3"><span class="badge bg-success">${data.ok} OK</span><span class="badge bg-danger">${data.errors} błędów</span></div>`;
+                if (data.errors === 0) { html += '<div class="alert alert-success py-2 mb-0">Wszystkie plany poprawne!</div>'; }
+                else {
+                    html += `<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Plan</th><th>Grupa</th><th>Kat.</th><th>Problem</th></tr></thead><tbody>`;
+                    data.details.forEach(d => { html += `<tr><td class="small">${d.plan.substring(0,55)}</td><td class="small">${d.group}</td><td><span class="badge bg-secondary">${d.category}</span></td><td class="small text-danger">${d.issues.join('; ')}</td></tr>`; });
+                    html += `</tbody></table></div><button class="btn btn-warning btn-sm" onclick="reprocessInvalid()">Wymuś ponowne przetworzenie (${data.errors})</button>`;
+                }
+                c.innerHTML = html;
+            }).catch(e => { c.innerHTML = `<div class="alert alert-danger">Błąd: ${e}</div>`; });
         }
-        
-        function previousSuggestionsPage() {
-            if (currentSuggestionsPage > 0) {
-                currentSuggestionsPage--;
-                loadSuggestions();
-            }
+
+        function reprocessInvalid() {
+            if (!confirm('Wyczyścić problematyczne plany z bazy? Backend przetworzy je w następnym cyklu.')) return;
+            fetch('/api/reprocess-invalid', { method: 'POST' }).then(r => r.json()).then(d => {
+                alert(d.success ? d.message : 'Błąd: ' + d.error);
+                runValidation();
+            }).catch(e => alert('Błąd: ' + e));
         }
-        // ─── Database Management ──────────────────────────────
+
+        // ─── Database ───────────────────────────────────
         function purgeDatabase() {
-            if (!confirm('Na pewno wyczyścić dane planów i aktywności? Ta operacja jest nieodwracalna!')) return;
-            fetch('/api/purge', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plans: true, activities: true, config: false })
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.success ? 'Baza wyczyszczona! Użyj "Skanuj Moodle" aby załadować nowe plany.' : 'Błąd: ' + data.error);
-                loadPlans();
-            })
-            .catch(err => alert('Błąd: ' + err));
+            if (!confirm('Wyczyścić dane planów i aktywności?')) return;
+            fetch('/api/purge', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plans: true, activities: true, config: false }) })
+                .then(r => r.json()).then(d => { alert(d.success ? 'Baza wyczyszczona! Skanuj Moodle.' : 'Błąd: ' + d.error); loadPlans(); });
         }
 
         function purgeDatabaseFull() {
-            if (!confirm('UWAGA: Wyczyścisz CAŁĄ bazę łącznie z konfiguracją plans.json!\nCzy na pewno?')) return;
-            if (!confirm('Ostatnie ostrzeżenie - po tym będziesz musiał ponownie skanować Moodle i załadować wszystkie plany.')) return;
-            fetch('/api/purge', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plans: true, activities: true, config: true })
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.success ? 'Pełny reset wykonany!' : 'Błąd: ' + data.error);
-                loadPlans();
-            })
-            .catch(err => alert('Błąd: ' + err));
+            if (!confirm('UWAGA: Pełny reset bazy?')) return;
+            if (!confirm('Na pewno? To usunie też plans.json.')) return;
+            fetch('/api/purge', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plans: true, activities: true, config: true }) })
+                .then(r => r.json()).then(d => { alert(d.success ? 'Pełny reset!' : 'Błąd: ' + d.error); loadPlans(); });
         }
 
         function forceCheck() {
-            fetch('/api/force-check', { method: 'POST' })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.success ? data.message : 'Błąd: ' + data.error);
-                loadStatus();
-            })
-            .catch(err => alert('Błąd: ' + err));
+            fetch('/api/force-check', { method: 'POST' }).then(r => r.json()).then(d => { alert(d.success ? d.message : 'Błąd: ' + d.error); loadStatus(); });
         }
 
-        // ─── Moodle Scanner ─────────────────────────────────
+        // ─── Moodle Scanner ─────────────────────────────
         let scanPollInterval = null;
-
         function startMoodleScan() {
             document.getElementById('startScanBtn').disabled = true;
             document.getElementById('scanStatus').style.display = 'block';
             document.getElementById('scanResults').style.display = 'none';
             document.getElementById('scanSpinner').style.display = '';
             document.getElementById('scanProgressText').textContent = 'Uruchamianie...';
-
-            fetch('/api/scanner/start', { method: 'POST' })
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.success) {
-                        alert(data.error);
-                        document.getElementById('startScanBtn').disabled = false;
-                        return;
-                    }
-                    scanPollInterval = setInterval(pollScanStatus, 3000);
-                })
-                .catch(err => {
-                    alert('Błąd: ' + err);
-                    document.getElementById('startScanBtn').disabled = false;
-                });
+            fetch('/api/scanner/start', { method: 'POST' }).then(r => r.json()).then(d => {
+                if (!d.success) { alert(d.error); document.getElementById('startScanBtn').disabled = false; return; }
+                scanPollInterval = setInterval(pollScanStatus, 3000);
+            }).catch(e => { alert('Błąd: ' + e); document.getElementById('startScanBtn').disabled = false; });
         }
 
         function pollScanStatus() {
-            fetch('/api/scanner/status')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('scanProgressText').textContent = data.progress || data.status;
-
-                    if (data.status === 'done') {
-                        clearInterval(scanPollInterval);
-                        document.getElementById('scanSpinner').style.display = 'none';
-                        document.getElementById('startScanBtn').disabled = false;
-                        if (data.result) renderScanResults(data.result);
-                    } else if (data.status === 'error') {
-                        clearInterval(scanPollInterval);
-                        document.getElementById('scanSpinner').style.display = 'none';
-                        document.getElementById('startScanBtn').disabled = false;
-                        document.getElementById('scanProgressText').textContent = 'Błąd: ' + data.error;
-                    }
-                });
+            fetch('/api/scanner/status').then(r => r.json()).then(d => {
+                document.getElementById('scanProgressText').textContent = d.progress || d.status;
+                if (d.status === 'done') { clearInterval(scanPollInterval); document.getElementById('scanSpinner').style.display = 'none'; document.getElementById('startScanBtn').disabled = false; if (d.result) renderScanResults(d.result); }
+                else if (d.status === 'error') { clearInterval(scanPollInterval); document.getElementById('scanSpinner').style.display = 'none'; document.getElementById('startScanBtn').disabled = false; document.getElementById('scanProgressText').textContent = 'Błąd: ' + d.error; }
+            });
         }
 
         function renderScanResults(r) {
-            const container = document.getElementById('scanResults');
-            container.style.display = 'block';
-
-            let html = `<p><strong>Rok ${r.year}, semestr ${r.semester}</strong> —
-                znaleziono ${r.total_scraped} planów (aktualnie w bazie: ${r.total_current})</p>`;
-
-            const hasChanges = r.new_count > 0 || r.changed_count > 0 || r.removed_count > 0;
-
-            if (!hasChanges) {
-                html += '<div class="alert alert-success">Brak zmian - wszystkie plany aktualne!</div>';
-                container.innerHTML = html;
-                return;
-            }
-
-            // New plans
-            if (r.new_count > 0) {
-                html += `<h5 class="text-success mt-3">Nowe plany (${r.new_count})</h5>
-                    <div class="list-group mb-2">`;
-                for (const [key, name] of Object.entries(r.new)) {
-                    html += `<label class="list-group-item">
-                        <input type="checkbox" class="form-check-input me-2 scan-add" value="${key}" checked>
-                        <strong>${key}</strong> — ${name}
-                    </label>`;
-                }
-                html += '</div>';
-            }
-
-            // Changed plans
-            if (r.changed_count > 0) {
-                html += `<h5 class="text-warning mt-3">Zmienione plany (${r.changed_count})</h5>
-                    <div class="list-group mb-2">`;
-                for (const [key, fields] of Object.entries(r.changed)) {
-                    html += `<label class="list-group-item">
-                        <input type="checkbox" class="form-check-input me-2 scan-update" value="${key}" checked>
-                        <strong>${key}</strong> — zmienione: ${fields.join(', ')}
-                    </label>`;
-                }
-                html += '</div>';
-            }
-
-            // Removed plans
-            if (r.removed_count > 0) {
-                html += `<h5 class="text-danger mt-3">Usunięte z Moodle (${r.removed_count})</h5>
-                    <div class="list-group mb-2">`;
-                for (const [key, name] of Object.entries(r.removed)) {
-                    html += `<label class="list-group-item">
-                        <input type="checkbox" class="form-check-input me-2 scan-remove" value="${key}">
-                        <strong>${key}</strong> — ${name}
-                    </label>`;
-                }
-                html += '</div>';
-            }
-
-            html += `<button class="btn btn-primary mt-3" onclick="applyScanResults()">
-                Zastosuj zaznaczone zmiany
-            </button>`;
-
-            container.innerHTML = html;
+            const c = document.getElementById('scanResults'); c.style.display = 'block';
+            let html = `<p class="mb-2"><strong>Rok ${r.year}, sem. ${r.semester}</strong> — ${r.total_scraped} znalezionych (w bazie: ${r.total_current})</p>`;
+            if (r.new_count + r.changed_count + r.removed_count === 0) { html += '<div class="alert alert-success py-2">Brak zmian!</div>'; c.innerHTML = html; return; }
+            if (r.new_count > 0) { html += `<h6 class="text-success mt-3">Nowe (${r.new_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.new)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-add" value="${k}" checked><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
+            if (r.changed_count > 0) { html += `<h6 class="text-warning mt-3">Zmienione (${r.changed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.changed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-update" value="${k}" checked><small><strong>${k}</strong> — ${v.join(', ')}</small></label>`; html += '</div>'; }
+            if (r.removed_count > 0) { html += `<h6 class="text-danger mt-3">Usunięte (${r.removed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.removed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-remove" value="${k}"><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
+            html += `<button class="btn btn-primary btn-sm mt-2" onclick="applyScanResults()">Zastosuj zaznaczone</button>`;
+            c.innerHTML = html;
         }
 
         function applyScanResults() {
-            const add = [...document.querySelectorAll('.scan-add:checked')].map(el => el.value);
-            const update = [...document.querySelectorAll('.scan-update:checked')].map(el => el.value);
-            const remove = [...document.querySelectorAll('.scan-remove:checked')].map(el => el.value);
-
-            if (add.length + update.length + remove.length === 0) {
-                alert('Nie zaznaczono żadnych zmian');
-                return;
-            }
-
-            fetch('/api/scanner/apply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ add, update, remove })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    document.getElementById('scanResults').style.display = 'none';
-                    loadPlans();
-                } else {
-                    alert('Błąd: ' + data.error);
-                }
-            })
-            .catch(err => alert('Błąd: ' + err));
+            const add = [...document.querySelectorAll('.scan-add:checked')].map(e => e.value);
+            const update = [...document.querySelectorAll('.scan-update:checked')].map(e => e.value);
+            const remove = [...document.querySelectorAll('.scan-remove:checked')].map(e => e.value);
+            if (add.length + update.length + remove.length === 0) { alert('Nic nie zaznaczono'); return; }
+            fetch('/api/scanner/apply', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ add, update, remove }) })
+                .then(r => r.json()).then(d => { if (d.success) { alert(d.message); document.getElementById('scanResults').style.display = 'none'; loadPlans(); } else alert('Błąd: ' + d.error); });
         }
     </script>
 </body>
