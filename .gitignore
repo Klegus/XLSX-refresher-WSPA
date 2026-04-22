@@ -1,30 +1,62 @@
+# ─── Secrets ────────────────────────────────────────
 .env
-.aider*
-test.html
-plans-old.json
+.env.local
+.env.*.local
+!.env.example
+!.env.minimal
+!.env.test.example
+!.env.test
 public-keys.py
+.safety-policy.yaml
+
+# ─── Python ─────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+.venv*/
+venv/
+env/
+
+# ─── Linting / type checking caches ─────────────────
+.ruff_cache/
+.mypy_cache/
+.coveragerc
+.flake8
 .bandit.yaml
 .bandit.json
 .codecov.yml
-.coveragerc
-.flake8
-.mypy.ini
-.ruff_cache
-.vscode
-.safety-policy.yaml
+
+# ─── Generated config / data ────────────────────────
+plans.json
+plans-old.json
+plans-sem3.json
+plans-full.json
+
+# ─── Downloaded / temp files ────────────────────────
+downloaded_file.xlsx
+unmerged_downloaded_file.xlsx
+test.html
+*.xlsx.tmp
+puw_wspa_pl.html
+
+# ─── Output directories ─────────────────────────────
+/lesson_plans/
+/group_lessons/
+/logs/
+
+# ─── One-shot scripts ───────────────────────────────
+fix_zero_columns.py
+
+# ─── OS / IDE ───────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+*.swp
+.aider*
+
+# ─── LaTeX docs ─────────────────────────────────────
 doc.tex
 doc.pdf
-mypy.ini
-plans-sem3.json
-plans.json
-test.html
-
-/.venv
-/lesson_plans
-/group_lessons
-plans.json
-plans-full.json
-unmerged_downloaded_file.xlsx
-logs/backend.log
-fix_zero_columns.py
-downloaded_file.xlsx
