@@ -13,7 +13,7 @@ GOLDEN_PATH = os.path.join(FIXTURES, 'golden.json')
 
 
 def load_plans():
-    with open(os.path.join(FIXTURES, 'plans.json'), encoding='utf-8') as f:
+    with open(os.path.join(FIXTURES, 'plan_config.json'), encoding='utf-8') as f:
         return json.load(f)
 
 

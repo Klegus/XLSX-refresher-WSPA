@@ -1,0 +1,998 @@
+{
+ "administracja_adm_ii_rok_puw_z_on_line": {
+  "category": "nst-online",
+  "download_url": "fixture://Administracja - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "administracja",
+  "groups": {
+   "Sp.: Nowoczesna administracja cz. 1": "Sp.: Nowoczesna administracja cz. 1"
+  },
+  "name": "Administracja - studia I stopnia - nst puw II - semestr zimowy - ADM II rok PUW - z on-line",
+  "sheet_name": "ADM II rok PUW - z. on-line"
+ },
+ "administracja_adm_ii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Administracja - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "administracja",
+  "groups": {
+   "Sp.: Nowoczesna administracja cz. 1": "Sp.: Nowoczesna administracja cz. 1"
+  },
+  "name": "Administracja - studia I stopnia - nst puw II - semestr zimowy - ADM II rok PUW - z stacjonarne",
+  "sheet_name": "ADM II rok PUW - z. stacjonarne"
+ },
+ "administracja_adm_iii_puw_z_on_line": {
+  "category": "nst-online",
+  "download_url": "fixture://Administracja - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "administracja",
+  "groups": {},
+  "name": "Administracja - studia I stopnia - nst puw III - semestr zimowy - ADM III PUW - z on-line",
+  "sheet_name": "ADM III PUW - z. on-line"
+ },
+ "administracja_adm_iii_puw_z_stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Administracja - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "administracja",
+  "groups": {},
+  "name": "Administracja - studia I stopnia - nst puw III - semestr zimowy - ADM III PUW - z stacjonarne",
+  "sheet_name": "ADM III PUW - z. stacjonarne"
+ },
+ "administracja_studia_magisterskie_adm_muz_i_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Administracja - studia II stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "administracja - studia magisterskie",
+  "groups": {},
+  "name": "Administracja - studia II stopnia - nst puw I - semestr zimowy - ADM MUZ I PUW - z on-line",
+  "sheet_name": "ADM MUZ I PUW - z. on-line"
+ },
+ "administracja_studia_magisterskie_adm_muz_i_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Administracja - studia II stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "administracja - studia magisterskie",
+  "groups": {
+   "gr.1 - wg nazwisk": "gr.1 - wg nazwisk:\n",
+   "gr.2 - wg nazwisk": "gr.2 - wg nazwisk: \n"
+  },
+  "name": "Administracja - studia II stopnia - nst puw I - semestr zimowy - ADM MUZ I PUW - z stacjonarne",
+  "sheet_name": "ADM MUZ I PUW - z. stacjonarne"
+ },
+ "administracja_studia_magisterskie_adm_muz_ii_puw_z_on_line": {
+  "category": "nst-online",
+  "download_url": "fixture://Administracja - studia II stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "administracja - studia magisterskie",
+  "groups": {
+   "Sp.: Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza",
+   "Sp.: Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym"
+  },
+  "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - ADM MUZ II PUW - z on-line",
+  "sheet_name": "ADM MUZ II PUW - z. on-line"
+ },
+ "administracja_studia_magisterskie_adm_muz_ii_puw_z_stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Administracja - studia II stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "administracja - studia magisterskie",
+  "groups": {
+   "Sp.: Administracja przedsiębiorcza": "Sp.: Administracja przedsiębiorcza",
+   "Sp.: Zarządzanie w samorządzie gminnym": "Sp.: Zarządzanie w samorządzie gminnym"
+  },
+  "name": "Administracja - studia II stopnia - nst puw II - semestr zimowy - ADM MUZ II PUW - z stacjonarne",
+  "sheet_name": "ADM MUZ II PUW - z. stacjonarne"
+ },
+ "architektura_aru_nst_i": {
+  "category": "nst",
+  "download_url": "fixture://Architektura - studia I stopnia - st I - semestr zimowy.xlsx",
+  "faculty": "architektura",
+  "groups": {},
+  "name": "Architektura - studia I stopnia - st I - semestr zimowy - ARU nst I",
+  "sheet_name": "ARU nst I"
+ },
+ "architektura_aru_st_ii": {
+  "category": "nst",
+  "download_url": "fixture://Architektura - studia I stopnia - st II - semestr zimowy.xlsx",
+  "faculty": "architektura",
+  "groups": {},
+  "name": "Architektura - studia I stopnia - st II - semestr zimowy - ARU ST II",
+  "sheet_name": "ARU ST II"
+ },
+ "architektura_aru_st_iii": {
+  "category": "nst",
+  "download_url": "fixture://Architektura - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "architektura",
+  "groups": {
+   "M: Psychologia środkowiskowa": "M: Psychologia środkowiskowa"
+  },
+  "name": "Architektura - studia I stopnia - st III - semestr zimowy - ARU st III",
+  "sheet_name": "ARU st III"
+ },
+ "architektura_aru_st_iv": {
+  "category": "st",
+  "download_url": "fixture://Architektura - studia I stopnia - st IV - semestr zimowy.xlsx",
+  "faculty": "architektura",
+  "groups": {},
+  "name": "Architektura - studia I stopnia - st IV - semestr zimowy - ARU st IV",
+  "sheet_name": "ARU st IV"
+ },
+ "architektura_studia_magisterskie_aru_muz_st_ii": {
+  "category": "nst",
+  "download_url": "fixture://Architektura - studia II stopnia - st II - semestr zimowy.xlsx",
+  "faculty": "architektura - studia magisterskie",
+  "groups": {},
+  "name": "Architektura - studia II stopnia - st II - semestr zimowy - ARU MUZ st II",
+  "sheet_name": "ARU MUZ st II"
+ },
+ "finanse_i_rachunkowość_fir_ii_rok_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "finanse i rachunkowość",
+  "groups": {
+   "Sp.: Rachunkowość i finanse przedsiębiorstw": "Sp.: Rachunkowość i finanse przedsiębiorstw"
+  },
+  "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy - FIR II rok PUW - z on-line",
+  "sheet_name": "FIR II rok PUW - z. on-line"
+ },
+ "finanse_i_rachunkowość_fir_ii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "finanse i rachunkowość",
+  "groups": {
+   "Sp.: Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk": "Sp.: Rachunkowość i finanse przedsiębiorstw\ngr.1 - wg. nazwisk: ",
+   "Sp.: Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk": "Sp.: Rachunkowość i finanse przedsiębiorstw\ngr.2 - wg. nazwisk: "
+  },
+  "name": "Finanse i rachunkowość - studia I stopnia - nst puw II - semestr zimowy - FIR II rok PUW - z stacjonarne",
+  "sheet_name": "FIR II rok PUW - z. stacjonarne"
+ },
+ "finanse_i_rachunkowość_fir_iii_puw_z_on_line": {
+  "category": "nst-online",
+  "download_url": "fixture://Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "finanse i rachunkowość",
+  "groups": {},
+  "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy - FIR III PUW - z on-line",
+  "sheet_name": "FIR III PUW - z. on-line"
+ },
+ "finanse_i_rachunkowość_fir_iii_puw_z_stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "finanse i rachunkowość",
+  "groups": {},
+  "name": "Finanse i rachunkowość - studia I stopnia - nst puw III - semestr zimowy - FIR III PUW - z stacjonarne",
+  "sheet_name": "FIR III PUW - z. stacjonarne"
+ },
+ "finanse_i_rachunkowość_fir_st_iii": {
+  "category": "st",
+  "download_url": "fixture://Finanse i rachunkowość - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "finanse i rachunkowość",
+  "groups": {},
+  "name": "Finanse i rachunkowość - studia I stopnia - st III - semestr zimowy - FIR st III",
+  "sheet_name": "FIR st III"
+ },
+ "gospodarka_przestrzenna_gp_iii_rok_puw_z_on_line": {
+  "category": "nst-online",
+  "download_url": "fixture://Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "gospodarka przestrzenna",
+  "groups": {
+   "Sp.: Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
+  },
+  "name": "Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy - GP III rok PUW - z on-line",
+  "sheet_name": "GP III rok PUW - z. on-line"
+ },
+ "gospodarka_przestrzenna_gp_iii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "gospodarka przestrzenna",
+  "groups": {
+   "Sp.: Nowe instrumenty planistyczne": "Sp.: Nowe instrumenty planistyczne"
+  },
+  "name": "Gospodarka przestrzenna - studia I stopnia - nst puw III - semestr zimowy - GP III rok PUW - z stacjonarne",
+  "sheet_name": "GP III rok PUW - z. stacjonarne"
+ },
+ "informatyka_inf_i_rok_puw_z_on_line": {
+  "category": "nst-online",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {},
+  "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - INF I rok PUW - z on-line",
+  "sheet_name": "INF I rok PUW - z. on-line"
+ },
+ "informatyka_inf_i_rok_puw_z_stac": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Grupa 1 kolejność wg nazwisk": "Grupa 1\nkolejność wg nazwisk:\n",
+   "Grupa 2 kolejność wg nazwisk": "Grupa 2\nkolejność wg nazwisk:\n",
+   "Grupa 3 kolejność wg nazwisk": "Grupa 3\nkolejność wg nazwisk:\n"
+  },
+  "groups_column_info": {
+   "Grupa 1 kolejność wg nazwisk": 3,
+   "Grupa 2 kolejność wg nazwisk": 6,
+   "Grupa 3 kolejność wg nazwisk": 3
+  },
+  "mixed": true,
+  "name": "Informatyka - studia I stopnia - nst puw I - semestr zimowy - INF I rok PUW - z stac",
+  "sheet_name": "INF I rok PUW - z. stac."
+ },
+ "informatyka_inf_ii_rok_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza"
+  },
+  "name": "Informatyka - studia I stopnia - nst puw II - semestr zimowy - INF II rok PUW - z on-line",
+  "sheet_name": "INF II rok PUW - z. on-line"
+ },
+ "informatyka_inf_ii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1 wg nazwisk": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1\nwg nazwisk:\n",
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2 wg nazwisk": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2\nwg nazwisk:",
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.3 wg nazwisk": "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.3\nwg nazwisk:\n"
+  },
+  "name": "Informatyka - studia I stopnia - nst puw II - semestr zimowy - INF II rok PUW - z stacjonarne",
+  "sheet_name": "INF II rok PUW - z. stacjonarne"
+ },
+ "informatyka_inf_iii_puw_z_on_line": {
+  "category": "st",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "group_aliases": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.1": [
+    "Sp.: Cyberbezpieczeństwo\n i informatyka śledcza"
+   ],
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.2": [
+    "Sp.: Cyberbezpieczeństwo\n i informatyka śledcza"
+   ]
+  },
+  "groups": {
+   "Sp.: Bazy danych": "Sp.: Bazy danych",
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.1": "Sp.: Cyberbezpieczeństwo\n i informatyka śledcza\ngr.1",
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.2": "Sp.: Cyberbezpieczeństwo\n i informatyka śledcza\ngr.2",
+   "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja"
+  },
+  "groups_column_info": {
+   "Sp.: Bazy danych": 4,
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.1": 2,
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.2": 4,
+   "Sp.: Sztuczna inteligencja": 4
+  },
+  "mixed": true,
+  "name": "Informatyka - studia I stopnia - nst puw III - semestr zimowy - INF III PUW - z on-line",
+  "sheet_name": "INF III PUW - z. on-line"
+ },
+ "informatyka_inf_iii_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Sp.: Bazy danych": "Sp.: Bazy danych",
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.1": "Sp.: Cyberbezpieczeństwo\n i informatyka śledcza\ngr.1",
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.2": "Sp.: Cyberbezpieczeństwo\n i informatyka śledcza\ngr.2",
+   "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja"
+  },
+  "name": "Informatyka - studia I stopnia - nst puw III - semestr zimowy - INF III PUW - z stacjonarne",
+  "sheet_name": "INF III PUW - z. stacjonarne"
+ },
+ "informatyka_inf_iv_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw IV - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {},
+  "name": "Informatyka - studia I stopnia - nst puw IV - semestr zimowy - INF IV PUW - z on-line",
+  "sheet_name": "INF IV PUW - z. on-line"
+ },
+ "informatyka_inf_iv_puw_z_stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst puw IV - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "grupa 1: podział wg nazwisk": "grupa 1:\npodział wg nazwisk",
+   "grupa 2: podział wg nazwisk": "grupa 2:\npodział wg nazwisk:",
+   "grupa 3: podział wg nazwisk": "grupa 3:\npodział wg nazwisk:"
+  },
+  "name": "Informatyka - studia I stopnia - nst puw IV - semestr zimowy - INF IV PUW - z stacjonarne",
+  "sheet_name": "INF IV PUW - z. stacjonarne"
+ },
+ "informatyka_inf_nst_iii_z_on_line": {
+  "category": "st",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst III - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+   "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja"
+  },
+  "name": "Informatyka - studia I stopnia - nst III - semestr zimowy - INF nst III - z on-line",
+  "sheet_name": "INF nst III - z. on-line"
+ },
+ "informatyka_inf_nst_iii_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst III - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+   "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja"
+  },
+  "name": "Informatyka - studia I stopnia - nst III - semestr zimowy - INF nst III - z stacjonarne",
+  "sheet_name": "INF nst III - z. stacjonarne"
+ },
+ "informatyka_inf_nst_iv_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst IV - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {},
+  "name": "Informatyka - studia I stopnia - nst IV - semestr zimowy - INF nst IV - z on-line",
+  "sheet_name": "INF nst IV - z. on-line"
+ },
+ "informatyka_inf_nst_iv_z_stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Informatyka - studia I stopnia - nst IV - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {},
+  "name": "Informatyka - studia I stopnia - nst IV - semestr zimowy - INF nst IV - z stacjonarne",
+  "sheet_name": "INF nst IV - z. stacjonarne"
+ },
+ "informatyka_inf_st_ii": {
+  "category": "st",
+  "download_url": "fixture://Informatyka - studia I stopnia - st II - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "group_aliases": {
+   "Sp.: Sztuczna inteligencja gr.1": [
+    "Sp.: Sztuczna inteligencja"
+   ],
+   "Sp.: Sztuczna inteligencja gr.2": [
+    "Sp.: Sztuczna inteligencja"
+   ]
+  },
+  "groups": {
+   "Sp.: Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
+   "Sp.: Sztuczna inteligencja gr.1": "Sp.: Sztuczna inteligencja\ngr.1",
+   "Sp.: Sztuczna inteligencja gr.2": "Sp.: Sztuczna inteligencja\ngr.2",
+   "Sp.: Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i Internet rzeczy"
+  },
+  "groups_column_info": {
+   "Sp.: Grafika komputerowa i projektowanie gier": 5,
+   "Sp.: Sztuczna inteligencja gr.1": 4,
+   "Sp.: Sztuczna inteligencja gr.2": 5,
+   "Sp.: Technologie Webowe i Internet rzeczy": 5
+  },
+  "mixed": true,
+  "name": "Informatyka - studia I stopnia - st II - semestr zimowy - INF st II",
+  "sheet_name": "INF st II"
+ },
+ "informatyka_inf_st_ii_1": {
+  "category": "st",
+  "download_url": "fixture://Informatyka - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+   "Sp.: Grafika komputerowa i projektowanie gier": "Sp.: Grafika komputerowa i projektowanie gier",
+   "Sp.: Sztuczna inteligencja": "Sp.: Sztuczna inteligencja",
+   "Sp.: Technologie Webowe i Internet rzeczy": "Sp.: Technologie Webowe i Internet rzeczy"
+  },
+  "name": "Informatyka - studia I stopnia - st III - semestr zimowy - INF st II",
+  "sheet_name": "INF st II"
+ },
+ "informatyka_inf_st_iv": {
+  "category": "st",
+  "download_url": "fixture://Informatyka - studia I stopnia - st IV - semestr zimowy.xlsx",
+  "faculty": "informatyka",
+  "groups": {
+   "grupa 1 podział wg nazwisk": "grupa 1\npodział wg nazwisk: \n",
+   "grupa 2 podział wg nazwisk": "grupa 2\npodział wg nazwisk: \n",
+   "grupa 3 podział wg nazwisk": "grupa 3\npodział wg nazwisk: \n",
+   "grupa 4 podział wg nazwisk": "grupa 4\npodział wg nazwisk: \n"
+  },
+  "name": "Informatyka - studia I stopnia - st IV - semestr zimowy - INF st IV",
+  "sheet_name": "INF st IV"
+ },
+ "informatyka_studia_magisterskie_inf_muz_i_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia II stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "informatyka studia magisterskie",
+  "groups": {},
+  "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - INF MUZ I PUW - z on-line",
+  "sheet_name": "INF MUZ I PUW - z. on-line"
+ },
+ "informatyka_studia_magisterskie_inf_muz_i_puw_z_stac": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia II stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "informatyka studia magisterskie",
+  "groups": {
+   "grupa 1 podział wg nazwisk": "grupa 1\npodział wg nazwisk: \n",
+   "grupa 2 podział wg nazwisk": "grupa 2\npodział wg nazwisk: \n"
+  },
+  "name": "Informatyka - studia II stopnia - nst puw I - semestr zimowy - INF MUZ I PUW - z stac",
+  "sheet_name": "INF MUZ I PUW - z. stac."
+ },
+ "informatyka_studia_magisterskie_inf_muz_ii_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Informatyka - studia II stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "informatyka studia magisterskie",
+  "groups": {
+   "M. Neuromodelowanie": "M. Neuromodelowanie",
+   "M: Cyberbezpieczeństwo": "M: Cyberbezpieczeństwo"
+  },
+  "name": "Informatyka - studia II stopnia - nst puw II - semestr zimowy - INF MUZ II PUW - z on-line",
+  "sheet_name": "INF MUZ II PUW - z. on-line"
+ },
+ "informatyka_studia_magisterskie_inf_muz_ii_puw_z_stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Informatyka - studia II stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "informatyka studia magisterskie",
+  "groups": {
+   "M. Neuromodelowanie": "M. Neuromodelowanie",
+   "M: Cyberbezpieczeństwo": "M: Cyberbezpieczeństwo"
+  },
+  "name": "Informatyka - studia II stopnia - nst puw II - semestr zimowy - INF MUZ II PUW - z stacjonarne",
+  "sheet_name": "INF MUZ II PUW - z. stacjonarne"
+ },
+ "media_i_dziennikarstwo_mid_ii_rok_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "media i dziennikarstwo",
+  "groups": {
+   "Sp.: Nowe media cz. 1": "Sp.: Nowe media cz. 1"
+  },
+  "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy - MID II rok PUW - z on-line",
+  "sheet_name": "MID II rok PUW - z. on-line"
+ },
+ "media_i_dziennikarstwo_mid_ii_rok_puw_z_stacjonarny": {
+  "category": "nst",
+  "download_url": "fixture://Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "media i dziennikarstwo",
+  "groups": {
+   "Sp.: Nowe media cz. 1": "Sp.: Nowe media cz. 1"
+  },
+  "name": "Media i dziennikarstwo - studia I stopnia - nst puw II - semestr zimowy - MID II rok PUW - z stacjonarny",
+  "sheet_name": "MID II rok PUW - z. stacjonarny"
+ },
+ "media_i_dziennikarstwo_mid_iii_rok_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "media i dziennikarstwo",
+  "groups": {},
+  "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy - MID III rok PUW - z on-line",
+  "sheet_name": "MID III rok PUW - z. on-line"
+ },
+ "media_i_dziennikarstwo_mid_iii_rok_puw_z_stacjonarny": {
+  "category": "nst",
+  "download_url": "fixture://Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "media i dziennikarstwo",
+  "groups": {},
+  "name": "Media i dziennikarstwo - studia I stopnia - nst puw III - semestr zimowy - MID III rok PUW - zstacjonarny",
+  "sheet_name": "MID III rok PUW - z.stacjonarny"
+ },
+ "media_i_dziennikarstwo_mid_st_iii": {
+  "category": "st",
+  "download_url": "fixture://Media i dziennikarstwo - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "media i dziennikarstwo",
+  "groups": {},
+  "name": "Media i dziennikarstwo - studia I stopnia - st III - semestr zimowy - MID st III",
+  "sheet_name": "MID st III"
+ },
+ "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_i": {
+  "category": "nst",
+  "download_url": "fixture://Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst I - semestr zimowy.xlsx",
+  "faculty": "pedagogika przedszkolna i wczesnoszkolna",
+  "groups": {},
+  "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst I - semestr zimowy - PG J nst I",
+  "sheet_name": "PG J nst I"
+ },
+ "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_iii": {
+  "category": "nst",
+  "download_url": "fixture://Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst III - semestr zimowy.xlsx",
+  "faculty": "pedagogika przedszkolna i wczesnoszkolna",
+  "groups": {},
+  "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst III - semestr zimowy - PG J nst III",
+  "sheet_name": "PG J nst III"
+ },
+ "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_v": {
+  "category": "nst",
+  "download_url": "fixture://Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst V - semestr zimowy.xlsx",
+  "faculty": "pedagogika przedszkolna i wczesnoszkolna",
+  "groups": {},
+  "name": "Pedagogika przedszkolna i wczesnoszkolna - studia jednolite magisterskie - nst V - semestr zimowy - PG J nst V",
+  "sheet_name": "PG J nst V"
+ },
+ "pielęgniarstwo_pie_st_i": {
+  "category": "st",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (dzienne).xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Gą": "Grupa 1\npodział wg nazwisk: \nA-Gą",
+   "Grupa 2 podział wg nazwisk: Gb-M": "Grupa 2\npodział wg nazwisk: \nGb-M",
+   "Grupa 3 podział wg nazwisk: N-Z": "Grupa 3\npodział wg nazwisk: \nN-Z"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (dzienne) - PIE ST I",
+  "sheet_name": "PIE ST I"
+ },
+ "pielęgniarstwo_pie_st_ii": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 4 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-D": "Grupa 1\npodział wg nazwisk: \nA-D",
+   "Grupa 2 podział wg nazwisk: E-Ko": "Grupa 2\npodział wg nazwisk: \nE-Ko",
+   "Grupa 3 podział wg nazwisk: Kp-Mę": "Grupa 3\npodział wg nazwisk: \nKp-Mę",
+   "Grupa 4 podział wg nazwisk: Mf-Ro": "Grupa 4\npodział wg nazwisk: \nMf-Ro",
+   "Grupa 5 podział wg nazwisk: Rp-St": "Grupa 5\npodział wg nazwisk: \nRp-St",
+   "Grupa 6 podział wg nazwisk: Su-Ż": "Grupa 6\npodział wg nazwisk: \nSu-Ż"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 4 - zimowy - PIE st II",
+  "sheet_name": "PIE st II"
+ },
+ "pielęgniarstwo_pie_st_ii_zj_on_line": {
+  "category": "st",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupy 1-9": "Grupy 1-9\n"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy - PIE st II zj on-line",
+  "sheet_name": "PIE st II zj. on-line"
+ },
+ "pielęgniarstwo_pie_st_iii": {
+  "category": "st",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st III - semestr 5 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {},
+  "name": "Pielęgniarstwo - studia I stopnia - st III - semestr 5 - zimowy - PIE st III",
+  "sheet_name": "PIE st III"
+ },
+ "pielęgniarstwo_zajęcia_on_line": {
+  "category": "st",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (weekendowe).xlsx",
+  "faculty": "pielęgniarstwo",
+  "group_aliases": {
+   "Grupy 1 - 18": [
+    "Grupy 1-18"
+   ]
+  },
+  "groups": {
+   "Grupy 1 - 18": "Grupy 1 - 18"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (weekendowe) - zajęcia on-line",
+  "sheet_name": "zajęcia on-line"
+ },
+ "pielęgniarstwo_zajęcia_praktyczne": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 4 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "group_aliases": {
+   "Grupa 1 podział wg nazwisk: A-D": [
+    "Grupa 1"
+   ],
+   "Grupa 2 podział wg nazwisk: E-Ko": [
+    "Grupa 2"
+   ],
+   "Grupa 3 podział wg nazwisk: Kp-Mę": [
+    "Grupa 3"
+   ],
+   "Grupa 4 podział wg nazwisk: Mf-Ro": [
+    "Grupa 4"
+   ],
+   "Grupa 5 podział wg nazwisk: Rp-St": [
+    "Grupa 5"
+   ],
+   "Grupa 6 podział wg nazwisk: Su-Ż": [
+    "Grupa 6"
+   ]
+  },
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-D": "Grupa 1\npodział wg nazwisk: \nA-D",
+   "Grupa 2 podział wg nazwisk: E-Ko": "Grupa 2\npodział wg nazwisk: \nE-Ko",
+   "Grupa 3 podział wg nazwisk: Kp-Mę": "Grupa 3\npodział wg nazwisk: \nKp-Mę",
+   "Grupa 4 podział wg nazwisk: Mf-Ro": "Grupa 4\npodział wg nazwisk: \nMf-Ro",
+   "Grupa 5 podział wg nazwisk: Rp-St": "Grupa 5\npodział wg nazwisk: \nRp-St",
+   "Grupa 6 podział wg nazwisk: Su-Ż": "Grupa 6\npodział wg nazwisk: \nSu-Ż"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 4 - zimowy - zajęcia praktyczne",
+  "sheet_name": "zajęcia praktyczne"
+ },
+ "pielęgniarstwo_zajęcia_w_siedzibie": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (weekendowe).xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Buc": "Grupa 1\npodział wg nazwisk: \nA-Buc",
+   "Grupa 10 podział wg nazwisk: Mis-Orz": "Grupa 10\npodział wg nazwisk: \nMis-Orz",
+   "Grupa 11 podział wg nazwisk: Osa-Pie": "Grupa 11\npodział wg nazwisk: \nOsa-Pie",
+   "Grupa 12 podział wg nazwisk: Pif-Rom": "Grupa 12\npodział wg nazwisk: \nPif-Rom",
+   "Grupa 13 podział wg nazwisk: Ron-Ser": "Grupa 13\npodział wg nazwisk: \nRon-Ser",
+   "Grupa 14 podział wg nazwisk: Ses-Ste": "Grupa 14\npodział wg nazwisk: \nSes-Ste",
+   "Grupa 15 podział wg nazwisk: Stf-Śz": "Grupa 15\npodział wg nazwisk: \nStf-Śz",
+   "Grupa 16 podział wg nazwisk: T-Was": "Grupa 16\npodział wg nazwisk: \nT-Was",
+   "Grupa 17 podział wg nazwisk: Wat-Wojn": "Grupa 17\npodział wg nazwisk: \nWat-Wojn",
+   "Grupa 18 podział wg nazwisk: Wojm-Z": "Grupa 18\npodział wg nazwisk: \nWojm-Z",
+   "Grupa 2 podział wg nazwisk: Bud-Dub": "Grupa 2\npodział wg nazwisk: \nBud-Dub",
+   "Grupa 3 podział wg nazwisk: Duc-Gra": "Grupa 3\npodział wg nazwisk: \nDuc-Gra",
+   "Grupa 4 podział wg nazwisk: Grb-Jaw": "Grupa 4\npodział wg nazwisk: \nGrb-Jaw",
+   "Grupa 5 podział wg nazwisk: Jax-Kol": "Grupa 5\npodział wg nazwisk: \nJax-Kol",
+   "Grupa 6 podział wg nazwisk: Koł-Kru": "Grupa 6\npodział wg nazwisk: \nKoł-Kru",
+   "Grupa 7 podział wg nazwisk: Krw-Luc": "Grupa 7\npodział wg nazwisk: Krw-Luc",
+   "Grupa 8 podział wg nazwisk: Lud-Mal": "Grupa 8\npodział wg nazwisk: \nLud-Mal",
+   "Grupa 9 podział wg nazwisk: Mał-Mit": "Grupa 9\npodział wg nazwisk: \nMał-Mit"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (weekendowe) - zajęcia w siedzibie",
+  "sheet_name": "zajęcia w siedzibie"
+ },
+ "pielęgniarstwo_zj_11": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": "Grupa 1\npodział wg nazwisk: \nA-Cie",
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": "Grupa 2\npodział wg nazwisk: \nCię-Dzid",
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": "Grupa 3\npodział wg nazwisk: \nDzie-Jan",
+   "Grupa 4 podział wg nazwisk: Jam-Kow": "Grupa 4\npodział wg nazwisk: \nJam-Kow",
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": "Grupa 5\npodział wg nazwisk: \nKox-Martyn",
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": "Grupa 6\npodział wg nazwisk: \nMartyo-Mz",
+   "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": "Grupa 8\npodział wg nazwisk: \nSax-Śmic",
+   "Grupa 9 podział wg nazwisk: Śmid-Z": "Grupa 9\npodział wg nazwisk: \nŚmid-Z"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy - zj11",
+  "sheet_name": "zj.11"
+ },
+ "pielęgniarstwo_zj_12": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": "Grupa 1\npodział wg nazwisk: \nA-Cie",
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": "Grupa 2\npodział wg nazwisk: \nCię-Dzid",
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": "Grupa 3\npodział wg nazwisk: \nDzie-Jan",
+   "Grupa 4 podział wg nazwisk: Jam-Kow": "Grupa 4\npodział wg nazwisk: \nJam-Kow",
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": "Grupa 5\npodział wg nazwisk: \nKox-Martyn",
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": "Grupa 6\npodział wg nazwisk: \nMartyo-Mz",
+   "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": "Grupa 8\npodział wg nazwisk: \nSax-Śmic",
+   "Grupa 9 podział wg nazwisk: Śmid-Z": "Grupa 9\npodział wg nazwisk: \nŚmid-Z"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy - zj12",
+  "sheet_name": "zj.12"
+ },
+ "pielęgniarstwo_zj_3": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": "Grupa 1\npodział wg nazwisk: \nA-Cie",
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": "Grupa 2\npodział wg nazwisk: \nCię-Dzid",
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": "Grupa 3\npodział wg nazwisk: \nDzie-Jan",
+   "Grupa 4 podział wg nazwisk: Jam-Kow": "Grupa 4\npodział wg nazwisk: \nJam-Kow",
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": "Grupa 5\npodział wg nazwisk: \nKox-Martyn",
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": "Grupa 6\npodział wg nazwisk: \nMartyo-Mz",
+   "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": "Grupa 8\npodział wg nazwisk: \nSax-Śmic",
+   "Grupa 9 podział wg nazwisk: Śmid-Z": "Grupa 9\npodział wg nazwisk: \nŚmid-Z"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy - zj3",
+  "sheet_name": "zj.3"
+ },
+ "pielęgniarstwo_zj_5": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": "Grupa 1\npodział wg nazwisk: \nA-Cie",
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": "Grupa 2\npodział wg nazwisk: \nCię-Dzid",
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": "Grupa 3\npodział wg nazwisk: \nDzie-Jan",
+   "Grupa 4 podział wg nazwisk: Jam-Kow": "Grupa 4\npodział wg nazwisk: \nJam-Kow",
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": "Grupa 5\npodział wg nazwisk: \nKox-Martyn",
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": "Grupa 6\npodział wg nazwisk: \nMartyo-Mz",
+   "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": "Grupa 8\npodział wg nazwisk: \nSax-Śmic",
+   "Grupa 9 podział wg nazwisk: Śmid-Z": "Grupa 9\npodział wg nazwisk: \nŚmid-Z"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy - zj5",
+  "sheet_name": "zj.5"
+ },
+ "pielęgniarstwo_zj_6": {
+  "category": "nst",
+  "download_url": "fixture://Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy.xlsx",
+  "faculty": "pielęgniarstwo",
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": "Grupa 1\npodział wg nazwisk: \nA-Cie",
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": "Grupa 2\npodział wg nazwisk: \nCię-Dzid",
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": "Grupa 3\npodział wg nazwisk: \nDzie-Jan",
+   "Grupa 4 podział wg nazwisk: Jam-Kow": "Grupa 4\npodział wg nazwisk: \nJam-Kow",
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": "Grupa 5\npodział wg nazwisk: \nKox-Martyn",
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": "Grupa 6\npodział wg nazwisk: \nMartyo-Mz",
+   "Grupa 7 podział wg nazwisk: N-Saw": "Grupa 7\npodział wg nazwisk: \nN-Saw",
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": "Grupa 8\npodział wg nazwisk: \nSax-Śmic",
+   "Grupa 9 podział wg nazwisk: Śmid-Z": "Grupa 9\npodział wg nazwisk: \nŚmid-Z"
+  },
+  "name": "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy - zj6",
+  "sheet_name": "zj.6"
+ },
+ "praca_socjalna_ps_ii_rok_puw_z_online": {
+  "category": "nst",
+  "download_url": "fixture://Praca socjalna - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "praca socjalna",
+  "groups": {
+   "Sp. Organizator społeczności lokalnej": "Sp.  Organizator społeczności lokalnej"
+  },
+  "name": "Praca socjalna - studia I stopnia - nst puw II - semestr zimowy - PS II rok PUW - z online",
+  "sheet_name": "PS II rok PUW - z. online"
+ },
+ "praca_socjalna_ps_ii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Praca socjalna - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "praca socjalna",
+  "groups": {
+   "Sp. Organizator społeczności lokalnej": "Sp.  Organizator społeczności lokalnej"
+  },
+  "name": "Praca socjalna - studia I stopnia - nst puw II - semestr zimowy - PS II rok PUW - z stacjonarne",
+  "sheet_name": "PS II rok PUW - z. stacjonarne"
+ },
+ "praca_socjalna_ps_iii_rok_puw_z_online": {
+  "category": "nst-online",
+  "download_url": "fixture://Praca socjalna - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "praca socjalna",
+  "groups": {},
+  "name": "Praca socjalna - studia I stopnia - nst puw III - semestr zimowy - PS III rok PUW - z online",
+  "sheet_name": "PS III rok PUW - z. online"
+ },
+ "praca_socjalna_ps_iii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Praca socjalna - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "praca socjalna",
+  "groups": {},
+  "name": "Praca socjalna - studia I stopnia - nst puw III - semestr zimowy - PS III rok PUW - z stacjonarne",
+  "sheet_name": "PS III rok PUW - z. stacjonarne"
+ },
+ "projektowanie_wnętrz_pw_nst_i": {
+  "category": "nst",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - nst I - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {},
+  "name": "Projektowanie wnętrz - studia I stopnia - nst I - semestr zimowy - PW nst I",
+  "sheet_name": "PW nst I"
+ },
+ "projektowanie_wnętrz_pw_nst_ii": {
+  "category": "nst",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - nst II - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {
+   "M.: Visual merchandising": "M.: Visual merchandising"
+  },
+  "name": "Projektowanie wnętrz - studia I stopnia - nst II - semestr zimowy - PW nst II",
+  "sheet_name": "PW nst II"
+ },
+ "projektowanie_wnętrz_pw_nst_iii": {
+  "category": "nst",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - nst III - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {
+   "M: Moduł A": "M: Moduł A"
+  },
+  "name": "Projektowanie wnętrz - studia I stopnia - nst III - semestr zimowy - PW nst III",
+  "sheet_name": "PW nst III"
+ },
+ "projektowanie_wnętrz_pw_nst_iv": {
+  "category": "nst-online",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - nst IV - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {
+   "M: Moduł B": "M: Moduł B"
+  },
+  "name": "Projektowanie wnętrz - studia I stopnia - nst IV - semestr zimowy - PW nst IV",
+  "sheet_name": "PW nst IV"
+ },
+ "projektowanie_wnętrz_pw_st_i": {
+  "category": "st",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - st I - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {},
+  "name": "Projektowanie wnętrz - studia I stopnia - st I - semestr zimowy - PW st I",
+  "sheet_name": "PW st I"
+ },
+ "projektowanie_wnętrz_pw_st_ii": {
+  "category": "st",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - st II - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {
+   "M.: Visual merchandising": "M.: Visual merchandising"
+  },
+  "name": "Projektowanie wnętrz - studia I stopnia - st II - semestr zimowy - PW st II",
+  "sheet_name": "PW st II"
+ },
+ "projektowanie_wnętrz_pw_st_iii": {
+  "category": "st",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {
+   "M: Moduł B": "M: Moduł B"
+  },
+  "name": "Projektowanie wnętrz - studia I stopnia - st III - semestr zimowy - PW st III",
+  "sheet_name": "PW st III"
+ },
+ "projektowanie_wnętrz_pw_st_iv": {
+  "category": "st",
+  "download_url": "fixture://Projektowanie wnętrz - studia I stopnia - st IV - semestr zimowy.xlsx",
+  "faculty": "projektowanie wnętrz",
+  "groups": {
+   "M: Moduł B": "M: Moduł B"
+  },
+  "name": "Projektowanie wnętrz - studia I stopnia - st IV - semestr zimowy - PW st IV",
+  "sheet_name": "PW st IV"
+ },
+ "socjologia_soc_iii_puw_-_z._on-line": {
+  "category": "nst-online",
+  "download_url": "fixture://Socjologia - studia I stopnia - nst puw III - semestr letni.xlsx",
+  "faculty": "socjologia",
+  "groups": {},
+  "name": "Socjologia - studia I stopnia - nst puw III - semestr letni - SOC III PUW - z on-line",
+  "sheet_name": "SOC III PUW - z. on-line"
+ },
+ "socjologia_soc_iii_puw_-_z._stacjonarne": {
+  "category": "nst-online",
+  "download_url": "fixture://Socjologia - studia I stopnia - nst puw III - semestr letni.xlsx",
+  "faculty": "socjologia",
+  "groups": {},
+  "name": "Socjologia - studia I stopnia - nst puw III - semestr letni - SOC III PUW - z stacjonarne",
+  "sheet_name": "SOC III PUW - z. stacjonarne"
+ },
+ "stosunki_międzynarodowe_stm_st_ii": {
+  "category": "st",
+  "download_url": "fixture://Stosunki międzynarodowe - studia I stopnia - st II - semestr zimowy.xlsx",
+  "faculty": "stosunki międzynarodowe",
+  "groups": {
+   "Sp.: Biznes międzynarodowy i współpraca transgraniczna": "Sp.: Biznes międzynarodowy i współpraca transgraniczna"
+  },
+  "name": "Stosunki międzynarodowe - studia I stopnia - st II - semestr zimowy - STM st II",
+  "sheet_name": "STM st II"
+ },
+ "stosunki_międzynarodowe_stm_st_iii": {
+  "category": "st",
+  "download_url": "fixture://Stosunki międzynarodowe - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "stosunki międzynarodowe",
+  "groups": {},
+  "name": "Stosunki międzynarodowe - studia I stopnia - st III - semestr zimowy - STM st III",
+  "sheet_name": "STM st III"
+ },
+ "transport_trt_st_iii_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Transport - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "transport",
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+  },
+  "name": "Transport - studia I stopnia - st III - semestr zimowy - TRT st III - z on-line",
+  "sheet_name": "TRT st III - z. on-line"
+ },
+ "transport_trt_st_iii_z_on_line_1": {
+  "category": "nst",
+  "download_url": "fixture://Transport - studia I stopnia - nst III - semestr zimowy.xlsx",
+  "faculty": "transport",
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+  },
+  "name": "Transport - studia I stopnia - nst III - semestr zimowy - TRT st III - z on-line",
+  "sheet_name": "TRT st III - z. on-line"
+ },
+ "transport_trt_st_iii_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Transport - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "transport",
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+  },
+  "name": "Transport - studia I stopnia - st III - semestr zimowy - TRT st III - z stacjonarne",
+  "sheet_name": "TRT st III - z. stacjonarne"
+ },
+ "transport_trt_st_iii_z_stacjonarne_1": {
+  "category": "nst",
+  "download_url": "fixture://Transport - studia I stopnia - nst III - semestr zimowy.xlsx",
+  "faculty": "transport",
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": "Sp.: Transport, spedycja i logistyka"
+  },
+  "name": "Transport - studia I stopnia - nst III - semestr zimowy - TRT st III - z stacjonarne",
+  "sheet_name": "TRT st III - z. stacjonarne"
+ },
+ "transport_trt_st_iv": {
+  "category": "st",
+  "download_url": "fixture://Transport - studia I stopnia - st IV - semestr zimowy.xlsx",
+  "faculty": "transport",
+  "groups": {},
+  "name": "Transport - studia I stopnia - st IV - semestr zimowy - TRT st IV",
+  "sheet_name": "TRT st IV"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_i_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia II stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "zarządzanie studia magisterskie",
+  "groups": {},
+  "name": "Zarządzanie - studia II stopnia - nst puw I - semestr zimowy - ZAZ MUZ I PUW - z on-line",
+  "sheet_name": "ZAZ MUZ I PUW - z. on-line"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_i_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia II stopnia - nst puw I - semestr zimowy.xlsx",
+  "faculty": "zarządzanie studia magisterskie",
+  "groups": {
+   "gr.1": "gr.1",
+   "gr.2": "gr.2"
+  },
+  "name": "Zarządzanie - studia II stopnia - nst puw I - semestr zimowy - ZAZ MUZ I PUW - z stacjonarne",
+  "sheet_name": "ZAZ MUZ I PUW - z. stacjonarne"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_ii_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia II stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "zarządzanie studia magisterskie",
+  "groups": {
+   "Sp.: E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+   "Sp.: Menadżer HR i coaching biznesowy": "Sp.: Menadżer HR i coaching biznesowy"
+  },
+  "name": "Zarządzanie - studia II stopnia - nst puw II - semestr zimowy - ZAZ MUZ II PUW - z on-line",
+  "sheet_name": "ZAZ MUZ II PUW - z. on-line"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_ii_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia II stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "zarządzanie studia magisterskie",
+  "groups": {
+   "Sp.: E-biznes i nowoczesne formy marketingu": "Sp.: E-biznes i nowoczesne formy marketingu",
+   "Sp.: Menadżer HR i coaching biznesowy": "Sp.: Menadżer HR i coaching biznesowy"
+  },
+  "name": "Zarządzanie - studia II stopnia - nst puw II - semestr zimowy - ZAZ MUZ II PUW - z stacjonarne",
+  "sheet_name": "ZAZ MUZ II PUW - z. stacjonarne"
+ },
+ "zarządzanie_zaz_ii_rok_puw_z_on_line": {
+  "category": "st",
+  "download_url": "fixture://Zarządzanie - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "zarządzanie",
+  "groups": {
+   "Sp.: Zarządzanie firmą": "Sp.:  Zarządzanie firmą "
+  },
+  "name": "Zarządzanie - studia I stopnia - nst puw II - semestr zimowy - ZAZ II rok PUW - z on-line",
+  "sheet_name": "ZAZ II rok PUW - z. on-line"
+ },
+ "zarządzanie_zaz_ii_rok_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia I stopnia - nst puw II - semestr zimowy.xlsx",
+  "faculty": "zarządzanie",
+  "groups": {
+   "Sp.: Zarządzanie firmą": "Sp.:  Zarządzanie firmą "
+  },
+  "name": "Zarządzanie - studia I stopnia - nst puw II - semestr zimowy - ZAZ II rok PUW - z stacjonarne",
+  "sheet_name": "ZAZ II rok PUW - z. stacjonarne"
+ },
+ "zarządzanie_zaz_iii_puw_z_on_line": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "zarządzanie",
+  "groups": {},
+  "name": "Zarządzanie - studia I stopnia - nst puw III - semestr zimowy - ZAZ III PUW - z on-line",
+  "sheet_name": "ZAZ III PUW - z. on-line"
+ },
+ "zarządzanie_zaz_iii_puw_z_stacjonarne": {
+  "category": "nst",
+  "download_url": "fixture://Zarządzanie - studia I stopnia - nst puw III - semestr zimowy.xlsx",
+  "faculty": "zarządzanie",
+  "groups": {
+   "Grupa 1 podział wg nazwisk": "Grupa 1\npodział wg nazwisk:",
+   "Grupa 2 podział wg nazwisk": "Grupa 2\npodział wg nazwisk:"
+  },
+  "name": "Zarządzanie - studia I stopnia - nst puw III - semestr zimowy - ZAZ III PUW - z stacjonarne",
+  "sheet_name": "ZAZ III PUW - z. stacjonarne"
+ },
+ "zarządzanie_zaz_st_ii": {
+  "category": "st",
+  "download_url": "fixture://Zarządzanie - studia I stopnia - st II - semestr zimowy.xlsx",
+  "faculty": "zarządzanie",
+  "groups": {},
+  "name": "Zarządzanie - studia I stopnia - st II - semestr zimowy - ZAZ st II",
+  "sheet_name": "ZAZ st II"
+ },
+ "zarządzanie_zaz_st_iii": {
+  "category": "st",
+  "download_url": "fixture://Zarządzanie - studia I stopnia - st III - semestr zimowy.xlsx",
+  "faculty": "zarządzanie",
+  "groups": {},
+  "name": "Zarządzanie - studia I stopnia - st III - semestr zimowy - ZAZ st III",
+  "sheet_name": "ZAZ st III"
+ }
+}

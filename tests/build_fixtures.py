@@ -6,7 +6,7 @@ Run once in a while (needs PUW credentials in the environment):
 Writes tests/fixtures/:
     plans/<file>.xlsx     every plan file currently configured, lecturer names replaced
     timetable.xlsx        exam timetable, lecturer names replaced
-    plans.json            plan configuration (as produced by the scanner)
+    plan_config.json      plan configuration (as produced by the scanner)
 
 Names are replaced consistently across all files ("dr Jan Kowalski" becomes
 the same "dr Jan Nazwiskoab" everywhere), titles and layout stay intact, so
@@ -94,7 +94,7 @@ def main():
             print(f'  {filename}')
         config[plan_id] = {**plan, 'download_url': f'fixture://{filename}'}
 
-    with open(os.path.join(FIXTURES, 'plans.json'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(FIXTURES, 'plan_config.json'), 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=1, sort_keys=True)
 
     timetables = exam_schedule.find_timetable_files(session)
