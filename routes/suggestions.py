@@ -37,7 +37,30 @@ def send_pushover_notification(content):
         logger.error(f"Error sending Pushover notification: {str(e)}")
         return False
 
-def init_suggestion_routes(app, db):
+def _device_id():
+    """Visitor identity for the daily limit - the real client IP comes from the proxy."""
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    client_ip = forwarded.split(',')[0].strip() or request.remote_addr
+    user_agent = request.headers.get('User-Agent', '')
+    return hashlib.md5(f"{client_ip}:{user_agent}".encode()).hexdigest()
+
+
+def _today_count(db, device_id):
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    return db.Suggestions.count_documents({
+        "device_id": device_id,
+        "created_at": {"$gte": today, "$lt": today + timedelta(days=1)}
+    })
+
+
+def init_suggestion_routes(app, db, public=False):
+    """public=True registers only submitting (public API); the admin panel gets everything."""
+
+    @app.route('/api/suggestions/count', methods=['GET'])
+    def suggestion_count():
+        remaining = max(0, 5 - _today_count(db, _device_id()))
+        return jsonify({"success": True, "remaining_today": remaining})
+
     # Endpoint to add a new suggestion
     @app.route('/api/suggestions', methods=['POST'])
     def add_suggestion():
@@ -54,9 +77,7 @@ def init_suggestion_routes(app, db):
                 raise BadRequest("Content is required")
             
             # Extract client IP and create device identifier
-            client_ip = request.remote_addr
-            user_agent = request.headers.get('User-Agent', '')
-            device_id = hashlib.md5(f"{client_ip}:{user_agent}".encode()).hexdigest()
+            device_id = _device_id()
             
             # Check daily limit (5 suggestions per device per day)
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -106,7 +127,10 @@ def init_suggestion_routes(app, db):
             logger.error(f"Error adding suggestion: {str(e)}")
             return jsonify({"success": False, "message": "An error occurred while processing your request"}), 500
     
-    # Endpoint to get suggestions (admin only - should be protected)
+    if public:
+        return
+
+    # Endpoint to get suggestions (admin panel only)
     @app.route('/api/suggestions', methods=['GET'])
     def get_suggestions():
         try:

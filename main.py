@@ -317,6 +317,8 @@ init_activity_routes(app, db)
 init_comparison_routes(app, db)
 from routes.exams import init_exam_routes
 init_exam_routes(app, db)
+from routes.suggestions import init_suggestion_routes
+init_suggestion_routes(app, db, public=True)
 
 
 def run_flask_app():
