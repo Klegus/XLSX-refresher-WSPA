@@ -21,6 +21,42 @@ import re
 # Setup logger
 logger = get_logger('LessonPlan')
 
+# Bump when HTML generation changes - stored plans with another version get
+# re-processed even if the Excel file itself did not change.
+PARSER_VERSION = 6
+
+_DAY_NAMES = {
+    'PONIEDZIALEK': 'Poniedziałek', 'WTOREK': 'Wtorek', 'SRODA': 'Środa',
+    'CZWARTEK': 'Czwartek', 'PIATEK': 'Piątek', 'SOBOTA': 'Sobota', 'NIEDZIELA': 'Niedziela',
+}
+_TIME_SLOT_RE = re.compile(r'^\s*(\d{1,2})[.:]?(\d{2})\s*[-–—]\s*(\d{1,2})[.:]?(\d{2})')
+
+
+def config_fingerprint(plan_config):
+    """Hash of config fields that change the generated HTML."""
+    import hashlib
+    relevant = {k: plan_config.get(k) for k in ("sheet_name", "groups", "group_aliases", "category", "mixed")}
+    return hashlib.md5(json.dumps(relevant, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def _squash(text):
+    """Compare key tolerant to manual typing: letters/digits only, no diacritics."""
+    import unicodedata
+    t = unicodedata.normalize('NFKD', str(text or '').lower().replace('ł', 'l'))
+    return re.sub(r'[^a-z0-9]', '', ''.join(c for c in t if not unicodedata.combining(c)))
+
+
+def _day_name(value):
+    """Weekday for a header cell, tolerating typos like 'PIATEK' or 'Sobota.'"""
+    key = _squash(value).upper()
+    if not key or len(key) > 14:
+        return None
+    if key in _DAY_NAMES:
+        return _DAY_NAMES[key]
+    from difflib import get_close_matches
+    close = get_close_matches(key, _DAY_NAMES.keys(), n=1, cutoff=0.8)
+    return _DAY_NAMES[close[0]] if close else None
+
 class LessonPlan(LessonPlanDownloader):
     def __init__(self, username, password, mongo_uri, plan_config, directory=""):
         super().__init__(username, password, directory, plan_config["download_url"])
@@ -139,6 +175,146 @@ class LessonPlan(LessonPlanDownloader):
                 self.converted_lesson_plan, self.sheet_name
             )
         return self._weekday_column_map_cache or {}
+
+    def _generate_groups_html(self, file_path):
+        """Build HTML for every group straight from the Excel sheet (openpyxl).
+
+        Handles merged cells (multi-slot lessons, lectures shared by groups),
+        groups with several sub-columns per day and takes day names from the
+        sheet itself. Returns {group_name: html} or None when the layout is
+        not recognised (caller falls back to the legacy pandas pipeline).
+        """
+        wb = openpyxl.load_workbook(file_path)
+        try:
+            if self.sheet_name not in wb.sheetnames:
+                return None
+            ws = wb[self.sheet_name]
+
+            # Merged ranges: every covered cell reads the top-left value
+            merged = {}
+            for rng in ws.merged_cells.ranges:
+                value = ws.cell(rng.min_row, rng.min_col).value
+                for r in range(rng.min_row, rng.max_row + 1):
+                    for c in range(rng.min_col, rng.max_col + 1):
+                        merged[(r, c)] = value
+
+            def cell(r, c):
+                return merged[(r, c)] if (r, c) in merged else ws.cell(r, c).value
+
+            max_col, max_row = ws.max_column, ws.max_row
+
+            # Row with day names - the one naming the most distinct days
+            days_row, day_starts = None, []
+            for r in range(1, 13):
+                found = []
+                for c in range(2, max_col + 1):
+                    day = _day_name(cell(r, c))
+                    if day and (not found or found[-1][1] != day):
+                        found.append((c, day))
+                if len(found) > len(day_starts):
+                    days_row, day_starts = r, found
+            if not day_starts:
+                return None
+
+            # Header row under the days: GRUPA row if present, used for group mapping
+            whole_programme = list(self.groups) == ["cały kierunek"]
+            header_row, group_cols = None, {}
+            if not whole_programme:
+                aliases = self.plan_config.get("group_aliases") or {}
+                wanted = {name: {_squash(ident)} | {_squash(a) for a in aliases.get(name, [])}
+                          for name, ident in self.groups.items()}
+                best_hits = 0
+                for r in range(days_row + 1, days_row + 5):
+                    row_keys = {_squash(cell(r, c)) for c in range(1, max_col + 1)}
+                    hits = sum(1 for keys in wanted.values() if keys & row_keys)
+                    if hits > best_hits:
+                        header_row, best_hits = r, hits
+                if header_row is None:
+                    return None
+                for name, keys in wanted.items():
+                    group_cols[name] = [c for c in range(2, max_col + 1)
+                                        if _squash(cell(header_row, c)) in keys]
+                if any(not cols for cols in group_cols.values()):
+                    missing = [n for n, cols in group_cols.items() if not cols]
+                    logger.warning(f"Groups not found in sheet header: {missing}")
+                    return None
+
+            # Column span of each day: up to the next day; last day ends at the
+            # last column that has a group header (or content)
+            header_probe = header_row or days_row + 1
+            last_col = max((c for c in range(2, max_col + 1)
+                            if cell(header_probe, c) or cell(days_row, c)), default=max_col)
+            spans = []
+            for i, (start, day) in enumerate(day_starts):
+                end = day_starts[i + 1][0] - 1 if i + 1 < len(day_starts) else last_col
+                spans.append((day, start, end))
+            if whole_programme:
+                group_cols = {"cały kierunek": list(range(spans[0][1], spans[-1][2] + 1))}
+
+            # Time slot rows
+            time_rows = []
+            stop_words = ['program studiów', 'uwaga', 'uwagi:', 'praktyka zawodowa']
+            for r in range((header_row or days_row) + 1, max_row + 1):
+                label = str(cell(r, 1) or '').strip()
+                if any(sw in label.lower() for sw in stop_words):
+                    break
+                m = _TIME_SLOT_RE.match(label)
+                if m:
+                    h1, m1, h2, m2 = m.groups()
+                    time_rows.append((r, f"{int(h1)}<sup>{m1}</sup> - {int(h2)}<sup>{m2}</sup>"))
+            if not time_rows:
+                return None
+
+            # Exams and extra information printed above / below the table
+            try:
+                from plan_notes import parse_notes
+
+                def row_texts(rows):
+                    texts = []
+                    for r in rows:
+                        for c in range(1, max_col + 1):
+                            v = cell(r, c)
+                            if v is not None and str(v).strip() and str(v) not in texts:
+                                texts.append(str(v))
+                    return texts
+                last_time_row = time_rows[-1][0]
+                self.last_notes = parse_notes(row_texts(range(1, days_row)),
+                                              row_texts(range(last_time_row + 1, max_row + 1)))
+            except Exception as e:
+                logger.warning(f"Could not parse notes around the table: {e}")
+                self.last_notes = None
+
+            result = {}
+            for group, cols in group_cols.items():
+                parts = ["<table border='1'>\n<tr>\n<th><b>Godziny</b></th>\n"]
+                parts += [f"<th><b>{day}</b></th>\n" for day, _, _ in spans]
+                parts.append("</tr>\n")
+                rows_written = 0
+                for r, time_label in time_rows:
+                    texts_per_day = []
+                    for _, start, end in spans:
+                        texts = []
+                        for c in (c for c in cols if start <= c <= end):
+                            value = cell(r, c)
+                            text = str(value).strip() if value is not None else ''
+                            if text and text not in texts:
+                                texts.append(text)
+                        texts_per_day.append("\n\n".join(texts))
+                    if not any(texts_per_day):
+                        continue
+                    parts.append(f"<tr>\n<td>{time_label}</td>\n")
+                    parts += [f"<td>{t}</td>\n" for t in texts_per_day]
+                    parts.append("</tr>\n")
+                    rows_written += 1
+                parts.append("</table>")
+                # A group with no classes this semester is still a recognised layout
+                result[group] = "".join(parts) if rows_written else (
+                    "<p>Brak zajęć w planie tej grupy w bieżącym semestrze.</p>")
+            logger.info(f"Generated HTML from sheet for {len(result)} groups "
+                        f"({', '.join(d for d, _, _ in spans)})")
+            return result
+        finally:
+            wb.close()
 
     def _generate_html_direct(self, checksum):
         """Generate HTML table directly from Excel using openpyxl.
@@ -594,6 +770,8 @@ class LessonPlan(LessonPlanDownloader):
                 plans_data = {
                     "timestamp": current_datetime,
                     "checksum": new_checksum,
+                    "parser_version": PARSER_VERSION,
+                    "config_fingerprint": config_fingerprint(self.plan_config),
                     "plan_name": self.plan_config["name"],
                     "category": None,
                     "groups": {
@@ -629,7 +807,9 @@ class LessonPlan(LessonPlanDownloader):
                 else None
             )
 
-            if latest_checksum and latest_checksum == new_checksum:
+            same_parser = (latest_plan and latest_plan.get("parser_version") == PARSER_VERSION
+                           and latest_plan.get("config_fingerprint") == config_fingerprint(self.plan_config))
+            if latest_checksum and latest_checksum == new_checksum and same_parser:
                 logger.info(
                     f"Plan has not changed (MongoDB check in {collection_name}, checksum: {new_checksum})."
                 )
@@ -643,28 +823,36 @@ class LessonPlan(LessonPlanDownloader):
         if should_process:
             logger.info(f"Processing plan for {self.plan_config['name']}")
 
-            # Fast path for "cały kierunek" plans — bypass complex pipeline,
-            # read Excel directly with openpyxl and generate HTML table
-            if len(self.groups) == 1 and "cały kierunek" in self.groups:
-                try:
-                    html = self._generate_html_direct(new_checksum)
-                    if html:
-                        if self.save_to_mongodb:
-                            faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
-                            collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
-                            collection = self.db[collection_name]
-                            current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            collection.insert_one({
-                                "timestamp": current_datetime,
-                                "checksum": new_checksum,
-                                "plan_name": self.plan_config["name"],
-                                "category": self.schedule_type,
-                                "groups": {"cały kierunek": html},
-                            })
-                            logger.info(f"Saved 'cały kierunek' plan via direct path to {collection_name}")
-                        return new_checksum
-                except Exception as e:
-                    logger.warning(f"Direct HTML generation failed, falling back to standard pipeline: {e}")
+            # Sheet-based generator for all plans (merged cells, sub-columns,
+            # day names from the sheet); legacy pipeline below is the fallback
+            try:
+                file_path = self.file_save_path or os.path.join(self.directory or '', 'downloaded_file.xlsx')
+                groups_html = self._generate_groups_html(file_path)
+                if groups_html:
+                    if self.save_to_mongodb:
+                        faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
+                        collection_name = f"plans_{faculty_name}_{self.plan_config['name'].lower().replace(' ', '_')}"
+                        collection = self.db[collection_name]
+                        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        document = {
+                            "timestamp": current_datetime,
+                            "checksum": new_checksum,
+                            "plan_name": self.plan_config["name"],
+                            "category": self.schedule_type,
+                            "groups": groups_html,
+                            "notes": getattr(self, "last_notes", None),
+                            "parser_version": PARSER_VERSION,
+                            "config_fingerprint": config_fingerprint(self.plan_config),
+                        }
+                        if self.is_mixed:
+                            document["mixed"] = True
+                            document["group_column_info"] = self.group_column_counts
+                        collection.insert_one(document)
+                        logger.info(f"Saved plan via sheet generator to {collection_name}")
+                    return new_checksum
+                logger.warning("Sheet generator did not recognise the layout, using legacy pipeline")
+            except Exception as e:
+                logger.warning(f"Sheet generator failed, falling back to legacy pipeline: {e}")
 
             try:
                 self._invalidate_processing_cache()
@@ -746,6 +934,8 @@ class LessonPlan(LessonPlanDownloader):
                         collection.insert_one({
                             "timestamp": current_datetime,
                             "checksum": new_checksum,
+                            "parser_version": PARSER_VERSION,
+                            "config_fingerprint": config_fingerprint(self.plan_config),
                             "plan_name": self.plan_config["name"],
                             "category": self.schedule_type,
                             "groups": {"cały kierunek": "<p>Plan nie zawiera danych do wyświetlenia.</p>"},
@@ -1306,6 +1496,8 @@ class LessonPlan(LessonPlanDownloader):
         plans_data = {
             "timestamp": current_datetime,
             "checksum": checksum,
+            "parser_version": PARSER_VERSION,
+            "config_fingerprint": config_fingerprint(self.plan_config),
             "plan_name": self.plan_config["name"],
             "category": self.schedule_type,
             "groups": {},

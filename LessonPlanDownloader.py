@@ -68,7 +68,10 @@ class LessonPlanDownloader:
         if not session:
             return None
 
-        file_save_path = os.path.join(self.directory, "downloaded_file.xlsx")
+        # One file per URL: the cache hands out paths by URL, so a shared file
+        # name would let a later download overwrite a file another plan reuses
+        url_hash = hashlib.md5(self.download_url.encode(), usedforsecurity=False).hexdigest()[:12]
+        file_save_path = os.path.join(self.directory, f"downloaded_{url_hash}.xlsx")
 
         try:
             response = session.get(self.download_url, timeout=30)

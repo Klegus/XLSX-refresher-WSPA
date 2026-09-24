@@ -1,0 +1,3295 @@
+{
+ "administracja_adm_ii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Prawo administracyjne część szczegółowa"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Nowoczesna administracja cz. 1": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 10,
+    "sha1": "c68b5b1882fdabba515e9d0dfc0727fe6d2cb5b3"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "administracja_adm_ii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Nowoczesna administracja cz. 1": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 34,
+    "rows": 15,
+    "sha1": "dd696148743e61a4851645116d78bed107786cc6"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "administracja_adm_iii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Publiczne prawo gospodarcze",
+     "Zarządzanie finansami publicznymi w Polsce",
+     "Prawo handlowe"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 22,
+    "rows": 14,
+    "sha1": "96f33e59ef473ce9d9d3ea38594d0432620ee075"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "administracja_adm_iii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "8d059b3ad43450389531bff0da44526a97b8daff"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "administracja_studia_magisterskie_adm_muz_i_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "System ochrony prawnej UE",
+     "Fundusze strukturalne i system finansowania UE",
+     "Ochrona i zarządzanie zasobami przyrodniczymi",
+     "Postępowanie sądowo-administracyjne"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 36,
+    "rows": 16,
+    "sha1": "2a03b6d71efe042b554f1e586da24450423759f9"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · II stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "administracja_studia_magisterskie_adm_muz_i_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "gr.1 - wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "4064bbad0f7326d3e3d3affc481562260bba14b7"
+   },
+   "gr.2 - wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 45,
+    "rows": 15,
+    "sha1": "0e051dde6bba26e574b4beec5a10516b0eec5553"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · II stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "administracja_studia_magisterskie_adm_muz_ii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Prawo podatkowe"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Administracja przedsiębiorcza": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 15,
+    "sha1": "522357ce2d08063699c2c42ce0f1c4ba9279c02a"
+   },
+   "Sp.: Zarządzanie w samorządzie gminnym": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 15,
+    "sha1": "95f5f13d32a5ec508605105b60e989e94da2c434"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · II stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "administracja_studia_magisterskie_adm_muz_ii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Administracja przedsiębiorcza": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "5d8fd47c9f75fb05a35442530a81539fa47a29ea"
+   },
+   "Sp.: Zarządzanie w samorządzie gminnym": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "9e278955af6ba9287ed167c33dcb1e67c6a1de6a"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · II stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "architektura_aru_nst_i": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Podstawy projektowania - kompozycja architektoniczna",
+     "Podstawy projektowania architektonicznego cz. 1 (Projektowanie domów jednorodzinnych)",
+     "Matematyka",
+     "Historia architektury powszechnej"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 41,
+    "rows": 15,
+    "sha1": "45718c022e97a11023c8f36b4a8476939e534a2e"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "architektura_aru_st_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Projektowanie architektoniczne i urbanistyczne cz. 3. (Projektowanie domów wielorodzinnych)",
+     "Podstawy projektowania urbanistycznego",
+     "Budownictwo ogólne z rysunkiem budowlanym cz. 2",
+     "Statyka i mechanika budowli",
+     "Fizyka budowli",
+     "Konstrukcje budowlane",
+     "Teoria urbanistyki i ruralistyki"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 42,
+    "rows": 16,
+    "sha1": "629d871a6fb029c7a63d80939dbdeb07124cc3d5"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "architektura_aru_st_iii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Projektowanie architektoniczne i urbanistyczne cz. 5 (Projektowanie w zabudowie śródmiejskiej)",
+     "Podstawy planowania przestrzennego",
+     "Psychologia środowiskowa"
+    ]
+   }
+  ],
+  "groups": {
+   "M: Psychologia środkowiskowa": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 39,
+    "rows": 15,
+    "sha1": "3e2aae3835d2b2269c29e1d097db79eaba4b1eca"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "architektura_aru_st_iv": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 45,
+    "rows": 9,
+    "sha1": "cc42f905eb002c5f80a68d591977743d69a4855d"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 4, semestr 7 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "architektura_studia_magisterskie_aru_muz_st_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Zaawansowane systemy konstrukcyjne",
+     "Zaawansowane systemy instalacyjne"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 38,
+    "rows": 16,
+    "sha1": "8764abb6c362ee8864490df18f389a475324a83e"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · II stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "finanse_i_rachunkowość_fir_ii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Mikroekonomia",
+     "Strategie finansowania przedsiębiorstw i opłacalność projektów inwestycyjnych"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Rachunkowość i finanse przedsiębiorstw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 23,
+    "rows": 15,
+    "sha1": "d874d2d3df616a4cd36fbbcf0dc2c8bd7585fef9"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "finanse_i_rachunkowość_fir_ii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Rachunkowość i finanse przedsiębiorstw gr.1 - wg. nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 29,
+    "rows": 15,
+    "sha1": "36f367494c572556cb5056cd5cd5c1d643b21bb1"
+   },
+   "Sp.: Rachunkowość i finanse przedsiębiorstw gr.2 - wg. nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 29,
+    "rows": 15,
+    "sha1": "80152380672e70f3969ba85e8faa0f8bd5036a08"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "finanse_i_rachunkowość_fir_iii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Finanse przedsiębiorstwa"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 11,
+    "rows": 9,
+    "sha1": "709b5c870bbd208015e086364a273e99099d0056"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "finanse_i_rachunkowość_fir_iii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 27,
+    "rows": 16,
+    "sha1": "36a737aa27bd7fb90d341b66d9f6a696646537bb"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "finanse_i_rachunkowość_fir_st_iii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Finanse przedsiębiorstwa"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 39,
+    "rows": 13,
+    "sha1": "4e4b9b54af47d9d71da622318a445df16dd854d2"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "gospodarka_przestrzenna_gp_iii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Ochrona dziedzictwa kulturowego",
+     "System monitorowania i oceny zmian w zagospodarowaniu przestrzennym w skali lokalnej i regionalnej"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Nowe instrumenty planistyczne": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 23,
+    "rows": 12,
+    "sha1": "30f6f71ad301738921c7e4555daa89caa27b6afd"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "gospodarka_przestrzenna_gp_iii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Nowe instrumenty planistyczne": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "92e471021139cc99a4c09dbec40135de60c2d491"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_i_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Analiza matematyczna i algebra liniowa",
+     "Algorytmy i struktury danych",
+     "Podstawy techniki cyfrowej",
+     "Podstawy programowania",
+     "Sieci komputerowe"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 15,
+    "rows": 10,
+    "sha1": "58e6a8b9ddc035e54925e96a14e4599842ac5184"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_inf_i_rok_puw_z_stac": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 kolejność wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "eaba9b8621b5f62b8372710b1a2026989d49a06f"
+   },
+   "Grupa 2 kolejność wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "31eb901388452ed1e065beb6ddb0f303e371b81d"
+   },
+   "Grupa 3 kolejność wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "9c6fec8688804b6dda3a18b3253163bf7b8e11cd"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_ii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Rachunek prawdopodobieństwa i statystyka",
+     "Podstawy teorii grafów",
+     "Programowanie",
+     "Wstęp do inżynierii oprogramowania"
+    ]
+   },
+   {
+    "scope": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+    "subjects": [
+     "Projektowanie i konfiguracja sieci komputerowych zorientowana na bezpieczeństwo cz. I"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 14,
+    "sha1": "22c20544e4515dcffc8696045681d8160b5f3e7e"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_inf_ii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.1 wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "a0740d198c02e0b7e042f6b92049e118fea1edc0"
+   },
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.2 wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 45,
+    "rows": 15,
+    "sha1": "fd47606cfa31da8a5447fb484a96479e1884d656"
+   },
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza - gr.3 wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "220b717c46860252007741d838931652487bf6a5"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_iii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": "Sp.: Bazy danych",
+    "subjects": [
+     "Nierelacyjne bazy danych"
+    ]
+   },
+   {
+    "scope": "Sp.: Sztuczna inteligencja",
+    "subjects": [
+     "Programowanie w języku Python - bilioteka KERAS"
+    ]
+   },
+   {
+    "scope": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+    "subjects": [
+     "Zarządzanie bezpieczeństwem danych"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Bazy danych": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 32,
+    "rows": 15,
+    "sha1": "5f5d8dcf72129e499e827f473c8eb8933edb5089"
+   },
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.1": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "dcba9474b80e6940d81749e397d29a66c2a1e9f6"
+   },
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.2": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "31aa75fc640b115cbf203f79d95523d59e1116da"
+   },
+   "Sp.: Sztuczna inteligencja": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 31,
+    "rows": 15,
+    "sha1": "08e4c92a2ecd904ac2acf5db70495c84b6fc861e"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_inf_iii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Bazy danych": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 16,
+    "sha1": "de43639af8ca409873f83d5bae6d6fe33de949d8"
+   },
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.1": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 36,
+    "rows": 16,
+    "sha1": "e76edba145c38d2fb01077cba1dc78014cc3b179"
+   },
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza gr.2": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 16,
+    "sha1": "cafe3cb4181f77710040d9ec169b9d505970a939"
+   },
+   "Sp.: Sztuczna inteligencja": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 36,
+    "rows": 16,
+    "sha1": "539f809137dd4c77512063eee1c40e599f1fc935"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_iv_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Integracja systemów informatycznych",
+     "Systemy sztucznej inteligencji"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 11,
+    "rows": 7,
+    "sha1": "bd49fdd8a14e9da68aa7d200f94d3758b0d4fa37"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 4, semestr 7 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_inf_iv_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "grupa 1: podział wg nazwisk": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 10,
+    "rows": 10,
+    "sha1": "e4cfd7c116e67b6ba136eb4aa0aecc799c62419f"
+   },
+   "grupa 2: podział wg nazwisk": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 10,
+    "rows": 10,
+    "sha1": "1444b26cc75ea7be43058828e31cfb75144f27ba"
+   },
+   "grupa 3: podział wg nazwisk": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 10,
+    "rows": 10,
+    "sha1": "933a8a228ad3d04293ddfffdcba39b842f230238"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 4, semestr 7 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_nst_iii_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": "Sp.: Sztuczna inteligencja",
+    "subjects": [
+     "Programowanie w języku Python - bilioteka KERAS"
+    ]
+   },
+   {
+    "scope": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+    "subjects": [
+     "Zarządzanie bezpieczeństwem danych"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 9,
+    "sha1": "8b321210996f8263b38b25c9c351121d2d88f9f4"
+   },
+   "Sp.: Sztuczna inteligencja": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 14,
+    "rows": 9,
+    "sha1": "be186b38c5a67b355d1f4ae8ac552c03c6194433"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · niestacjonarne · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_inf_nst_iii_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "384bb09241932b33c905dfe0c49243f89c27dc5f"
+   },
+   "Sp.: Sztuczna inteligencja": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 33,
+    "rows": 15,
+    "sha1": "ae0cdf614e15b49b8cbb8e399a3a59553053150a"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · niestacjonarne · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_nst_iv_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Integracja systemów informatycznych",
+     "Systemy sztucznej inteligencji"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 10,
+    "rows": 7,
+    "sha1": "6dc8e6feab356147937bc7643960740d8cabd188"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 4, semestr 7 · I stopnia · niestacjonarne · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_inf_nst_iv_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 6,
+    "rows": 6,
+    "sha1": "57d16334c0116791b24213c9cc2aa39e51a47a12"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 4, semestr 7 · I stopnia · niestacjonarne · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_inf_st_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Rachunek prawdopodobieństwa i statystyka",
+     "Podstawy teorii grafów",
+     "Programowanie",
+     "Wstęp do inżynierii oprogramowania"
+    ]
+   },
+   {
+    "scope": "Sp.: Technologie Webowe i Internet rzeczy",
+    "subjects": [
+     "Programowanie baz danych"
+    ]
+   },
+   {
+    "scope": "Sp.: Sztuczna inteligencja",
+    "subjects": [
+     "Statystyka matematyczna"
+    ]
+   },
+   {
+    "scope": "Sp.: Grafika komputerowa i projektowanie gier",
+    "subjects": [
+     "Grafika komputerowa cz. 1"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Grafika komputerowa i projektowanie gier": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 50,
+    "rows": 15,
+    "sha1": "039db4c95f5dfe43c045ac5aa832b2b78fa674ef"
+   },
+   "Sp.: Sztuczna inteligencja gr.1": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 49,
+    "rows": 15,
+    "sha1": "9e5ef56dfaec0e03da18b5d6f75d25971c0f7c80"
+   },
+   "Sp.: Sztuczna inteligencja gr.2": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 49,
+    "rows": 15,
+    "sha1": "d31bdce12efa1e286c6c94006874faadc1216db1"
+   },
+   "Sp.: Technologie Webowe i Internet rzeczy": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 51,
+    "rows": 15,
+    "sha1": "f2b1755d2b704b2e1f8c31fd1067504c7898b133"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "informatyka_inf_st_ii_1": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": "Sp.: Technologie Webowe i Internet rzeczy",
+    "subjects": [
+     "Technologie frontendowe"
+    ]
+   },
+   {
+    "scope": "Sp.: Sztuczna inteligencja",
+    "subjects": [
+     "Programowanie w języku Python - bilioteka KERAS"
+    ]
+   },
+   {
+    "scope": "Sp.: Grafika komputerowa i projektowanie gier",
+    "subjects": [
+     "Design Thinking"
+    ]
+   },
+   {
+    "scope": "Sp.: Cyberbezpieczeństwo i informatyka śledcza",
+    "subjects": [
+     "Zarządzanie bezpieczeństwem danych"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Cyberbezpieczeństwo i informatyka śledcza": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 42,
+    "rows": 15,
+    "sha1": "86c71ef0cb50b1bf90ea1c161cef9bd59dd06276"
+   },
+   "Sp.: Grafika komputerowa i projektowanie gier": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 45,
+    "rows": 15,
+    "sha1": "2565be3bd54d46700547c8b1b994280b0224aea9"
+   },
+   "Sp.: Sztuczna inteligencja": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 44,
+    "rows": 15,
+    "sha1": "076612c4f9ac3e3d10e7cd74e6b2ebdc5e51a8e4"
+   },
+   "Sp.: Technologie Webowe i Internet rzeczy": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 44,
+    "rows": 15,
+    "sha1": "fd9b3f1db2877225da9cc583af510b2b38f5460b"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "informatyka_inf_st_iv": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Integracja systemów informatycznych",
+     "Systemy sztucznej inteligencji"
+    ]
+   }
+  ],
+  "groups": {
+   "grupa 1 podział wg nazwisk": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 15,
+    "rows": 7,
+    "sha1": "838fc2dc80c81b086793f64e9c5620391ecb0528"
+   },
+   "grupa 2 podział wg nazwisk": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 15,
+    "rows": 7,
+    "sha1": "7a68aa96a205c47b6396a3d8a663587e22b56000"
+   },
+   "grupa 3 podział wg nazwisk": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 15,
+    "rows": 7,
+    "sha1": "03793123d1f5399d5d22492e00cf09fda55fb7be"
+   },
+   "grupa 4 podział wg nazwisk": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 15,
+    "rows": 7,
+    "sha1": "ddee960d1703b2a88dba6a7d504a23c0bad0ec6c"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 4, semestr 7 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "informatyka_studia_magisterskie_inf_muz_i_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Podstawy bioinformatyki",
+     "Medyczne systemy bazodanowe",
+     "Zaawansowane przetwarzanie obrazów cyfrowych",
+     "Programowanie z wykorzystaniem biblioteki STL",
+     "Zaawansowany projekt zespołowy cz. 1"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 38,
+    "rows": 16,
+    "sha1": "4174cbed043532a8ad9d4f429b707a0367dc171c"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · II stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_studia_magisterskie_inf_muz_i_puw_z_stac": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "grupa 1 podział wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "ef0e9d1904fae3c7d14b9627cd8b41a457ae6255"
+   },
+   "grupa 2 podział wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "22e3aa446955f2bc778756079a8066f4e897c88e"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · II stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "informatyka_studia_magisterskie_inf_muz_ii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "M. Neuromodelowanie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 23,
+    "rows": 14,
+    "sha1": "e33986ea7d40459bb82adf3e30e633f75b82b5d6"
+   },
+   "M: Cyberbezpieczeństwo": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 23,
+    "rows": 14,
+    "sha1": "6af480e4d89a56a126bfb56c5ba8d4a752d94c28"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · II stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "informatyka_studia_magisterskie_inf_muz_ii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "M. Neuromodelowanie": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 15,
+    "sha1": "6da6953e9157eb93b8fb4ed89893932ec9382397"
+   },
+   "M: Cyberbezpieczeństwo": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "9af1acd65b429efb8f814d8360ca511272a7612d"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · II stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "media_i_dziennikarstwo_mid_ii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Nowe media"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Nowe media cz. 1": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 33,
+    "rows": 16,
+    "sha1": "2997a1fb24a1bf0d90e0dd5f53e8dda342d7f698"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "media_i_dziennikarstwo_mid_ii_rok_puw_z_stacjonarny": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Nowe media cz. 1": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 34,
+    "rows": 15,
+    "sha1": "bf35576949f789188a4db0303cd46ca541cd0996"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "media_i_dziennikarstwo_mid_iii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 23,
+    "rows": 13,
+    "sha1": "19efb53c0d8db2c97cca109f9aad029665d8a538"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "media_i_dziennikarstwo_mid_iii_rok_puw_z_stacjonarny": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "d34bbc1eda85ef8a9da958f283f65f10865c446f"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "media_i_dziennikarstwo_mid_st_iii": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 23,
+    "rows": 11,
+    "sha1": "d62edb9d711883a1c3b3272a13c9980876000155"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_i": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Pedagogika ogólna",
+     "Historia i filozofia wychowania",
+     "Pedagogika przedszkolna",
+     "Pedagogika wczesnoszkolna",
+     "Podstawy psychologii"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "79ce8ea97140192892b60858c536b26076d8e17f"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · jednolite magisterskie · niestacjonarne",
+  "validation": "ok"
+ },
+ "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_iii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Diagnostyka pedagogiczna",
+     "Wprowadzenie do pedagogkiki specjalnej",
+     "Diagnoza i terapia dziecka z dysfunkcjami"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "b2cfab53d4c0d28e82578839ce99de6834ef16c6"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · jednolite magisterskie · niestacjonarne",
+  "validation": "ok"
+ },
+ "pedagogika_przedszkolna_i_wczesnoszkolna_pg_j_nst_v": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Projekt edukacyjny dotyczący wybranego środowiska opiekuńczo-wychowawczego cz. 2",
+     "Projektowanie spersonalizowanych strategii edukacyjnych"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 14,
+    "sha1": "503c390688139c9f09ab07d398f2f579e313836f"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 5, semestr 9 · jednolite magisterskie · niestacjonarne",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_pie_st_i": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Anatomia",
+     "Fizjologia"
+    ]
+   }
+  ],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Gą": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 75,
+    "rows": 15,
+    "sha1": "b692acea0312d45c8d31a5ce6bbeb38bf082432e"
+   },
+   "Grupa 2 podział wg nazwisk: Gb-M": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 75,
+    "rows": 15,
+    "sha1": "e9c61180bb661c210b81206c27556a075905e6ac"
+   },
+   "Grupa 3 podział wg nazwisk: N-Z": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 75,
+    "rows": 15,
+    "sha1": "ac06ba27075afb4ea553dd45cbf9216958dcac59"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · I stopnia · stacjonarne · tryb dzienny",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_pie_st_ii": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-D": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 8,
+    "sha1": "2b990af998b68b5431fa22bcdbb2899e08c41277"
+   },
+   "Grupa 2 podział wg nazwisk: E-Ko": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 8,
+    "sha1": "2b990af998b68b5431fa22bcdbb2899e08c41277"
+   },
+   "Grupa 3 podział wg nazwisk: Kp-Mę": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 8,
+    "sha1": "2b990af998b68b5431fa22bcdbb2899e08c41277"
+   },
+   "Grupa 4 podział wg nazwisk: Mf-Ro": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 8,
+    "sha1": "0d471f412c07baed2727a54583c3d214a62f5e18"
+   },
+   "Grupa 5 podział wg nazwisk: Rp-St": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 8,
+    "sha1": "0d471f412c07baed2727a54583c3d214a62f5e18"
+   },
+   "Grupa 6 podział wg nazwisk: Su-Ż": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 21,
+    "rows": 8,
+    "sha1": "0d471f412c07baed2727a54583c3d214a62f5e18"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 4 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_pie_st_ii_zj_on_line": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupy 1-9": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "02701da8472756f9bcc84de2b13a16c64f475358"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne · zjazdy on-line",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_pie_st_iii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Psychiatria i pielęgniarstwo psychiatryczne",
+     "Pediatria i pielegniarstwo pediatryczne"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 35,
+    "rows": 8,
+    "sha1": "67509c69a3fe29d8131b6becd15fee189cd00dd4"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zajęcia_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Anatomia",
+     "Fizjologia"
+    ]
+   }
+  ],
+  "groups": {
+   "Grupy 1 - 18": {
+    "days": [
+     "Czwartek",
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "574e29dce2c1dec92cdaa68ec62762ad8a562dc3"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · I stopnia · stacjonarne · tryb weekendowy, zajęcia on-line",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zajęcia_praktyczne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-D": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 12,
+    "rows": 12,
+    "sha1": "c2fcf56f5c9424a4bc05d6c3546a3ebfbd8601b8"
+   },
+   "Grupa 2 podział wg nazwisk: E-Ko": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 12,
+    "rows": 12,
+    "sha1": "c7fba29505e87ecec3f7579b921d794db7923736"
+   },
+   "Grupa 3 podział wg nazwisk: Kp-Mę": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 12,
+    "rows": 12,
+    "sha1": "cbb19ce9c0b4c0870b4e04d16812dab9acbfdf18"
+   },
+   "Grupa 4 podział wg nazwisk: Mf-Ro": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 12,
+    "rows": 12,
+    "sha1": "f4eb4b35244e0e226b9d81d16ef28632033e30ef"
+   },
+   "Grupa 5 podział wg nazwisk: Rp-St": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 12,
+    "rows": 12,
+    "sha1": "5d5104541b85806b19dc4195fb399603da8eca14"
+   },
+   "Grupa 6 podział wg nazwisk: Su-Ż": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 12,
+    "rows": 12,
+    "sha1": "48faa870e8201d3777d4e23df3d1289359d815ce"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 4 · I stopnia · stacjonarne · zajęcia praktyczne",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zajęcia_w_siedzibie": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Anatomia",
+     "Fizjologia"
+    ]
+   }
+  ],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Buc": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "66b7709effe82b5b9e09ae15dfb6007c91512914"
+   },
+   "Grupa 10 podział wg nazwisk: Mis-Orz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "18d2ef69edd54c1f3ad6eefb8c8c702b22a26fe0"
+   },
+   "Grupa 11 podział wg nazwisk: Osa-Pie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "534520a147f37d2697c7985a8247600d88ad8148"
+   },
+   "Grupa 12 podział wg nazwisk: Pif-Rom": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "0d81d72d07594f0ece22baca2066b48bd38b60ff"
+   },
+   "Grupa 13 podział wg nazwisk: Ron-Ser": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "5268dc1083e3dc00867a28597fa1cc24553593fc"
+   },
+   "Grupa 14 podział wg nazwisk: Ses-Ste": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "7d44e8a5da692a5219bc70b2736c0892fa705036"
+   },
+   "Grupa 15 podział wg nazwisk: Stf-Śz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "ded3eaba4374ddb8d99eb5df2cb441e3901267da"
+   },
+   "Grupa 16 podział wg nazwisk: T-Was": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "ed852bdcac409802a5101508466ee67dec782a3e"
+   },
+   "Grupa 17 podział wg nazwisk: Wat-Wojn": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "e0a6198191eff18cf6f30b5cdaa9d5c81d37c45f"
+   },
+   "Grupa 18 podział wg nazwisk: Wojm-Z": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "1032c2fa60aedad4329911f0677f4374064276e1"
+   },
+   "Grupa 2 podział wg nazwisk: Bud-Dub": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "0e274aa4384a6f1dce39731f6b804f57f388605e"
+   },
+   "Grupa 3 podział wg nazwisk: Duc-Gra": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "3ee36b4c7017a0e77b0d1bca111a74b1f97cb55f"
+   },
+   "Grupa 4 podział wg nazwisk: Grb-Jaw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "6f6819c440789713a370c01680ce24bd8702834f"
+   },
+   "Grupa 5 podział wg nazwisk: Jax-Kol": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "23b0256e3a48c6abebfc356d439757b44148cfb4"
+   },
+   "Grupa 6 podział wg nazwisk: Koł-Kru": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "90578b59705bad234e1bfa40d10588a6f695e6ad"
+   },
+   "Grupa 7 podział wg nazwisk: Krw-Luc": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "f2b4f3ee15b5ec188c159e8186528257a41280c8"
+   },
+   "Grupa 8 podział wg nazwisk: Lud-Mal": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "48316e4d519fc1fa76c8956366995ba696eb2baa"
+   },
+   "Grupa 9 podział wg nazwisk: Mał-Mit": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "6b69bd8d60cda61455ce8d428a02a798e784a5b1"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · I stopnia · stacjonarne · tryb weekendowy, zajęcia w siedzibie",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zj_11": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "4e9e4adc5793cc0fe07c0b3c5d1e1189ba98f897"
+   },
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "0e5ad3d4f44de7ce93b0eb02aba080dfbd69af31"
+   },
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "c67966fba471fb843ac13814ddf5f7320203ff9a"
+   },
+   "Grupa 4 podział wg nazwisk: Jam-Kow": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "962e6c3a00eecd748dd1b09b9e8eb3936257a596"
+   },
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "d031c6b0c8ccedf0fefb4f489fda6dd7386e5ac1"
+   },
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "3533784ed039ed16465d6c7c19fb7a0cc2c3462e"
+   },
+   "Grupa 7 podział wg nazwisk: N-Saw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "83edca8efaf435ad26cd7d344ef91fb17375dea2"
+   },
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "81a692369d257826b9a0438884e8dbd2e9479198"
+   },
+   "Grupa 9 podział wg nazwisk: Śmid-Z": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 20,
+    "rows": 10,
+    "sha1": "71d22c47ac375ea021f80689ebdceca402cb56f7"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne · zjazd 11",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zj_12": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 14,
+    "sha1": "e505c4b72e6f309f4180b8e9bff2e916bec52893"
+   },
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 12,
+    "sha1": "e66aec995ccd80d42a9a3902c041ce6e070d661d"
+   },
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 22,
+    "rows": 12,
+    "sha1": "43fbd1089568d89ba7255e26e2161290542b5987"
+   },
+   "Grupa 4 podział wg nazwisk: Jam-Kow": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 11,
+    "sha1": "4dd95ed17116fac75385ba7ef40b93eeabc3f213"
+   },
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 11,
+    "sha1": "37d5d900c17633b0eb9da07874e7fd18c99dd457"
+   },
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 14,
+    "rows": 11,
+    "sha1": "b3de48b5ef91010ada2ce92c31e7a98c1ddc93d2"
+   },
+   "Grupa 7 podział wg nazwisk: N-Saw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 12,
+    "sha1": "1458e5acabd6f971f273c9c1b12621ce3a2ba75a"
+   },
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 18,
+    "rows": 12,
+    "sha1": "8ed1afc2320707733b12bb791d23a243991dc872"
+   },
+   "Grupa 9 podział wg nazwisk: Śmid-Z": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 13,
+    "rows": 9,
+    "sha1": "bb6b7a38e55df311075f05fbccb6cab5a503b25f"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne · zjazd 12",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zj_3": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "9d04d2a1d00ccbe6ff049357ae96e01564e032ed"
+   },
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "b7b8b41ba9034b6817fb3b114b8052f9517e61bf"
+   },
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "8c3986a356553493bab98f49d67e37e0006071f1"
+   },
+   "Grupa 4 podział wg nazwisk: Jam-Kow": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "e4c52c44f9f7f87234c345cfdef0dcb00875c7c8"
+   },
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 15,
+    "sha1": "c934726e7996a43aa32a06ab9aa9f4b1cfb1273c"
+   },
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "919474dd9fcfd447cb277033eeb5b9d11fd58630"
+   },
+   "Grupa 7 podział wg nazwisk: N-Saw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "29effd5a4d435903d1e162b94dff9f89d651c4ee"
+   },
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "210ebe9459e58873f0d48087134c187bc0737c96"
+   },
+   "Grupa 9 podział wg nazwisk: Śmid-Z": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "d2ac1e5c66f8232d0f2e762ada6548e658882b74"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne · zjazd 3",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zj_5": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "02e22c2312a8f75479b76c9df137448cdf314165"
+   },
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "9c91998f92289c6b145f67ecb2d6e1199a0c7253"
+   },
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "75c9bc5be2f14d2b5c922f94b429679912100c0d"
+   },
+   "Grupa 4 podział wg nazwisk: Jam-Kow": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "f4350c56c089b5e2e4a383d68e68541e41ed3215"
+   },
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "d68929be4630efdf7efde12339752679a013fa2e"
+   },
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "217b0c06a3d438f91955e2dd84ea233482348c07"
+   },
+   "Grupa 7 podział wg nazwisk: N-Saw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "250080e31b4df8910f96092a703b43aa405910b6"
+   },
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "d07435e337bcea279e0417a06d17c48fc3128e6e"
+   },
+   "Grupa 9 podział wg nazwisk: Śmid-Z": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 15,
+    "sha1": "4372e435d0864fad595517f6dc6e8d436283138d"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne · zjazd 5",
+  "validation": "ok"
+ },
+ "pielęgniarstwo_zj_6": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk: A-Cie": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "fcdccd90d28d2a4d3d0214e56e5b4123ec04fb04"
+   },
+   "Grupa 2 podział wg nazwisk: Cię-Dzid": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "add0c648d592b0aec8fc6f2f0e87f7f8620cec05"
+   },
+   "Grupa 3 podział wg nazwisk: Dzie-Jan": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "9ea02afd4cd221b9f71042ae4e2bff0727bf37fb"
+   },
+   "Grupa 4 podział wg nazwisk: Jam-Kow": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "247f687cc1ddc091375f35db78594bd03c9dedf7"
+   },
+   "Grupa 5 podział wg nazwisk: Kox-Martyn": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "0468dd46e123dd2f162681e67efbdd954efade47"
+   },
+   "Grupa 6 podział wg nazwisk: Martyo-Mz": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "20d3fd26e4981ba01024ceb244379ec35f3cdb63"
+   },
+   "Grupa 7 podział wg nazwisk: N-Saw": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "1612e926bcef2e9177697775d1797995d4f4c151"
+   },
+   "Grupa 8 podział wg nazwisk: Sax-Śmic": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "e904ad1139f2de4c01e57468d445738ce7824270"
+   },
+   "Grupa 9 podział wg nazwisk: Śmid-Z": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 26,
+    "rows": 15,
+    "sha1": "595fb3a3a23aa5c2260af1ed19cef8fe06258721"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne · zjazd 6",
+  "validation": "ok"
+ },
+ "praca_socjalna_ps_ii_rok_puw_z_online": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Organizowanie społeczności lokalnej oraz zasady funkcjonowania samorządu terytorialnego",
+     "Prawo rodzinne i opiekuńcze w Polsce, system świadczeń rodzinnych i postępowanie wobec dłużników alimentacyjnych",
+     "Metodyka pracy socjalnej"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp. Organizator społeczności lokalnej": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 36,
+    "rows": 15,
+    "sha1": "3e074607ee4508eee6bb8f4cdb2bc79b4871a7ea"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "praca_socjalna_ps_ii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp. Organizator społeczności lokalnej": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 27,
+    "rows": 13,
+    "sha1": "43ee90ca5ef3212e98d7625bf1b1085c5eb96eda"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "praca_socjalna_ps_iii_rok_puw_z_online": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Projektowanie uniwersalne"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 13,
+    "rows": 8,
+    "sha1": "0484de54b432a53c6b898926581f502cfc929755"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "praca_socjalna_ps_iii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 28,
+    "rows": 15,
+    "sha1": "73d8f2e0b771f8ffeccfd6f3c7f299c2cabd13d8"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_nst_i": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Historia sztuki",
+     "Podstawy budownictwa ogólnego cz. 1"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 33,
+    "rows": 15,
+    "sha1": "d5a7744622aea50153e018154d52b37d39b3efac"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · I stopnia · niestacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_nst_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Historia sztuki użytkowej i wzornictwa przemysłowego"
+    ]
+   }
+  ],
+  "groups": {
+   "M.: Visual merchandising": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 31,
+    "rows": 14,
+    "sha1": "13d24f05a13039d3b2593c9ebe3c6a30cf9d6ccf"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · niestacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_nst_iii": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "M: Moduł A": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 25,
+    "rows": 15,
+    "sha1": "717e47ef5e9ca272e61740e74458f0fb5ae843eb"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · niestacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_nst_iv": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "M: Moduł B": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 13,
+    "rows": 7,
+    "sha1": "95c2a2c635fe8f58f75b09db2512dd923a7062b4"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 4, semestr 7 · I stopnia · niestacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_st_i": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Historia sztuki",
+     "Podstawy budownictwa ogólnego cz. 1"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 36,
+    "rows": 15,
+    "sha1": "fc6213cbf12d52e7570deba842485052e29bac74"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_st_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Historia sztuki użytkowej i wzornictwa przemysłowego"
+    ]
+   }
+  ],
+  "groups": {
+   "M.: Visual merchandising": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 39,
+    "rows": 15,
+    "sha1": "711bf65f18c9022069bb9dcfc7f39cfa8b74bbb0"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_st_iii": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "M: Moduł B": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 42,
+    "rows": 13,
+    "sha1": "6fc4dc91d33db60b1db52c5394807f3b8d2d7be3"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "projektowanie_wnętrz_pw_st_iv": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "M: Moduł B": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 13,
+    "rows": 5,
+    "sha1": "2b6ae26f254902d1cef58e05652f48ffc86619a8"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 4, semestr 7 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "socjologia_soc_iii_puw_-_z._on-line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Rynek pracy"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 10,
+    "rows": 8,
+    "sha1": "b4ff9d82b534d71a31c024d44b110c39f14af237"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 6 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "socjologia_soc_iii_puw_-_z._stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 5,
+    "rows": 5,
+    "sha1": "4fe2e9e99e62f2bd18b36bbb9bb94c5531b88f52"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 6 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "stosunki_międzynarodowe_stm_st_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Prawo międzynarodowe publiczne",
+     "Współpraca transgraniczna i handel zagraniczny"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Biznes międzynarodowy i współpraca transgraniczna": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 44,
+    "rows": 13,
+    "sha1": "97bb706da52209adfc16dfa5305b6c230753effc"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "stosunki_międzynarodowe_stm_st_iii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Polityka zagraniczna RP",
+     "Procesy globalizacyjne we współczesnym świecie"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 40,
+    "rows": 12,
+    "sha1": "769ea90abe5bd417a5859ae18e7988d6b245c884"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "transport_trt_st_iii_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Automatyka",
+     "Spedycja"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 28,
+    "rows": 14,
+    "sha1": "381af12524d6c20b23d57cd8caaac1d7fd7b071f"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne · zjazdy on-line",
+  "validation": "ok"
+ },
+ "transport_trt_st_iii_z_on_line_1": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Automatyka",
+     "Spedycja"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 28,
+    "rows": 14,
+    "sha1": "381af12524d6c20b23d57cd8caaac1d7fd7b071f"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · niestacjonarne · zjazdy on-line",
+  "validation": "ok"
+ },
+ "transport_trt_st_iii_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Rachunek prawdopodobieństwa i statystyka",
+     "Badania operacyjne",
+     "Podstawy logistyki",
+     "Normy techniczne i techniczne aspekty działalności"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 36,
+    "rows": 16,
+    "sha1": "73f36f397249edc276ea5a7989263e8ec946822d"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "transport_trt_st_iii_z_stacjonarne_1": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Rachunek prawdopodobieństwa i statystyka",
+     "Badania operacyjne",
+     "Podstawy logistyki",
+     "Normy techniczne i techniczne aspekty działalności"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Transport, spedycja i logistyka": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 36,
+    "rows": 16,
+    "sha1": "73f36f397249edc276ea5a7989263e8ec946822d"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 3, semestr 5 · I stopnia · niestacjonarne · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "transport_trt_st_iv": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Alternatywne układy napędowe pojazdów"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 16,
+    "rows": 10,
+    "sha1": "0d7cec5ea164bf369b85cf5313ffa09c0ad4ed4c"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 4, semestr 7 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_i_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Psychologia w biznesie",
+     "Zarządzanie strategiczne",
+     "Statystyka matematyczna"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 34,
+    "rows": 15,
+    "sha1": "492482afd9152622196125ff8feb46dcd06a3f68"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 1, semestr 1 · II stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_i_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "gr.1": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 37,
+    "rows": 15,
+    "sha1": "b5acafb845eeea240b140aa52233782a731fde55"
+   },
+   "gr.2": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 42,
+    "rows": 15,
+    "sha1": "c386c6844ca1fc96b2b58c325b60cf56a833e84e"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 1, semestr 1 · II stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_ii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Zarządzanie procesami"
+    ]
+   },
+   {
+    "scope": "Sp.: E-biznes i nowoczesne formy marketingu",
+    "subjects": [
+     "Logistyka w e-biznesie"
+    ]
+   },
+   {
+    "scope": "Sp.: Menadżer HR i coaching biznesowy",
+    "subjects": [
+     "Modele i narzędzia coachingu biznesowego"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: E-biznes i nowoczesne formy marketingu": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 31,
+    "rows": 13,
+    "sha1": "6629a7e485be6c31294e277ac6551600d44647ed"
+   },
+   "Sp.: Menadżer HR i coaching biznesowy": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 27,
+    "rows": 13,
+    "sha1": "c3f8cbff3bc68289364bd325d1841699d8d960c1"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · II stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "zarządzanie_studia_magisterskie_zaz_muz_ii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: E-biznes i nowoczesne formy marketingu": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 28,
+    "rows": 14,
+    "sha1": "310435abe38abd4043453637b6c3a0be2eb44e75"
+   },
+   "Sp.: Menadżer HR i coaching biznesowy": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 32,
+    "rows": 15,
+    "sha1": "47d68619cdf19bc5f089fa582594b851eeda5e5a"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · II stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "zarządzanie_zaz_ii_rok_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Metody ilościowe w zarządzaniu",
+     "Nowoczesne metody i techniki zarządzania",
+     "Badania marketingowe"
+    ]
+   },
+   {
+    "scope": "Sp.: Zarządzanie firmą",
+    "subjects": [
+     "Finanse przedsiebiorstw",
+     "Zarządzanie produkcją"
+    ]
+   }
+  ],
+  "groups": {
+   "Sp.: Zarządzanie firmą": {
+    "days": [
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 11,
+    "rows": 6,
+    "sha1": "b189cc69502bd4b68ffea5054048b57c07167d59"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "zarządzanie_zaz_ii_rok_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Sp.: Zarządzanie firmą": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 40,
+    "rows": 15,
+    "sha1": "5224e84c4429d409243e5cb38d8908cec97af8c4"
+   }
+  },
+  "info_blocks": 0,
+  "short_name": "rok 2, semestr 3 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "zarządzanie_zaz_iii_puw_z_on_line": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Diagnozowanie przedsiębiorstw"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 10,
+    "rows": 6,
+    "sha1": "252aaf855131412e3f809a96e89c2c8891264f6f"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy on-line",
+  "validation": "ok"
+ },
+ "zarządzanie_zaz_iii_puw_z_stacjonarne": {
+  "coverage": 100.0,
+  "exams": [],
+  "groups": {
+   "Grupa 1 podział wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 30,
+    "rows": 14,
+    "sha1": "84cc0b9c4731c9808a864ec8f88c4e58e16244ca"
+   },
+   "Grupa 2 podział wg nazwisk": {
+    "days": [
+     "Piątek",
+     "Sobota",
+     "Niedziela"
+    ],
+    "lessons": 35,
+    "rows": 14,
+    "sha1": "4330e2d05d4faffe54ba6e9a4a81600874b40a77"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · PUW · zjazdy w siedzibie",
+  "validation": "ok"
+ },
+ "zarządzanie_zaz_st_ii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Metody ilościowe w zarządzaniu",
+     "Nowoczesne metody i techniki zarządzania",
+     "Badania marketingowe"
+    ]
+   },
+   {
+    "scope": "Sp.: Zarządzanie firmą",
+    "subjects": [
+     "Finanse przedsiebiorstw",
+     "Zarządzanie produkcją"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 47,
+    "rows": 15,
+    "sha1": "5363abb937ce1d644302655989d05d5ce40edd32"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 2, semestr 3 · I stopnia · stacjonarne",
+  "validation": "ok"
+ },
+ "zarządzanie_zaz_st_iii": {
+  "coverage": 100.0,
+  "exams": [
+   {
+    "scope": null,
+    "subjects": [
+     "Diagnozowanie przedsiębiorstw"
+    ]
+   }
+  ],
+  "groups": {
+   "cały kierunek": {
+    "days": [
+     "Poniedziałek",
+     "Wtorek",
+     "Środa",
+     "Czwartek",
+     "Piątek"
+    ],
+    "lessons": 34,
+    "rows": 15,
+    "sha1": "da5831609bd2545770742448af1cb7507c04bb8a"
+   }
+  },
+  "info_blocks": 1,
+  "short_name": "rok 3, semestr 5 · I stopnia · stacjonarne",
+  "validation": "ok"
+ }
+}

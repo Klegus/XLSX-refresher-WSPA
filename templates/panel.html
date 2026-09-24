@@ -15,6 +15,26 @@
         .status-dot.inactive { background: #dc3545; }
         .card { border: none; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-radius: 0.75rem; }
         .card-header { background: transparent; border-bottom: 1px solid #f0f0f0; font-weight: 600; }
+        .now-card .state-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+        .now-card .state-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .state-idle { background: #e7f1ff; color: #0d6efd; }
+        .state-running { background: #fff3cd; color: #997404; }
+        .state-maint { background: #f8d7da; color: #b02a37; }
+        .state-empty { background: #e9ecef; color: #6c757d; }
+        .pulse { animation: pulse 1.4s ease-in-out infinite; }
+        @keyframes pulse { 50% { opacity: .45; } }
+        .step { position: relative; padding-left: 2.5rem; padding-bottom: 1.25rem; }
+        .step:last-child { padding-bottom: 0; }
+        .step::before { content: ''; position: absolute; left: .85rem; top: 1.9rem; bottom: .2rem; width: 2px; background: #e9ecef; }
+        .step:last-child::before { display: none; }
+        .step-num { position: absolute; left: 0; top: 0; width: 1.75rem; height: 1.75rem; border-radius: 50%; background: #e9ecef; color: #6c757d; font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center; }
+        .step.done .step-num { background: #d1e7dd; color: #146c43; }
+        .step.active .step-num { background: #fff3cd; color: #997404; }
+        .step.todo .step-num { background: #cfe2ff; color: #0a58ca; }
+        .stat { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+        .stat-label { font-size: .75rem; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; }
+        .plan-row-name { max-width: min(520px, 45vw); }
+        #plansStatusTable td { vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -51,8 +71,9 @@
 
         <!-- Tab navigation -->
         <ul class="nav nav-pills mb-4" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tab-scanner">Skaner Moodle</a></li>
-            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-validation">Walidacja</a></li>
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tab-dashboard" id="dashboardTabLink">Pulpit</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-scanner" id="scannerTabLink">Skaner Moodle <span class="badge bg-warning text-dark" id="scanPendingBadge" style="display:none"></span></a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-validation">Walidacja <span class="badge bg-danger" id="blockedBadge" style="display:none"></span></a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-plans">Plany <span class="badge bg-secondary" id="plansCount"></span></a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-logs">Logi</a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-suggestions">Sugestie</a></li>
@@ -61,8 +82,125 @@
 
         <!-- Tab content -->
         <div class="tab-content">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="tab-dashboard">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <!-- Co się dzieje teraz -->
+                        <div class="card now-card mb-4">
+                            <div class="card-body d-flex gap-3 align-items-center flex-wrap">
+                                <div class="state-icon state-empty" id="nowIcon">•</div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="state-title" id="nowTitle">Ładowanie...</div>
+                                    <div class="text-muted small" id="nowSubtitle"></div>
+                                    <div class="progress mt-2" id="nowProgressWrap" style="height:6px; display:none">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="nowProgress" style="width:0%"></div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="checkNowBtn" onclick="forceCheck()">Sprawdź plany teraz</button>
+                            </div>
+                        </div>
+
+                        <!-- Liczby -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3"><div class="card"><div class="card-body py-3"><div class="stat" id="statPlans">–</div><div class="stat-label">Planów w konfiguracji</div></div></div></div>
+                            <div class="col-6 col-md-3"><div class="card"><div class="card-body py-3"><div class="stat text-success" id="statDownloaded">–</div><div class="stat-label">Pobranych</div></div></div></div>
+                            <div class="col-6 col-md-3"><div class="card"><div class="card-body py-3"><div class="stat text-secondary" id="statMissing">–</div><div class="stat-label">Czeka na pobranie</div></div></div></div>
+                            <div class="col-6 col-md-3"><div class="card"><div class="card-body py-3"><div class="stat" id="statLastCycle">–</div><div class="stat-label">Ostatni cykl</div></div></div></div>
+                        </div>
+
+                        <!-- Status planów -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                Status planów
+                                <div class="d-flex gap-2 align-items-center">
+                                    <div class="btn-group btn-group-sm" id="planFilter">
+                                        <button class="btn btn-outline-secondary active" data-filter="all">Wszystkie</button>
+                                        <button class="btn btn-outline-secondary" data-filter="missing">Niepobrane</button>
+                                        <button class="btn btn-outline-secondary" data-filter="ok">Pobrane</button>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" id="planStatusSearch" placeholder="Szukaj..." style="width:180px">
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height:520px; overflow:auto">
+                                    <table class="table table-sm table-hover mb-0" id="plansStatusTable">
+                                        <thead class="table-light sticky-top"><tr><th class="ps-3">Plan</th><th>Tryb</th><th>Grupy</th><th>Ostatnio pobrany</th></tr></thead>
+                                        <tbody id="plansStatusBody"><tr><td colspan="4" class="text-center text-muted py-4">Ładowanie...</td></tr></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 order-lg-last">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                Pokrycie planów
+                                <span class="small fw-normal text-muted">✓ = plan jest · – = brak na PUW (np. rocznik jeszcze nie opublikowany albo nie istnieje)</span>
+                            </div>
+                            <div class="card-body p-0"><div class="table-responsive">
+                                <table class="table table-sm mb-0 small" id="coverageTable"></table>
+                            </div></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <!-- Kolejność kroków -->
+                        <div class="card mb-4">
+                            <div class="card-header">Co i kiedy</div>
+                            <div class="card-body">
+                                <div class="step" id="step1">
+                                    <div class="step-num">1</div>
+                                    <div class="fw-semibold small">Skan Moodle</div>
+                                    <div class="text-muted small" id="step1Text">Szuka plików .xlsx w „Strefa studenta”. Uruchamiasz ręcznie, np. na początku semestru.</div>
+                                    <div class="small mt-1" id="autoScanText"></div>
+                                    <button class="btn btn-outline-warning btn-sm mt-2" onclick="goToScanner(true)">Skanuj Moodle</button>
+                                </div>
+                                <div class="step" id="step2">
+                                    <div class="step-num">2</div>
+                                    <div class="fw-semibold small">Zastosuj wyniki</div>
+                                    <div class="text-muted small" id="step2Text">Wybrane plany trafiają do konfiguracji.</div>
+                                    <button class="btn btn-outline-primary btn-sm mt-2" id="step2Btn" onclick="goToScanner(false)" style="display:none">Przejrzyj wyniki</button>
+                                </div>
+                                <div class="step" id="step3">
+                                    <div class="step-num">3</div>
+                                    <div class="fw-semibold small">Pobieranie planów</div>
+                                    <div class="text-muted small" id="step3Text">Backend pobiera i przetwarza każdy plan automatycznie.</div>
+                                </div>
+                                <div class="step" id="step4">
+                                    <div class="step-num">4</div>
+                                    <div class="fw-semibold small">Terminarz egzaminów</div>
+                                    <div class="text-muted small" id="step4Text">Ostatni krok każdego cyklu.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terminarz egzaminów -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                Terminarz egzaminów
+                                <button class="btn btn-outline-secondary btn-sm" id="examsRefreshBtn" onclick="refreshExams()">Odśwież</button>
+                            </div>
+                            <div class="card-body small" id="examsCard">Ładowanie...</div>
+                        </div>
+
+                        <!-- Ostatnie cykle -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                Ostatnie cykle
+                                <a href="#" class="small fw-normal" onclick="document.querySelector('[href=\'#tab-logs\']').click(); return false;">Wszystkie logi →</a>
+                            </div>
+                            <ul class="list-group list-group-flush" id="lastCyclesList">
+                                <li class="list-group-item text-muted small">Brak cykli</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Scanner Tab -->
-            <div class="tab-pane fade show active" id="tab-scanner">
+            <div class="tab-pane fade" id="tab-scanner">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         Moodle Plan Scanner
@@ -83,17 +221,45 @@
 
             <!-- Validation Tab -->
             <div class="tab-pane fade" id="tab-validation">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        Walidacja planów
-                        <button class="btn btn-outline-primary btn-sm" onclick="runValidation()">Sprawdź</button>
-                    </div>
-                    <div class="card-body">
-                        <div id="validationResults">
-                            <p class="text-muted small">Kliknij "Sprawdź" aby zwalidować wszystkie plany w bazie.</p>
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        Walidacja ze źródłem (Excel)
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="blockingSwitch">
+                                <label class="form-check-label small fw-normal" for="blockingSwitch">Ukrywaj plany z błędami przed studentami</label>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="deepValidateBtn" onclick="startDeepValidation()">Waliduj wszystkie</button>
                         </div>
                     </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-3">Walidator czyta oryginalny Excel niezależnie od parsera i sprawdza, czy każde zajęcia trafiły do właściwej grupy, dnia i godziny.
+                            Plan lub grupa z <strong>błędem krytycznym</strong> jest ukrywana przed studentami, dopóki problem nie zniknie (poprawka w kodzie) albo nie zatwierdzisz jej ręcznie.
+                            Uruchamia się automatycznie po każdej zmianie planu.</p>
+                        <div id="deepProgress" class="mb-3" style="display:none">
+                            <div class="d-flex justify-content-between small mb-1"><span id="deepProgressText">...</span><span id="deepProgressCount"></span></div>
+                            <div class="progress" style="height:6px"><div class="progress-bar progress-bar-striped progress-bar-animated" id="deepProgressBar" style="width:0%"></div></div>
+                        </div>
+                        <div class="row g-3 mb-3" id="validationStats"></div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                            <div class="btn-group btn-group-sm" id="validationFilter">
+                                <button class="btn btn-outline-secondary active" data-filter="problems">Z problemami</button>
+                                <button class="btn btn-outline-secondary" data-filter="blocked">Zablokowane</button>
+                                <button class="btn btn-outline-secondary" data-filter="all">Wszystkie</button>
+                            </div>
+                            <input type="text" class="form-control form-control-sm" id="validationSearch" placeholder="Szukaj planu..." style="max-width:240px">
+                            <span class="text-muted small ms-auto" id="validationLastRun"></span>
+                        </div>
+                        <div class="accordion" id="validationList"><p class="text-muted small">Ładowanie...</p></div>
+                    </div>
                 </div>
+                <details class="small text-muted">
+                    <summary>Szybka walidacja struktury HTML (stara)</summary>
+                    <div class="card mt-2"><div class="card-body">
+                        <button class="btn btn-outline-secondary btn-sm mb-2" onclick="runValidation()">Sprawdź HTML</button>
+                        <div id="validationResults"></div>
+                    </div></div>
+                </details>
             </div>
 
             <!-- Plans Tab -->
@@ -200,8 +366,8 @@
                     <div class="col-md-4">
                         <div class="card border-primary">
                             <div class="card-body">
-                                <h6 class="card-title">Force check</h6>
-                                <p class="card-text small text-muted">Wyłącz maintenance i wymuś sprawdzenie planów.</p>
+                                <h6 class="card-title">Sprawdź plany teraz</h6>
+                                <p class="card-text small text-muted">Wyłącza maintenance i od razu startuje cykl pobierania, bez czekania na interwał.</p>
                                 <button class="btn btn-primary btn-sm" onclick="forceCheck()">Uruchom sprawdzanie</button>
                             </div>
                         </div>
@@ -287,7 +453,7 @@
                             details = `<button class="btn btn-sm btn-outline-success py-0" onclick="this.nextElementSibling.classList.toggle('d-none')">${plans.length} planów</button><ul class="d-none mt-1 mb-0 ps-3 small" style="list-style:disc">${list}</ul>`;
                         }
                         table.innerHTML += `<tr>
-                            <td class="small text-nowrap">${new Date(log.timestamp).toLocaleString('pl-PL')}</td>
+                            <td class="small text-nowrap">${new Date(log.timestamp).toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' })}</td>
                             <td>${log.successful_checks}</td>
                             <td>${hasUpdates ? `<span class="badge bg-success">${log.new_plans}</span>` : '0'}</td>
                             <td>${hasErrors ? '<span class="badge bg-danger">!</span>' : '-'}</td>
@@ -338,6 +504,10 @@
             loadPlans();
             loadLogs();
             loadSuggestions('pending');
+            loadOverview();
+            restoreScanResults();
+            loadDeepValidation();
+            loadExamsStatus();
         });
 
         setInterval(loadStatus, 30000);
@@ -449,7 +619,7 @@
         }
 
         function createSuggestionElement(s) {
-            const dt = new Date(s.created_at).toLocaleString('pl-PL');
+            const dt = new Date(s.created_at).toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' });
             const colors = { approved: 'success', rejected: 'danger', pending: 'warning' };
             const card = document.createElement('div');
             card.className = `card mb-2 border-${colors[s.status] || 'secondary'}`;
@@ -498,6 +668,127 @@
             }).catch(e => alert('Błąd: ' + e));
         }
 
+        // ─── Source validation ─────────────────────────
+        let deepData = null, validationFilter = 'problems', deepTimer = null;
+        const openValidation = new Set();
+
+        function loadDeepValidation() {
+            fetch('/api/validate/deep').then(r => r.json()).then(d => {
+                deepData = d;
+                const st = d.state, running = st.status === 'running';
+                document.getElementById('deepValidateBtn').disabled = running;
+                document.getElementById('blockingSwitch').checked = d.blocking_enabled;
+                const prog = document.getElementById('deepProgress');
+                prog.style.display = running ? '' : 'none';
+                if (running) {
+                    document.getElementById('deepProgressText').textContent = st.progress || '...';
+                    document.getElementById('deepProgressCount').textContent = st.total ? `${st.done} / ${st.total}` : '';
+                    document.getElementById('deepProgressBar').style.width = (st.total ? Math.round(st.done / st.total * 100) : 0) + '%';
+                }
+                if (st.status === 'error') document.getElementById('validationLastRun').innerHTML = `<span class="text-danger">Błąd: ${esc(st.error)}</span>`;
+                renderValidationStats(); renderValidationList();
+                clearTimeout(deepTimer);
+                if (running) deepTimer = setTimeout(loadDeepValidation, 2000);
+            }).catch(e => console.error('Deep validation error:', e));
+        }
+
+        function startDeepValidation(planIds) {
+            fetch('/api/validate/deep', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(planIds ? { plan_ids: planIds } : {}) })
+                .then(r => r.json()).then(d => { if (!d.success) alert(d.error); setTimeout(loadDeepValidation, 500); });
+        }
+
+        function ackPlan(planId, revoke) {
+            if (!revoke && !confirm('Zatwierdzić plan mimo problemów? Studenci zobaczą go w obecnej postaci – do czasu zmiany pliku na PUW.')) return;
+            fetch('/api/validate/ack', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plan_id: planId, revoke: !!revoke }) })
+                .then(r => r.json()).then(d => { if (!d.success) alert(d.error); loadDeepValidation(); loadOverview(); });
+        }
+
+        document.getElementById('blockingSwitch').addEventListener('change', e => {
+            if (!e.target.checked && !confirm('Wyłączyć ukrywanie? Plany z wykrytymi błędami będą widoczne dla studentów.')) { e.target.checked = true; return; }
+            fetch('/api/validate/blocking', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ enabled: e.target.checked }) })
+                .then(() => { loadDeepValidation(); loadOverview(); });
+        });
+
+        function reportState(r) {
+            if (!r.has_blocking) return r.status === 'ok' ? 'ok' : 'warn';
+            if (r.acked) return 'acked';
+            return 'blocked';
+        }
+
+        function renderValidationStats() {
+            const reps = deepData.reports, c = { ok: 0, warn: 0, blocked: 0, acked: 0 };
+            reps.forEach(r => c[reportState(r)]++);
+            const tile = (n, label, cls) => `<div class="col-6 col-md-3"><div class="card"><div class="card-body py-2"><div class="stat ${cls}">${n}</div><div class="stat-label">${label}</div></div></div></div>`;
+            document.getElementById('validationStats').innerHTML = reps.length ? [
+                tile(c.ok, 'Zgodne ze źródłem', 'text-success'),
+                tile(c.blocked, deepData.blocking_enabled ? 'Zablokowane' : 'Z błędami (widoczne!)', 'text-danger'),
+                tile(c.acked, 'Zatwierdzone ręcznie', 'text-primary'),
+                tile(c.warn, 'Tylko uwagi', 'text-secondary'),
+            ].join('') : '<div class="col"><div class="alert alert-light border mb-0 small">Jeszcze nie było walidacji. Kliknij „Waliduj wszystkie”.</div></div>';
+            const last = reps.map(r => r.validated_at).filter(Boolean).sort().pop();
+            if (last && deepData.state.status !== 'error') document.getElementById('validationLastRun').textContent = `Ostatnia walidacja: ${fmtAgo(last)}`;
+        }
+
+        function renderValidationList() {
+            const list = document.getElementById('validationList');
+            const term = (document.getElementById('validationSearch').value || '').toLowerCase();
+            const order = { blocked: 0, acked: 1, warn: 2, ok: 3 };
+            let reps = deepData.reports.filter(r => {
+                const s = reportState(r);
+                if (validationFilter === 'problems' && s === 'ok') return false;
+                if (validationFilter === 'blocked' && s !== 'blocked') return false;
+                return !term || (r.plan || '').toLowerCase().includes(term);
+            }).sort((a, b) => order[reportState(a)] - order[reportState(b)] || (a.plan || '').localeCompare(b.plan || '', 'pl'));
+            if (!reps.length) { list.innerHTML = `<p class="text-muted small mb-0">${deepData.reports.length ? 'Brak planów dla tego filtra 🎉' : ''}</p>`; return; }
+            const kinds = deepData.kinds;
+            list.innerHTML = reps.map((r, idx) => {
+                const s = reportState(r), id = 'val-' + idx;
+                const badge = s === 'blocked' ? (r.blocked_plan ? '<span class="badge bg-danger">Zablokowany cały plan</span>' : `<span class="badge bg-danger">Zablokowane grupy: ${r.blocked_groups.length}</span>`)
+                    : s === 'acked' ? '<span class="badge bg-primary">Zatwierdzony ręcznie</span>'
+                    : s === 'warn' ? '<span class="badge bg-secondary">Uwagi</span>' : '<span class="badge bg-success">OK</span>';
+                const chips = Object.entries(r.counts || {}).sort((a, b) => kinds[b[0]].severity - kinds[a[0]].severity)
+                    .map(([k, n]) => `<span class="badge ${kinds[k].severity >= 3 ? 'bg-danger-subtle text-danger-emphasis' : 'bg-light text-dark'} border">${esc(kinds[k].label)}: ${n}</span>`).join(' ');
+                const open = openValidation.has(r.plan_id);
+                return `<div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button ${open ? '' : 'collapsed'} py-2" type="button" data-bs-toggle="collapse" data-bs-target="#${id}" onclick="toggleValidationOpen('${esc(r.plan_id)}')">
+                        <div class="d-flex flex-column gap-1 w-100 me-3 min-w-0">
+                            <div class="d-flex gap-2 align-items-center"><span class="small fw-semibold text-truncate">${esc(r.plan)}</span></div>
+                            <div class="d-flex flex-wrap gap-1 align-items-center">${badge} ${r.coverage != null ? `<span class="badge bg-light text-dark border">zgodność ${r.coverage}%</span>` : ''} ${chips}</div>
+                        </div></button></h2>
+                    <div id="${id}" class="accordion-collapse collapse ${open ? 'show' : ''}"><div class="accordion-body pt-2">
+                        ${renderIssues(r)}
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            ${r.has_blocking ? (r.acked ? `<button class="btn btn-outline-danger btn-sm" onclick="ackPlan('${esc(r.plan_id)}', true)">Cofnij zatwierdzenie</button>`
+                                : `<button class="btn btn-outline-primary btn-sm" onclick="ackPlan('${esc(r.plan_id)}')">Zatwierdź mimo to</button>`) : ''}
+                            <button class="btn btn-outline-secondary btn-sm" onclick="startDeepValidation(['${esc(r.plan_id)}'])">Waliduj ponownie</button>
+                            <span class="text-muted small align-self-center">Sprawdzono ${esc(fmtAgo(r.validated_at) || '–')}</span>
+                        </div>
+                    </div></div></div>`;
+            }).join('');
+        }
+
+        function toggleValidationOpen(id) { openValidation.has(id) ? openValidation.delete(id) : openValidation.add(id); }
+
+        function renderIssues(r) {
+            if (!r.issues.length) return '<p class="small text-success mb-0">Wszystkie zajęcia z Excela są na swoim miejscu.</p>';
+            const kinds = deepData.kinds, byKind = {};
+            r.issues.forEach(i => (byKind[i.kind] = byKind[i.kind] || []).push(i));
+            const fmtT = t => t ? `${t.slice(0, -2)}:${t.slice(-2)}` : '';
+            return Object.entries(byKind).sort((a, b) => kinds[b[0]].severity - kinds[a[0]].severity).map(([k, items]) => `
+                <div class="mb-3"><div class="small fw-semibold ${kinds[k].severity >= 3 ? 'text-danger' : 'text-secondary'} mb-1">${esc(kinds[k].label)} (${items.length})${kinds[k].severity >= 3 ? ' – blokuje' : ''}</div>
+                <div class="table-responsive"><table class="table table-sm small mb-0"><thead><tr><th>Grupa</th><th>Dzień</th><th>Godz.</th><th>Zajęcia</th><th>Szczegóły</th></tr></thead><tbody>
+                ${items.slice(0, 40).map(i => `<tr><td>${esc(i.group || '–')}</td><td>${esc(i.day || '')}</td><td>${fmtT(i.time)}</td><td>${esc(i.text || '')}</td><td class="text-muted">${esc(i.detail || '')}</td></tr>`).join('')}
+                ${items.length > 40 ? `<tr><td colspan="5" class="text-muted">… i ${items.length - 40} więcej</td></tr>` : ''}
+                </tbody></table></div></div>`).join('') + (r.issues_total > r.issues.length ? `<p class="small text-muted">Pokazano ${r.issues.length} z ${r.issues_total} problemów.</p>` : '');
+        }
+
+        document.getElementById('validationSearch').addEventListener('input', () => deepData && renderValidationList());
+        document.querySelectorAll('#validationFilter button').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('#validationFilter button').forEach(x => x.classList.remove('active'));
+            b.classList.add('active'); validationFilter = b.dataset.filter; renderValidationList();
+        }));
+        document.querySelector('[href="#tab-validation"]').addEventListener('shown.bs.tab', loadDeepValidation);
+
         // ─── Database ───────────────────────────────────
         function purgeDatabase() {
             if (!confirm('Wyczyścić dane planów i aktywności?')) return;
@@ -513,8 +804,272 @@
         }
 
         function forceCheck() {
-            fetch('/api/force-check', { method: 'POST' }).then(r => r.json()).then(d => { alert(d.success ? d.message : 'Błąd: ' + d.error); loadStatus(); });
+            const btn = document.getElementById('checkNowBtn');
+            if (btn) btn.disabled = true;
+            fetch('/api/force-check', { method: 'POST' }).then(r => r.json()).then(d => {
+                if (!d.success) alert('Błąd: ' + d.error);
+                document.getElementById('dashboardTabLink').click();
+                loadStatus(); loadOverview();
+            }).catch(e => { alert('Błąd: ' + e); if (btn) btn.disabled = false; });
         }
+
+        // ─── Dashboard ──────────────────────────────────
+        const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const CATEGORY_LABELS = { st: 'Stacjonarne', nst: 'Niestacjonarne', 'nst-online': 'NST online', 'nst-puw': 'NST PUW' };
+        let overviewTimer = null, lastOverview = null, planFilter = 'all', serverOffsetMs = 0;
+
+        function fmtDate(iso) { return iso ? new Date(iso).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }) : '–'; }
+        function fmtAgo(iso) {
+            if (!iso) return null;
+            const sec = Math.round((Date.now() + serverOffsetMs - new Date(iso)) / 1000);
+            if (sec < 60) return 'przed chwilą';
+            if (sec < 3600) return `${Math.floor(sec / 60)} min temu`;
+            if (sec < 86400) return `${Math.floor(sec / 3600)} godz. temu`;
+            return `${Math.floor(sec / 86400)} dni temu`;
+        }
+        function fmtIn(iso) {
+            const sec = Math.round((new Date(iso) - (Date.now() + serverOffsetMs)) / 1000);
+            if (sec <= 0) return 'za chwilę';
+            if (sec < 60) return `za ${sec} s`;
+            const m = Math.floor(sec / 60), s = sec % 60;
+            return m < 60 ? `za ${m} min ${String(s).padStart(2, '0')} s` : `za ${Math.floor(m / 60)} godz. ${m % 60} min`;
+        }
+
+        function loadOverview() {
+            fetch('/api/overview').then(r => r.json()).then(d => {
+                lastOverview = d;
+                if (d.now) serverOffsetMs = new Date(d.now) - Date.now();
+                renderNow(d); renderStats(d); renderSteps(d); renderPlanStatus(); renderLastCycles(d); renderCoverage(d); renderAutoScan(d); renderExamStep(d);
+                const running = d.cycle.running || d.force_check_pending || d.scan.status === 'running';
+                clearTimeout(overviewTimer);
+                overviewTimer = setTimeout(loadOverview, running ? 3000 : 10000);
+            }).catch(e => { console.error('Overview error:', e); clearTimeout(overviewTimer); overviewTimer = setTimeout(loadOverview, 10000); });
+        }
+
+        function renderNow(d) {
+            const icon = document.getElementById('nowIcon'), title = document.getElementById('nowTitle'), sub = document.getElementById('nowSubtitle');
+            const wrap = document.getElementById('nowProgressWrap'), bar = document.getElementById('nowProgress'), btn = document.getElementById('checkNowBtn');
+            const c = d.cycle || {};
+            wrap.style.display = 'none';
+            btn.disabled = false; btn.textContent = 'Sprawdź plany teraz';
+            if (d.maintenance_mode) {
+                icon.className = 'state-icon state-maint'; icon.textContent = '⏸';
+                title.textContent = 'Wstrzymane (maintenance)';
+                sub.textContent = (d.maintenance_reason ? d.maintenance_reason + ' · ' : '') + '„Sprawdź plany teraz” wyłączy maintenance i ruszy z cyklem.';
+            } else if (c.running) {
+                const pct = c.total ? Math.round((c.done / c.total) * 100) : 0;
+                icon.className = 'state-icon state-running pulse'; icon.textContent = '⟳';
+                title.textContent = `Sprawdzanie planów: ${c.done} / ${c.total}`;
+                sub.innerHTML = `${c.current_plan ? 'Teraz: <strong>' + esc(c.current_plan) + '</strong> · ' : ''}start ${fmtAgo(c.started_at)}${c.trigger === 'manual' ? ' (ręcznie)' : ''}${c.changes ? ' · zmiany: ' + c.changes : ''}${c.errors ? ' · błędy: ' + c.errors : ''}`;
+                wrap.style.display = ''; bar.style.width = pct + '%';
+                btn.disabled = true; btn.textContent = 'Cykl trwa...';
+            } else if (d.force_check_pending) {
+                icon.className = 'state-icon state-running pulse'; icon.textContent = '⟳';
+                title.textContent = 'Startuje sprawdzanie...';
+                sub.textContent = 'Backend podejmie zlecenie w ciągu kilku sekund.';
+                btn.disabled = true; btn.textContent = 'Zlecono';
+            } else if (c.paused === 'night') {
+                icon.className = 'state-icon state-empty'; icon.textContent = '☾';
+                title.textContent = `Przerwa nocna – wznowienie ${c.next_check_at ? fmtIn(c.next_check_at) : 'o 06:00'}`;
+                sub.textContent = 'Plany nie są sprawdzane w godz. 21:00–06:00 (czas warszawski). „Sprawdź plany teraz” uruchomi cykl mimo to.';
+            } else if (!d.plans.length) {
+                icon.className = 'state-icon state-empty'; icon.textContent = '∅';
+                title.textContent = 'Brak planów w konfiguracji';
+                sub.textContent = 'Zacznij od skanu Moodle (krok 1 po prawej).';
+            } else {
+                icon.className = 'state-icon state-idle'; icon.textContent = '✓';
+                title.textContent = c.next_check_at ? `Następne sprawdzenie ${fmtIn(c.next_check_at)}` : 'Czeka na pierwszy cykl';
+                const parts = [];
+                if (c.next_check_at) parts.push(`o ${new Date(c.next_check_at).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' })}`);
+                parts.push(`co ${Math.round(d.check_interval / 60)} min`);
+                if (c.finished_at) parts.push(`ostatni cykl ${fmtAgo(c.finished_at)}${c.duration ? ' (' + Math.round(c.duration) + ' s)' : ''}`);
+                sub.textContent = parts.join(' · ');
+            }
+        }
+
+        function renderStats(d) {
+            const total = d.plans.length, ok = d.plans.filter(p => p.downloaded_at).length;
+            document.getElementById('statPlans').textContent = total;
+            document.getElementById('statDownloaded').textContent = ok;
+            document.getElementById('statMissing').textContent = total - ok;
+            const blocked = d.plans.filter(p => p.blocked).length, bb = document.getElementById('blockedBadge');
+            bb.style.display = blocked ? '' : 'none'; bb.textContent = blocked;
+            const last = d.last_cycles[0], el = document.getElementById('statLastCycle');
+            if (!last) { el.textContent = '–'; el.className = 'stat'; return; }
+            el.textContent = last.has_errors ? 'Błędy' : (last.new_plans ? `+${last.new_plans}` : 'OK');
+            el.className = 'stat ' + (last.has_errors ? 'text-danger' : last.new_plans ? 'text-success' : 'text-body');
+            el.title = fmtDate(last.timestamp);
+        }
+
+        function setStep(id, state) { document.getElementById(id).className = 'step ' + state; }
+
+        function renderSteps(d) {
+            const s = d.scan, total = d.plans.length, ok = d.plans.filter(p => p.downloaded_at).length;
+            const pending = s.status === 'done' ? s.new_count + s.changed_count + s.removed_count : 0;
+            const badge = document.getElementById('scanPendingBadge');
+            badge.style.display = pending ? '' : 'none'; badge.textContent = pending;
+
+            // 1. Skan
+            const t1 = document.getElementById('step1Text');
+            if (s.status === 'running') { setStep('step1', 'active'); t1.textContent = s.progress || 'Skan trwa...'; }
+            else if (s.status === 'error') { setStep('step1', 'todo'); t1.innerHTML = `<span class="text-danger">Błąd: ${esc(s.error)}</span>`; }
+            else if (s.status === 'done' || s.status === 'applied') { setStep('step1', 'done'); t1.textContent = `Ostatni skan ${fmtAgo(s.finished_at)} · ${s.year}, sem. ${s.semester}`; }
+            else { setStep('step1', total ? 'done' : 'todo'); t1.textContent = total ? 'Uruchom ponownie, gdy uczelnia wrzuci nowe plany (np. nowy semestr).' : 'Szuka plików .xlsx w „Strefa studenta”. Zacznij tutaj.'; }
+
+            // 2. Zastosuj
+            const t2 = document.getElementById('step2Text'), b2 = document.getElementById('step2Btn');
+            b2.style.display = pending ? '' : 'none';
+            if (pending) { setStep('step2', 'todo'); t2.innerHTML = `<strong>${pending}</strong> zmian czeka na zatwierdzenie (${s.new_count} nowych, ${s.changed_count} zmienionych, ${s.removed_count} usuniętych).`; }
+            else if (total) { setStep('step2', 'done'); t2.textContent = `${total} planów w konfiguracji.`; }
+            else { setStep('step2', ''); t2.textContent = 'Wybrane plany trafią do konfiguracji.'; }
+
+            // 3. Pobieranie
+            const t3 = document.getElementById('step3Text'), c = d.cycle || {};
+            if (c.running || d.force_check_pending) { setStep('step3', 'active'); t3.textContent = c.running ? `W toku: ${c.done}/${c.total}` : 'Zlecono, startuje...'; }
+            else if (total && ok === total) { setStep('step3', 'done'); t3.textContent = `Wszystkie ${total} pobrane. Sprawdzane automatycznie co ${Math.round(d.check_interval / 60)} min.`; }
+            else if (total) { setStep('step3', 'todo'); t3.textContent = `${total - ok} planów czeka na pierwsze pobranie${c.next_check_at ? ' – nastąpi ' + fmtIn(c.next_check_at) : ''}. Możesz przyspieszyć przyciskiem „Sprawdź plany teraz”.`; }
+            else { setStep('step3', ''); t3.textContent = 'Backend pobiera i przetwarza każdy plan automatycznie.'; }
+        }
+
+        function renderPlanStatus() {
+            if (!lastOverview) return;
+            const body = document.getElementById('plansStatusBody');
+            const term = (document.getElementById('planStatusSearch').value || '').toLowerCase();
+            const current = lastOverview.cycle.running ? lastOverview.cycle.current_plan : null;
+            let rows = lastOverview.plans.filter(p =>
+                (planFilter === 'all' || (planFilter === 'ok') === !!p.downloaded_at) &&
+                (!term || (p.name + ' ' + (p.display_name || '') + ' ' + p.faculty).toLowerCase().includes(term)));
+            rows.sort((a, b) => (!!a.downloaded_at - !!b.downloaded_at) || a.name.localeCompare(b.name, 'pl'));
+            if (!rows.length) { body.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">${lastOverview.plans.length ? 'Brak planów dla filtra' : 'Brak planów – zacznij od skanu Moodle'}</td></tr>`; return; }
+            body.innerHTML = rows.map(p => {
+                const isCurrent = current && current === p.name;
+                const blockBadge = p.blocked === 'plan' ? ' <span class="badge bg-danger" title="Ukryty przed studentami – zobacz zakładkę Walidacja">ukryty</span>'
+                    : p.blocked ? ` <span class="badge bg-danger" title="Część grup ukryta przed studentami">${p.blocked} gr. ukryte</span>` : '';
+                const state = isCurrent ? '<span class="badge bg-warning text-dark">sprawdzam</span>'
+                    : p.downloaded_at ? `<span title="${esc(fmtDate(p.downloaded_at))}">${esc(fmtAgo(p.downloaded_at))}</span>`
+                    : '<span class="badge bg-secondary">jeszcze nie</span>';
+                return `<tr class="${isCurrent ? 'table-warning' : ''}">
+                    <td class="ps-3"><div class="small fw-semibold text-truncate plan-row-name" title="${esc(p.name)}">${esc(p.display_name || p.name)}</div>${blockBadge ? `<div>${blockBadge}</div>` : ''}<div class="text-muted" style="font-size:.75rem">${esc(p.faculty)}</div></td>
+                    <td><span class="badge bg-light text-dark border">${esc(CATEGORY_LABELS[p.category] || p.category || '–')}</span></td>
+                    <td class="small">${p.downloaded_at ? p.groups_downloaded : p.groups_config}</td>
+                    <td class="small text-nowrap">${state}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderCoverage(d) {
+            const t = document.getElementById('coverageTable');
+            const rows = d.coverage || [];
+            if (!rows.length) { t.innerHTML = '<tr><td class="text-muted p-3">Brak planów</td></tr>'; return; }
+            const maxYear = Math.max(...rows.map(r => r.years.length));
+            let html = `<thead class="table-light"><tr><th class="ps-3">Kierunek</th><th>Stopień</th><th>Tryb</th>${Array.from({ length: maxYear }, (_, i) => `<th class="text-center">Rok ${i + 1}</th>`).join('')}</tr></thead><tbody>`;
+            html += rows.map(r => `<tr><td class="ps-3">${esc(r.faculty)}</td><td>${esc(r.degree)}</td><td>${esc(r.mode === 'nst puw' ? 'PUW' : r.mode_label)}</td>${
+                Array.from({ length: maxYear }, (_, i) => {
+                    const y = r.years[i];
+                    if (!y) return '<td></td>';
+                    return y.plans ? `<td class="text-center text-success" title="${y.plans} plan(y)">✓${y.plans > 1 ? ` <span class="text-muted">${y.plans}</span>` : ''}</td>` : '<td class="text-center text-muted">–</td>';
+                }).join('')}</tr>`).join('');
+            t.innerHTML = html + '</tbody>';
+        }
+
+        function renderAutoScan(d) {
+            const el = document.getElementById('autoScanText'), a = d.auto_scan || {};
+            if (!d.auto_scan_hours) { el.innerHTML = '<span class="text-muted">Automatyczny skan wyłączony.</span>'; return; }
+            if (!a.at) { el.innerHTML = `<span class="text-muted">Automatyczny skan: co ${d.auto_scan_hours} h, pierwszy po najbliższym cyklu.</span>`; return; }
+            if (a.error) { el.innerHTML = `<span class="text-danger">Automatyczny skan ${esc(fmtAgo(a.at))}: błąd – ${esc(a.error)}</span>`; return; }
+            const pending = (a.pending_changed || []).length + (a.pending_removed || []).length;
+            el.innerHTML = `<span class="text-muted">Automatyczny skan ${esc(fmtAgo(a.at))}${a.added && a.added.length ? `: <strong class="text-success">dodano ${a.added.length} nowych</strong>` : ': bez nowych planów'}.</span>`
+                + (pending ? ` <span class="badge bg-warning text-dark">${pending} zmian czeka – uruchom skan, żeby przejrzeć</span>` : '');
+        }
+
+        function renderLastCycles(d) {
+            const list = document.getElementById('lastCyclesList');
+            if (!d.last_cycles.length) { list.innerHTML = '<li class="list-group-item text-muted small">Jeszcze nie było cyklu z planami</li>'; return; }
+            list.innerHTML = d.last_cycles.map(c => {
+                const badge = c.has_errors ? '<span class="badge bg-danger">błędy</span>'
+                    : c.new_plans ? `<span class="badge bg-success">${c.new_plans} zmian</span>` : '<span class="badge bg-light text-muted border">bez zmian</span>';
+                return `<li class="list-group-item d-flex justify-content-between align-items-center small">
+                    <span>${esc(fmtDate(c.timestamp))} <span class="text-muted">· ${c.successful_checks} planów${c.execution_time ? ' · ' + Math.round(c.execution_time) + ' s' : ''}</span></span>${badge}</li>`;
+            }).join('');
+        }
+
+        function loadExamsStatus() {
+            fetch('/api/exams/status').then(r => r.json()).then(d => {
+                const el = document.getElementById('examsCard');
+                if (!d.available) { el.innerHTML = '<span class="text-muted">Terminarz nie był jeszcze pobrany.</span>'; return; }
+                const years = (d.available_years || []).map(y => `<option value="${esc(y)}" ${d.forced_year === y ? 'selected' : ''}>${esc(y)}</option>`).join('');
+                el.innerHTML = `
+                    <div class="d-flex justify-content-between"><span>Rok akademicki</span><strong>${esc(d.academic_year)}</strong></div>
+                    ${d.is_current_year ? '' : `<div class="alert alert-warning py-1 px-2 my-2">Szukam terminarza <strong>${esc(d.requested_year || '')}</strong> – na PUW jeszcze go nie ma. Sprawdzane na końcu każdego cyklu${d.checked_at ? `, ostatnio ${esc(fmtAgo(d.checked_at))}` : ''}. Do tego czasu pokazywany jest ${esc(d.academic_year)}.</div>`}
+                    <div class="d-flex justify-content-between"><span>Wpisów</span><strong>${d.entries}</strong></div>
+                    <div class="d-flex justify-content-between"><span>Z poprawionymi literówkami</span><strong>${d.corrected}</strong></div>
+                    <a href="#" class="d-block mt-1" onclick="showExamRows(); return false;">Pokaż, jak odczytano każdy wiersz →</a>
+                    <div class="d-flex justify-content-between"><span>Pobrano</span><span>${esc(fmtAgo(d.fetched_at))}</span></div>
+                    <div class="d-flex justify-content-between align-items-center mt-2"><span>Rok źródła</span>
+                        <select class="form-select form-select-sm w-auto" onchange="refreshExams(this.value)"><option value="" ${d.forced_year ? '' : 'selected'}>automatycznie</option>${years}</select></div>
+                    ${d.problems.length ? `<details class="mt-2"><summary class="text-danger">${d.problems.length} wierszy do sprawdzenia</summary><ul class="mb-0 ps-3">${d.problems.map(p => `<li>${esc(p.sheet)} w. ${p.row ?? '–'}: ${esc(p.reason)} <span class="text-muted">${esc((p.raw || []).join(' | '))}</span></li>`).join('')}</ul></details>` : '<div class="text-success mt-2">Wszystkie wiersze rozpoznane</div>'}
+                    <a class="d-block mt-2" href="${esc(d.source_url)}" target="_blank" rel="noopener">Plik źródłowy na PUW ↗</a>`;
+            }).catch(() => {});
+        }
+
+        function showExamRows() {
+            fetch('/api/exams/rows').then(r => r.json()).then(d => {
+                const modal = document.createElement('div'); modal.className = 'modal fade';
+                const row = r => `<tr class="exam-row ${r.corrections.length ? 'table-warning' : ''}">
+                    <td class="text-nowrap">${esc(r.date)}<div class="text-muted">${esc(r.sheet)} w. ${r.row}</div></td>
+                    <td>${esc(r.subject)}</td>
+                    <td><div class="text-muted">${esc(r.raw.faculty || '–')}</div>${esc(r.parsed.faculty)}</td>
+                    <td><div class="text-muted">${esc(r.raw.year || '–')}</div>${esc(r.parsed.year)}</td>
+                    <td><div class="text-muted">${esc(r.raw.mode || '–')}</div>${esc(r.parsed.mode)}</td>
+                    <td>${r.corrections.map(c => `<span class="badge bg-warning text-dark me-1">${esc(c)}</span>`).join('') || '<span class="text-muted">–</span>'}</td></tr>`;
+                modal.innerHTML = `<div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">Interpretacja terminarza (${d.rows.length} wierszy)</h5>
+                        <div class="form-check form-switch ms-4 mb-0"><input class="form-check-input" type="checkbox" id="onlyCorrected">
+                        <label class="form-check-label small" for="onlyCorrected">Tylko z poprawkami</label></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body p-0"><table class="table table-sm small mb-0"><thead class="table-light sticky-top"><tr>
+                        <th>Data</th><th>Przedmiot</th><th>Kierunek <span class="fw-normal text-muted">(w pliku → odczyt)</span></th><th>Rok</th><th>Tryb</th><th>Poprawki</th></tr></thead>
+                        <tbody>${d.rows.map(row).join('')}</tbody></table></div></div></div>`;
+                document.body.appendChild(modal);
+                modal.querySelector('#onlyCorrected').addEventListener('change', e => modal.querySelectorAll('.exam-row').forEach(tr => {
+                    tr.style.display = e.target.checked && !tr.classList.contains('table-warning') ? 'none' : '';
+                }));
+                const m = new bootstrap.Modal(modal); m.show();
+                modal.addEventListener('hidden.bs.modal', () => modal.remove());
+            });
+        }
+
+        function refreshExams(year) {
+            const btn = document.getElementById('examsRefreshBtn'); btn.disabled = true; btn.textContent = 'Pobieram...';
+            const body = year === undefined ? {} : { year: year || null };
+            fetch('/api/exams/refresh', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
+                .then(r => r.json()).then(d => { if (!d.success) alert('Błąd: ' + d.error); loadExamsStatus(); })
+                .finally(() => { btn.disabled = false; btn.textContent = 'Odśwież'; });
+        }
+
+        function renderExamStep(d) {
+            const el = document.getElementById('step4Text');
+            fetch('/api/exams/status').then(r => r.json()).then(x => {
+                const running = d.cycle.running && d.cycle.current_plan === 'Terminarz egzaminów';
+                if (running) { setStep('step4', 'active'); el.textContent = 'Sprawdzam terminarz...'; return; }
+                if (!x.available) { setStep('step4', 'todo'); el.textContent = 'Jeszcze nie pobrany – zostanie sprawdzony na końcu najbliższego cyklu.'; return; }
+                setStep('step4', x.is_current_year ? 'done' : 'todo');
+                el.textContent = x.is_current_year
+                    ? `${x.academic_year}: ${x.entries} wpisów, sprawdzony ${fmtAgo(x.checked_at)}. Sprawdzany na końcu każdego cyklu.`
+                    : `Szukam ${x.requested_year} (ostatnio ${fmtAgo(x.checked_at)}); do tego czasu ${x.academic_year}. Sprawdzany na końcu każdego cyklu.`;
+            }).catch(() => {});
+        }
+
+        function goToScanner(start) {
+            document.getElementById('scannerTabLink').click();
+            if (start && !document.getElementById('startScanBtn').disabled) startMoodleScan();
+        }
+
+        document.getElementById('planStatusSearch').addEventListener('input', renderPlanStatus);
+        document.querySelectorAll('#planFilter button').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('#planFilter button').forEach(x => x.classList.remove('active'));
+            b.classList.add('active'); planFilter = b.dataset.filter; renderPlanStatus();
+        }));
 
         // ─── Moodle Scanner ─────────────────────────────
         let scanPollInterval = null;
@@ -533,7 +1088,7 @@
         function pollScanStatus() {
             fetch('/api/scanner/status').then(r => r.json()).then(d => {
                 document.getElementById('scanProgressText').textContent = d.progress || d.status;
-                if (d.status === 'done') { clearInterval(scanPollInterval); document.getElementById('scanSpinner').style.display = 'none'; document.getElementById('startScanBtn').disabled = false; if (d.result) renderScanResults(d.result); }
+                if (d.status === 'done') { clearInterval(scanPollInterval); document.getElementById('scanSpinner').style.display = 'none'; document.getElementById('startScanBtn').disabled = false; if (d.result) renderScanResults(d.result); loadOverview(); }
                 else if (d.status === 'error') { clearInterval(scanPollInterval); document.getElementById('scanSpinner').style.display = 'none'; document.getElementById('startScanBtn').disabled = false; document.getElementById('scanProgressText').textContent = 'Błąd: ' + d.error; }
             });
         }
@@ -542,20 +1097,39 @@
             const c = document.getElementById('scanResults'); c.style.display = 'block';
             let html = `<p class="mb-2"><strong>Rok ${r.year}, sem. ${r.semester}</strong> — ${r.total_scraped} znalezionych (w bazie: ${r.total_current})</p>`;
             if (r.new_count + r.changed_count + r.removed_count === 0) { html += '<div class="alert alert-success py-2">Brak zmian!</div>'; c.innerHTML = html; return; }
-            if (r.new_count > 0) { html += `<h6 class="text-success mt-3">Nowe (${r.new_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.new)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-add" value="${k}" checked><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
+            if (r.new_count > 0) { html += `<h6 class="text-success mt-3 d-flex align-items-center gap-2">Nowe (${r.new_count}) <a href="#" class="small fw-normal" onclick="toggleScanGroup('scan-add', true); return false;">zaznacz wszystkie</a><a href="#" class="small fw-normal text-muted" onclick="toggleScanGroup('scan-add', false); return false;">odznacz</a></h6><div class="list-group mb-2" style="max-height:360px; overflow:auto">`; for (const [k,v] of Object.entries(r.new)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-add" value="${k}" checked><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
             if (r.changed_count > 0) { html += `<h6 class="text-warning mt-3">Zmienione (${r.changed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.changed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-update" value="${k}" checked><small><strong>${k}</strong> — ${v.join(', ')}</small></label>`; html += '</div>'; }
             if (r.removed_count > 0) { html += `<h6 class="text-danger mt-3">Usunięte (${r.removed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.removed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-remove" value="${k}"><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
-            html += `<button class="btn btn-primary btn-sm mt-2" onclick="applyScanResults()">Zastosuj zaznaczone</button>`;
+            html += `<div class="d-flex flex-wrap gap-2 align-items-center mt-3 pt-3 border-top">
+                <button class="btn btn-primary btn-sm" onclick="applyScanResults(true)">Zastosuj i pobierz plany teraz</button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="applyScanResults(false)">Tylko zastosuj</button>
+                <span class="text-muted small ms-1">„Tylko zastosuj” = plany pobiorą się w następnym zaplanowanym cyklu.</span>
+            </div>`;
             c.innerHTML = html;
         }
 
-        function applyScanResults() {
+        function toggleScanGroup(cls, checked) { document.querySelectorAll('.' + cls).forEach(e => e.checked = checked); }
+
+        function restoreScanResults() {
+            // Wyniki skanu żyją w pamięci admina – pokaż je po odświeżeniu strony
+            fetch('/api/scanner/status').then(r => r.json()).then(d => {
+                if (d.status === 'running') { document.getElementById('startScanBtn').disabled = true; document.getElementById('scanStatus').style.display = 'block'; scanPollInterval = setInterval(pollScanStatus, 3000); }
+                else if (d.status === 'done' && d.result) renderScanResults(d.result);
+            }).catch(() => {});
+        }
+
+        function applyScanResults(checkNow) {
             const add = [...document.querySelectorAll('.scan-add:checked')].map(e => e.value);
             const update = [...document.querySelectorAll('.scan-update:checked')].map(e => e.value);
             const remove = [...document.querySelectorAll('.scan-remove:checked')].map(e => e.value);
             if (add.length + update.length + remove.length === 0) { alert('Nic nie zaznaczono'); return; }
-            fetch('/api/scanner/apply', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ add, update, remove }) })
-                .then(r => r.json()).then(d => { if (d.success) { alert(d.message); document.getElementById('scanResults').style.display = 'none'; loadPlans(); } else alert('Błąd: ' + d.error); });
+            fetch('/api/scanner/apply', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ add, update, remove, check_now: !!checkNow }) })
+                .then(r => r.json()).then(d => {
+                    if (!d.success) { alert('Błąd: ' + d.error); return; }
+                    document.getElementById('scanResults').innerHTML = `<div class="alert alert-success py-2 mb-0">${esc(d.message)}</div>`;
+                    loadPlans(); loadOverview();
+                    if (d.check_started) document.getElementById('dashboardTabLink').click();
+                });
         }
     </script>
 </body>
