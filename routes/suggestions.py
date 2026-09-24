@@ -39,8 +39,8 @@ def send_pushover_notification(content):
 
 def _device_id():
     """Visitor identity for the daily limit - the real client IP comes from the proxy."""
-    forwarded = request.headers.get('X-Forwarded-For', '')
-    client_ip = forwarded.split(',')[0].strip() or request.remote_addr
+    # Set by the frontend from Cloudflare's CF-Connecting-IP (not client-controlled)
+    client_ip = request.headers.get('X-Client-IP', '').strip()[:64] or request.remote_addr
     user_agent = request.headers.get('User-Agent', '')
     return hashlib.md5(f"{client_ip}:{user_agent}".encode()).hexdigest()
 
@@ -72,9 +72,13 @@ def init_suggestion_routes(app, db, public=False):
                 raise BadRequest("No data provided")
             
             # Check required fields
-            if 'content' not in data:
-                logger.warning("Content missing in suggestion request")
+            content = data.get('content') if isinstance(data, dict) else None
+            if not isinstance(content, str):
                 raise BadRequest("Content is required")
+            # Plain text only: drop control characters, limit length
+            content = ''.join(ch for ch in content if ch in '\n\t' or ch.isprintable()).strip()
+            if not content or len(content) > 500:
+                raise BadRequest("Content must be 1-500 characters")
             
             # Extract client IP and create device identifier
             device_id = _device_id()
@@ -97,7 +101,7 @@ def init_suggestion_routes(app, db, public=False):
             
             # Create suggestion document
             suggestion = {
-                "content": data['content'],
+                "content": content,
                 "device_id": device_id,
                 "created_at": datetime.now(),
                 "status": "pending"  # pending, approved, rejected
@@ -108,7 +112,7 @@ def init_suggestion_routes(app, db, public=False):
             logger.info(f"New suggestion added, id: {result.inserted_id}")
             
             # Send Pushover notification
-            notification_sent = send_pushover_notification(data['content'])
+            notification_sent = send_pushover_notification(content)
             if notification_sent:
                 logger.debug("Pushover notification sent for new suggestion")
             

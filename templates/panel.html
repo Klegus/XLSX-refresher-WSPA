@@ -619,15 +619,29 @@
         }
 
         function createSuggestionElement(s) {
+            // Suggestions are user input: build with textContent only, never innerHTML
             const dt = new Date(s.created_at).toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' });
             const colors = { approved: 'success', rejected: 'danger', pending: 'warning' };
-            const card = document.createElement('div');
-            card.className = `card mb-2 border-${colors[s.status] || 'secondary'}`;
-            card.innerHTML = `<div class="card-body py-2 px-3">
-                <div class="d-flex justify-content-between mb-1"><span class="badge bg-${colors[s.status]}">${s.status}</span><small class="text-muted">${dt}</small></div>
-                <p class="card-text small mb-1">${s.content}</p>
-                ${s.status === 'pending' ? `<div class="d-flex gap-1 justify-content-end"><button class="btn btn-sm btn-success py-0" onclick="updateSuggestionStatus('${s.id}','approved')">OK</button><button class="btn btn-sm btn-danger py-0" onclick="updateSuggestionStatus('${s.id}','rejected')">Odrzuć</button></div>` : ''}
-            </div>`;
+            const color = colors[s.status] || 'secondary';
+            const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+            const card = el('div', `card mb-2 border-${color}`);
+            const body = el('div', 'card-body py-2 px-3');
+            const head = el('div', 'd-flex justify-content-between mb-1');
+            head.append(el('span', `badge bg-${color}`, String(s.status ?? '')), el('small', 'text-muted', dt));
+            const text = el('p', 'card-text small mb-1', String(s.content ?? ''));
+            text.style.whiteSpace = 'pre-wrap';
+            text.style.overflowWrap = 'anywhere';
+            body.append(head, text);
+            if (s.status === 'pending') {
+                const actions = el('div', 'd-flex gap-1 justify-content-end');
+                const ok = el('button', 'btn btn-sm btn-success py-0', 'OK');
+                const no = el('button', 'btn btn-sm btn-danger py-0', 'Odrzuć');
+                ok.addEventListener('click', () => updateSuggestionStatus(String(s.id), 'approved'));
+                no.addEventListener('click', () => updateSuggestionStatus(String(s.id), 'rejected'));
+                actions.append(ok, no);
+                body.append(actions);
+            }
+            card.append(body);
             return card;
         }
 
