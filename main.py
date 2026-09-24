@@ -872,6 +872,15 @@ async def main():
                     if plans_config_doc and "plans" in plans_config_doc:
                         plans_config = plans_config_doc["plans"]
                     
+                    # A plan whose configuration changed (new semester file, sheet, groups...)
+                    # gets a fresh manager: LessonPlan fixes URL, sheet and collection
+                    # name at construction time, so updating plan_config alone would
+                    # keep downloading the old file
+                    for changed_id in [pid for pid, mgr in lesson_plan_managers.items()
+                                       if pid in plans_config and mgr.plan_config != plans_config[pid]]:
+                        logger.info(f"Configuration changed for {changed_id} - recreating its manager")
+                        del lesson_plan_managers[changed_id]
+
                     # Check for new plans and create managers for them
                     for plan_id, plan_config in plans_config.items():
                         if plan_id not in lesson_plan_managers:
