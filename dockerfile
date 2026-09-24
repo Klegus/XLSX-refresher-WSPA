@@ -38,9 +38,16 @@ RUN pip install --no-cache-dir --timeout=120 --retries=5 \
 
 # Copy application files
 COPY *.py ./
-COPY *.json ./
 COPY routes/ routes/
 COPY templates/ templates/
+
+# Test stage: runs the whole suite on every image build (anonymised real plans,
+# no network, no database). A failing test stops the build.
+FROM builder AS test
+COPY tests/ tests/
+RUN pip install --no-cache-dir pytest==8.3.3 \
+    && python -m pytest -q -p no:cacheprovider tests \
+    && touch /tmp/tests-passed
 
 # Final stage
 FROM python:3.12-slim
@@ -50,6 +57,11 @@ WORKDIR /app
 # Copy installed packages and application files from builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /app /app
+# Depending on the test stage forces it to run - the image only exists if tests passed
+COPY --from=test /tmp/tests-passed /tmp/tests-passed
+
+# Local time for schedule logic (night pause, auto-scan window) and timestamps
+ENV TZ=Europe/Warsaw
 
 # Create non-root user
 RUN addgroup --system app && adduser --system --group app \

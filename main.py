@@ -4,6 +4,7 @@ from LessonPlan import LessonPlan
 from comparer import LessonPlanComparator
 from ActivityDownloader import WebpageDownloader
 from MoodleParserComponent import MoodleFileParser
+import math
 import os, requests, json, hashlib
 from werkzeug.exceptions import BadRequest, InternalServerError
 from dotenv import load_dotenv
@@ -241,6 +242,54 @@ def log_check_cycle(successful_checks=0, new_plans=0, errors=None, execution_tim
     db.system_config.update_one({"_id": "config"}, {"$set": stats_update})
 
 
+def set_cycle_state(**fields):
+    """Publish live check-cycle state for the admin dashboard (system_config.cycle.*)."""
+    try:
+        db.system_config.update_one(
+            {"_id": "config"},
+            {"$set": {f"cycle.{k}": v for k, v in fields.items()}},
+            upsert=True,
+        )
+    except Exception as e:
+        logger.warning(f"Could not update cycle state: {e}")
+
+
+# Nothing is checked at night (Warsaw time) - PUW is not updated then and the
+# university's server gets a rest. A manual "check now" from the admin panel
+# still runs a cycle.
+NIGHT_START_HOUR = 21
+NIGHT_END_HOUR = 6
+
+
+def seconds_until_morning(now=None):
+    """0 during the day, otherwise seconds until NIGHT_END_HOUR:00."""
+    now = now or datetime.now()
+    if NIGHT_END_HOUR <= now.hour < NIGHT_START_HOUR:
+        return 0
+    morning = now.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+    if now.hour >= NIGHT_START_HOUR:
+        morning += timedelta(days=1)
+    return max(1, math.ceil((morning - now).total_seconds()))
+
+
+def wait_for_next_cycle(seconds, poll_every=3):
+    """Sleep until the next cycle, waking early when admin requests a check.
+
+    Returns the trigger for the next cycle: "manual" or "schedule".
+    """
+    deadline = time.time() + seconds
+    while time.time() < deadline:
+        request_doc = db.system_config.find_one_and_update(
+            {"_id": "config", "force_check_requested": {"$ne": None}},
+            {"$set": {"force_check_requested": None}},
+        )
+        if request_doc and request_doc.get("force_check_requested"):
+            logger.info("Manual check requested from admin panel - starting cycle now")
+            return "manual"
+        time.sleep(min(poll_every, max(0, deadline - time.time())))
+    return "schedule"
+
+
 def log_check_result(total_plans, plans_checked, changes_detected):
     """Log check results to MongoDB"""
     timestamp = datetime.now()
@@ -266,6 +315,8 @@ init_status_routes(app, status_checker, get_system_config)
 init_plan_routes(app, get_semester_collections, db)
 init_activity_routes(app, db)
 init_comparison_routes(app, db)
+from routes.exams import init_exam_routes
+init_exam_routes(app, db)
 
 
 def run_flask_app():
@@ -351,21 +402,7 @@ class LessonPlanManager:
         if plans_config_doc and "plans" in plans_config_doc:
             self.lesson_plan.plan_config = plans_config_doc["plans"].get(self.plan_name, self.lesson_plan.plan_config)
         
-        current_time = datetime.now()
-        current_hour = current_time.hour
-
-        # Skip checks between 21:00 and 06:00
-        if os.getenv("DEV", "false").lower() == "true":
-            logger.info("Dev mode is enabled. Skipping time check.")
-            is_night_time = False
-        else:
-            is_night_time = current_hour >= 21 or current_hour < 6
-        if is_night_time:
-            logger.info(
-                f"Skipping check at {current_time.strftime('%Y-%m-%d %H:%M:%S')} - night hours (21:00-06:00)"
-            )
-            return
-
+        # Night pause is handled by the main loop (whole cycle sleeps 21:00-06:00)
         try:
             logger.info(
                 f"Starting check",
@@ -791,8 +828,17 @@ async def main():
         flask_thread.start()
 
         # Run managers sequentially in the main thread
+        cycle_trigger = "startup"
         try:
             while True:
+                night_wait = seconds_until_morning()
+                if night_wait and cycle_trigger != "manual":
+                    wake_at = datetime.now() + timedelta(seconds=night_wait)
+                    logger.info(f"Night pause until {wake_at:%H:%M} (Warsaw time)")
+                    set_cycle_state(running=False, current_plan=None, paused="night", next_check_at=wake_at)
+                    cycle_trigger = wait_for_next_cycle(night_wait)
+                    continue
+                set_cycle_state(paused=None)
                 # Refresh check interval each cycle to reflect runtime config changes.
                 try:
                     check_interval = int(get_system_config().get("check_interval", check_interval))
@@ -890,45 +936,57 @@ async def main():
                             logger.info(f"LessonPlanManager for {plan_config['name']} successfully created")
                     
                     logger.info(f"Starting check cycle for {len(lesson_plan_managers)} plans")
+                    set_cycle_state(
+                        running=True,
+                        trigger=cycle_trigger,
+                        started_at=datetime.now(),
+                        finished_at=None,
+                        next_check_at=None,
+                        total=len(lesson_plan_managers),
+                        done=0,
+                        changes=0,
+                        errors=0,
+                        current_plan=None,
+                    )
+
+                    # Drop managers for plans removed from config (before iterating,
+                    # so the loop below never mutates the dict it walks over)
+                    plans_to_remove = [pid for pid in lesson_plan_managers if pid not in plans_config]
+                    for removed_id in plans_to_remove:
+                        removed_manager = lesson_plan_managers[removed_id]
+                        removed_name = removed_manager.plan_name
+                        logger.info(f"\nRemoving plan that no longer exists in config: {removed_name} ({removed_id})")
+
+                        # Get collection name for this plan
+                        collection_name = removed_manager.lesson_plan.collection_name
+                        if collection_name:
+                            # We don't delete the collection to preserve historical data
+                            # but we can mark it as inactive or add a log entry
+                            try:
+                                db[collection_name].insert_one({
+                                    "_id": f"removed_{datetime.now().isoformat()}",
+                                    "timestamp": datetime.now(),
+                                    "event": "plan_removed",
+                                    "plan_id": removed_id,
+                                    "plan_name": removed_name,
+                                    "message": "This plan was removed from the configuration"
+                                })
+                                logger.info(f"Added removal record to collection {collection_name}")
+                            except Exception as e:
+                                logger.error(f"Error adding removal record: {e}")
+
+                        del lesson_plan_managers[removed_id]
+                        logger.info(f"Manager for {removed_name} successfully removed")
+
+                    set_cycle_state(total=len(lesson_plan_managers))
 
                     for plan_id, manager in lesson_plan_managers.items():
-                        if plan_id in plans_config:
-                            manager.lesson_plan.plan_config = plans_config[plan_id]
-                            manager.plan_config = plans_config[plan_id]
-
-                        plans_to_remove = []
-                        for plan_id in lesson_plan_managers:
-                            if plan_id not in plans_config:
-                                plans_to_remove.append(plan_id)
-
-                        for plan_id in plans_to_remove:
-                            manager = lesson_plan_managers[plan_id]
-                            plan_name = manager.plan_name
-                            logger.info(f"\nRemoving plan that no longer exists in config: {plan_name} ({plan_id})")
-                            
-                            # Get collection name for this plan
-                            collection_name = manager.lesson_plan.collection_name
-                            if collection_name:
-                                # We don't delete the collection to preserve historical data
-                                # but we can mark it as inactive or add a log entry
-                                try:
-                                    db[collection_name].insert_one({
-                                        "_id": f"removed_{datetime.now().isoformat()}",
-                                        "timestamp": datetime.now(),
-                                        "event": "plan_removed",
-                                        "plan_id": plan_id,
-                                        "plan_name": plan_name,
-                                        "message": "This plan was removed from the configuration"
-                                    })
-                                    logger.info(f"Added removal record to collection {collection_name}")
-                                except Exception as e:
-                                    logger.error(f"Error adding removal record: {e}")
-                            
-                            del lesson_plan_managers[plan_id]
-                            logger.info(f"Manager for {plan_name} successfully removed")
+                        manager.lesson_plan.plan_config = plans_config[plan_id]
+                        manager.plan_config = plans_config[plan_id]
 
                         plan_name = plans_config[plan_id]["name"]
                         log_plan_header(plan_name, plan_id, "check")
+                        set_cycle_state(current_plan=plan_name, done=successful_checks + len(errors))
                         try:
                             with sentry_sdk.start_span(op="check_plan", description=f"Check plan: {plan_name}"):
                                 result = await manager.check_once()
@@ -951,6 +1009,12 @@ async def main():
                             logger.error(f"Error in manager for {plan_name}: {str(e)}")
 
                     cycle_execution_time = round(time.time() - cycle_start_time, 2)
+                    set_cycle_state(
+                        current_plan="Aktywności Moodle",
+                        done=successful_checks + len(errors),
+                        changes=new_plans,
+                        errors=len(errors),
+                    )
 
                     total_plans = len(lesson_plan_managers)
                     next_check = datetime.now() + timedelta(seconds=check_interval)
@@ -1025,15 +1089,70 @@ async def main():
                 except Exception as e:
                     logger.error(f"Plan validation failed: {e}")
 
+                # Reconcile changed plans against their Excel source; plans/groups with
+                # unhandled problems are hidden from the public API until resolved
+                try:
+                    from plan_reconciler import run_validation
+                    if cycle_trigger == "startup":
+                        to_validate = None  # everything
+                    else:
+                        changed = set(updated_plan_names)
+                        to_validate = [pid for pid, cfg in plans_config.items() if cfg.get("name") in changed]
+                    if to_validate is None or to_validate:
+                        set_cycle_state(running=True, current_plan="Walidacja ze źródłem")
+                        run_validation(db, to_validate)
+                except Exception as e:
+                    logger.error(f"Source validation failed: {e}")
+
                 # Clear download cache between cycles
                 from LessonPlanDownloader import _download_cache
                 _download_cache.clear()
 
+                # Daily PUW scan so plans published mid-semester (e.g. first-year
+                # schedules) show up without anyone clicking "Skanuj Moodle"
+                try:
+                    system_config = get_system_config()
+                    scan_every_h = float(system_config.get("auto_scan_hours", 24) or 0)
+                    last_scan = (system_config.get("auto_scan") or {}).get("at")
+                    due = scan_every_h > 0 and (
+                        not last_scan or datetime.now() - last_scan >= timedelta(hours=scan_every_h))
+                    if due and 6 <= datetime.now().hour < 21:
+                        from moodle_scanner import auto_scan
+                        set_cycle_state(running=True, current_plan="Automatyczny skan PUW")
+                        summary = auto_scan(db)
+                        if summary.get("added"):
+                            # Download the new plans right away
+                            db.system_config.update_one(
+                                {"_id": "config"}, {"$set": {"force_check_requested": datetime.now()}})
+                except Exception as e:
+                    logger.error(f"Auto-scan step failed: {e}")
+
+                # Last step of every cycle: the exam timetable (the university updates it
+                # during the semester; in September this is also where the new
+                # academic year's file gets picked up)
+                try:
+                    import requests as _requests
+                    from exam_schedule import refresh as refresh_exams
+                    from moodle_scanner import login_puw
+                    set_cycle_state(running=True, current_plan="Terminarz egzaminów")
+                    exam_session = _requests.Session()
+                    if login_puw(exam_session):
+                        refresh_exams(db, exam_session, get_system_config().get("exam_schedule_year"))
+                except Exception as e:
+                    logger.error(f"Exam timetable refresh failed: {e}")
+
+                set_cycle_state(
+                    running=False,
+                    current_plan=None,
+                    finished_at=datetime.now(),
+                    next_check_at=datetime.now() + timedelta(seconds=check_interval),
+                    duration=round(time.time() - cycle_start_time, 2),
+                )
                 logger.info(
                     f"All tasks completed. Waiting {check_interval} seconds before next cycle",
                     extra={"check_interval": check_interval}
                 )
-                time.sleep(check_interval)
+                cycle_trigger = wait_for_next_cycle(check_interval)
 
         except KeyboardInterrupt:
             logger.warning("\nShutting down gracefully...")

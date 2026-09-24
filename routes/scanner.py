@@ -17,7 +17,24 @@ _scan_state = {
 }
 
 
-def init_scanner_routes(app, get_plans_config, update_plans_config):
+def get_scan_summary():
+    """Lightweight scan state for the dashboard (without full plan payloads)."""
+    result = _scan_state.get("result") or {}
+    return {
+        "status": _scan_state["status"],
+        "progress": _scan_state["progress"],
+        "started_at": _scan_state["started_at"],
+        "finished_at": _scan_state["finished_at"],
+        "error": _scan_state["error"],
+        "year": result.get("year"),
+        "semester": result.get("semester"),
+        "new_count": len(result.get("new") or {}),
+        "changed_count": len(result.get("changed") or {}),
+        "removed_count": len(result.get("removed") or {}),
+    }
+
+
+def init_scanner_routes(app, get_plans_config, update_plans_config, request_check_now=None):
 
     @app.route("/api/scanner/start", methods=["POST"])
     def start_scan():
@@ -149,8 +166,19 @@ def init_scanner_routes(app, get_plans_config, update_plans_config):
             update_plans_config(current_plans)
             logger.info(f"Applied scan: +{added} ~{updated} -{removed}")
 
+        # Wyniki skanu są już w konfiguracji - nie pokazuj ich jako oczekujących
+        _scan_state["status"] = "applied"
+
+        message = f"Zastosowano: {added} dodanych, {updated} zaktualizowanych, {removed} usuniętych"
+        check_started = False
+        if data.get("check_now") and request_check_now and added + updated + removed > 0:
+            request_check_now()
+            check_started = True
+            message += ". Pobieranie planów startuje."
+
         return jsonify({
             "success": True,
-            "message": f"Zastosowano: {added} dodanych, {updated} zaktualizowanych, {removed} usuniętych",
-            "applied": {"added": added, "updated": updated, "removed": removed}
+            "message": message,
+            "applied": {"added": added, "updated": updated, "removed": removed},
+            "check_started": check_started,
         })

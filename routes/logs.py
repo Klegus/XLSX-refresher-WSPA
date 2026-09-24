@@ -1,6 +1,6 @@
 from flask import jsonify, request
 import pymongo
-from shared_utils import get_logger
+from shared_utils import get_logger, to_iso
 
 logger = get_logger('routes.logs')
 
@@ -37,7 +37,7 @@ def init_log_routes(app, db):
 
             for log in logs:
                 if 'timestamp' in log:
-                    log['timestamp'] = log['timestamp'].isoformat()
+                    log['timestamp'] = to_iso(log['timestamp'])
 
             return jsonify(logs)
 

@@ -34,14 +34,15 @@ EXCLUDE_PATTERNS = [
 
 def get_academic_year_label():
     now = datetime.now()
-    start_year = now.year if now.month >= 10 else now.year - 1
+    # Plany na semestr zimowy pojawiają się na PUW już we wrześniu
+    start_year = now.year if now.month >= 9 else now.year - 1
     end_year = start_year + 1
     return f"{start_year % 100}/{end_year % 100}"
 
 
 def get_current_semester():
     month = datetime.now().month
-    return "letni" if 2 <= month <= 9 else "zimowy"
+    return "letni" if 2 <= month <= 8 else "zimowy"
 
 
 def login_puw(session):
@@ -58,9 +59,9 @@ def login_puw(session):
         'password': os.getenv('PASSWORD')
     }, allow_redirects=True, timeout=30)
 
-    if 'wyloguj' in resp.text.lower() or 'logout' in resp.text.lower():
-        return True
-    return False
+    # Strona logowania też zawiera "wyloguj"/"logout", więc sprawdzamy URL:
+    # po udanym logowaniu Moodle przekierowuje poza /login/
+    return '/login/' not in resp.url
 
 
 def is_plan_xlsx(filename):
@@ -90,7 +91,11 @@ def scrape_strefa_courses(session, url, year_label):
     for link in soup.select('a[href*="course/view.php?id="]'):
         href = link.get('href', '')
         text = link.get_text(strip=True)
-        if 'strefa studenta' in text.lower() and year_label in text:
+        if 'strefa studenta' not in text.lower():
+            continue
+        # Kursy per kierunek nie mają już roku w nazwie; pomijamy tylko te z innym rokiem
+        years_in_name = re.findall(r'\b\d{2}/\d{2}\b', text)
+        if not years_in_name or year_label in years_in_name:
             courses.append((text, href))
 
     return list(set(subcategory_urls)), courses
@@ -246,10 +251,77 @@ def extract_groups(ws, groups_row_idx):
     return {clean: original for clean, original in seen_values.values()}
 
 
-def count_group_columns(ws, groups_row_idx, groups):
+def _squash(text):
+    import unicodedata
+    t = unicodedata.normalize('NFKD', str(text or '').lower().replace('ł', 'l'))
+    return re.sub(r'[^a-z0-9]', '', ''.join(c for c in t if not unicodedata.combining(c)))
+
+
+def _is_variant(short, long):
+    """'Grupa 1' -> 'Grupa 1 podział wg nazwisk' yes; 'Grupa 1' -> 'Grupa 10' no."""
+    a, b = _squash(short), _squash(long)
+    if a == b:
+        return True
+    return b.startswith(a) and not b[len(a)].isdigit()
+
+
+def merge_group_variants(ws, groups_row_idx, groups, days_found):
+    """Merge headers that name the same group differently on different days.
+
+    Excel files are edited by hand, so one group can be "Grupy 1-18" on Thursday
+    and "Grupy 1 - 18" on Sunday, or "Grupa 1" on Friday and "Grupa 1 podział wg
+    nazwisk: A-D" on Saturday. Two headers are treated as one group when they are
+    variants of each other and never appear on the same day (groups like
+    "Sp.: X" and "Sp.: X gr.1" that sit side by side stay separate).
+    Returns (groups, aliases) where aliases maps group name -> other header texts.
+    """
+    if groups_row_idx is None or len(groups) < 2:
+        return groups, {}
+    day_starts = sorted(days_found)
+
+    def day_of(col):
+        starts = [c for c in day_starts if c <= col]
+        return days_found[starts[-1]] if starts else None
+
+    days_of = {clean: set() for clean in groups}
+    original_to_clean = {orig: clean for clean, orig in groups.items()}
+    for col in range(2, ws.max_column + 1):
+        clean = original_to_clean.get(ws.cell(groups_row_idx, col).value)
+        if clean:
+            days_of[clean].add(day_of(col))
+
+    # A shorter header that is a variant of longer ones on other days is either
+    # the same group written differently (one match -> merge) or a shared header
+    # for several sub-groups, e.g. "Sp.: X" on days with joint classes and
+    # "Sp.: X gr.1" / "Sp.: X gr.2" on the others (many matches -> every
+    # sub-group also gets the shared columns)
+    names = sorted(groups, key=len, reverse=True)
+    merged_into, aliases = {}, {}
+    for short_name in sorted(groups, key=len):
+        targets = [long_name for long_name in names
+                   if long_name != short_name and long_name not in merged_into
+                   and len(long_name) >= len(short_name)
+                   and _is_variant(short_name, long_name)
+                   and not (days_of[short_name] & days_of[long_name])]
+        if not targets:
+            continue
+        merged_into[short_name] = targets
+        for long_name in targets:
+            aliases.setdefault(long_name, []).append(groups[short_name])
+
+    kept = {name: orig for name, orig in groups.items() if name not in merged_into}
+    if merged_into:
+        logger.info(f"Merged group header variants: {merged_into}")
+    return kept, aliases
+
+
+def count_group_columns(ws, groups_row_idx, groups, aliases=None):
     if groups_row_idx is None:
         return {}
     original_to_clean = {orig: clean for clean, orig in groups.items()}
+    for clean, variants in (aliases or {}).items():
+        for variant in variants:
+            original_to_clean[variant] = clean
     counts = Counter()
     for col in range(2, ws.max_column + 1):
         v = ws.cell(groups_row_idx, col).value
@@ -357,7 +429,8 @@ def process_excel_file(filepath, download_url, filename):
         days_row_idx, days_found = find_days_row(ws)
         groups_row_idx = find_groups_row(ws, days_row_idx)
         groups = extract_groups(ws, groups_row_idx)
-        col_counts = count_group_columns(ws, groups_row_idx, groups)
+        groups, aliases = merge_group_variants(ws, groups_row_idx, groups, days_found)
+        col_counts = count_group_columns(ws, groups_row_idx, groups, aliases)
         category = detect_category(days_found)
 
         faculty = extract_faculty_from_header(ws)
@@ -377,6 +450,8 @@ def process_excel_file(filepath, download_url, filename):
             'download_url': download_url,
             'sheet_name': sheet_name,
         }
+        if aliases:
+            plan['group_aliases'] = aliases
         if is_mixed:
             plan['mixed'] = True
             plan['groups_column_info'] = col_counts
@@ -463,7 +538,7 @@ def compare_plans(scraped, current):
     removed_plans = {k: current[k] for k in current_keys - scraped_keys}
 
     changed_plans = {}
-    compare_fields = ['download_url', 'sheet_name', 'category', 'faculty']
+    compare_fields = ['download_url', 'sheet_name', 'category', 'faculty', 'group_aliases', 'mixed']
 
     for key in scraped_keys & current_keys:
         diff_fields = []
@@ -491,3 +566,43 @@ def compare_plans(scraped, current):
         'changed': changed_plans,
         'removed': removed_plans,
     }
+
+
+# ─── Automatic scan (called from the backend loop) ─────────────────
+
+def auto_scan(db):
+    """Scan PUW and add plans that appeared since the last scan.
+
+    New plans are added right away (source validation still quarantines any
+    that do not parse cleanly). Changed and removed plans are only reported -
+    they can drop or rename groups students already use, so an admin approves
+    them in the panel. Returns the summary stored in system_config.auto_scan.
+    """
+    started = datetime.now()
+    summary = {"at": started, "added": [], "pending_changed": [], "pending_removed": [], "error": None}
+    try:
+        scraped, year_label, semester = run_full_scan()
+        config = db.plans_config.find_one({"_id": "plans_json"}) or {}
+        current = config.get("plans") or {}
+        diff = compare_plans(scraped, current)
+
+        if diff["new"]:
+            current.update(diff["new"])
+            db.plans_config.update_one(
+                {"_id": "plans_json"},
+                {"$set": {"plans": current, "last_updated": started.isoformat(), "source": "auto_scan"}},
+                upsert=True)
+            logger.info(f"Auto-scan added {len(diff['new'])} new plans")
+
+        summary.update(
+            year=year_label, semester=semester, scraped=len(scraped),
+            added=[p.get("name", k) for k, p in diff["new"].items()],
+            pending_changed=sorted(diff["changed"]),
+            pending_removed=sorted(diff["removed"]),
+        )
+    except Exception as e:
+        logger.error(f"Auto-scan failed: {e}")
+        summary["error"] = str(e)
+    summary["duration"] = round((datetime.now() - started).total_seconds(), 1)
+    db.system_config.update_one({"_id": "config"}, {"$set": {"auto_scan": summary}}, upsert=True)
+    return summary

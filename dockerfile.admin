@@ -21,10 +21,17 @@ COPY admin_app.py ./
 COPY shared_utils.py ./
 COPY moodle_scanner.py ./
 COPY plan_validator.py ./
+COPY plan_reconciler.py ./
+COPY plan_naming.py ./
+COPY plan_notes.py ./
+COPY exam_schedule.py ./
 COPY plan_differ.py ./
 COPY LessonPlanDownloader.py ./
 COPY routes/ routes/
 COPY templates/ templates/
+
+# Local time for schedule logic (night pause, auto-scan window) and timestamps
+ENV TZ=Europe/Warsaw
 
 RUN addgroup --system app && adduser --system --group app \
     && chown -R app:app /app

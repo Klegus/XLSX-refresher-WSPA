@@ -1,6 +1,24 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pymongo import MongoClient
 import os
+import time
+
+# The whole system runs on Warsaw time regardless of the host/container TZ:
+# night pause, scan windows and every timestamp stored in MongoDB are local.
+WARSAW = ZoneInfo("Europe/Warsaw")
+os.environ["TZ"] = "Europe/Warsaw"
+if hasattr(time, "tzset"):
+    time.tzset()
+
+
+def to_iso(value):
+    """Datetime -> ISO string with Warsaw offset, so browsers never guess the zone."""
+    if value is None or not hasattr(value, "isoformat"):
+        return value
+    if getattr(value, "tzinfo", None) is None and hasattr(value, "hour"):
+        value = value.replace(tzinfo=WARSAW)
+    return value.isoformat()
 import boto3
 import watchtower
 import logging
@@ -219,7 +237,7 @@ def get_semester_collections():
             latest_plan = db[collection_name].find_one(sort=[("timestamp", -1)])
             if latest_plan and "plan_name" in latest_plan and "groups" in latest_plan:
                 faculty = extract_faculty_from_collection(collection_name)
-                category = determine_category(collection_name)
+                category = plan_mode_category(latest_plan["plan_name"]) or determine_category(collection_name)
 
                 # Convert mixed to boolean (handle string "true"/"false" from MongoDB)
                 mixed_value = latest_plan.get("mixed", False)
@@ -263,6 +281,18 @@ def extract_faculty_from_collection(collection_name: str) -> str:
         # Capitalize each word for display
         return faculty.title()
     return "Unknown"
+
+def plan_mode_category(plan_name: str):
+    """Study mode from the plan's file name ("... - st I - ..." -> "st").
+
+    The collection name also contains the hand-typed sheet name, which can say
+    something else (sheet "ARU nst I" in the stacjonarne file), so the file-name
+    convention wins; None when the name does not follow it.
+    """
+    from plan_naming import describe_plan
+    mode = describe_plan(plan_name).get("mode")
+    return {"st": "st", "nst": "nst", "nst puw": "nst_puw"}.get(mode)
+
 
 def determine_category(collection_name: str) -> str:
     """

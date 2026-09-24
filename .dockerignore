@@ -12,8 +12,6 @@ ENV/
 .mypy_cache/
 
 # Testy
-test_*.py
-tests/
 
 # IDE
 .vscode/
