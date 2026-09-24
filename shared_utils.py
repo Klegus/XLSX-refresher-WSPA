@@ -230,8 +230,17 @@ def get_semester_collections():
     """
     client = MongoClient(os.getenv("MONGO_URI"))
     db = client[os.getenv("MONGO_DB")]
+    # Only plans in the current configuration - collections of removed plans
+    # (e.g. last semester) stay in the database as history but are not listed
+    config = db.plans_config.find_one({"_id": "plans_json"}) or {}
+    current = {
+        f"plans_{p.get('faculty', '').replace(' ', '-').replace('_', '-')}_{p.get('name', '').lower().replace(' ', '_')}"
+        for p in (config.get("plans") or {}).values()
+    }
     collections_data = {}
     for collection_name in db.list_collection_names():
+        if current and collection_name not in current:
+            continue
         if collection_name.startswith("plans_"):
             # Pobierz najnowszy dokument z kolekcji
             latest_plan = db[collection_name].find_one(sort=[("timestamp", -1)])
