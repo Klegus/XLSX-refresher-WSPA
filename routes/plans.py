@@ -26,17 +26,54 @@ def natural_key(text):
     return [int(part) if part.isdigit() else part.casefold() for part in re.split(r'(\d+)', text)]
 
 
-def companion_pairs(db):
-    """{on-site plan collection: on-line plan collection} for plans published as a pair."""
+# Some programmes publish one sheet per meeting ("... - zj3", "... - zj5") plus a sheet with
+# the on-line meetings ("... - PIE st II zj on-line"). They are listed as one plan: the first
+# meeting's sheet, with the others attached; a cell of the "zj5" sheet without its own
+# meeting numbers belongs to meeting 5.
+_MEETING_RE = re.compile(r'\s*-\s*zj\.?\s*(\d{1,2})\s*$', re.I)
+_MEETING_ONLINE_RE = re.compile(r'\s*-\s*[^-]*?\bzj\.?\s*on-?\s?line\s*$', re.I)
+
+
+def companion_sets(db, allowed=None):
+    """Plans published in parts and shown as one plan:
+    {listed collection: {"base": name without the part, "meeting": its meeting or None,
+                         "parts": [{"label", "collection", "meeting"}]}}.
+    allowed - collections that may take part (e.g. not quarantined)."""
     config = db.plans_config.find_one({"_id": "plans_json"}, {"plans": 1}) or {}
-    onsite, online = {}, {}
+    onsite, online, meetings, meetings_online = {}, {}, {}, {}
     for plan in (config.get("plans") or {}).values():
-        name = plan.get("name", "")
+        name, collection = plan.get("name", ""), plan_collection_name(plan)
+        if allowed is not None and collection not in allowed:
+            continue
+        meeting = _MEETING_RE.search(name)
         if _ONSITE_RE.search(name):
-            onsite[_ONSITE_RE.sub("", name)] = plan_collection_name(plan)
+            onsite[_ONSITE_RE.sub("", name)] = collection
         elif _ONLINE_RE.search(name):
-            online[_ONLINE_RE.sub("", name)] = plan_collection_name(plan)
-    return {onsite[base]: online[base] for base in onsite if base in online}
+            online[_ONLINE_RE.sub("", name)] = collection
+        elif meeting:
+            meetings.setdefault(_MEETING_RE.sub("", name), {})[str(int(meeting.group(1)))] = collection
+        elif _MEETING_ONLINE_RE.search(name):
+            meetings_online[_MEETING_ONLINE_RE.sub("", name)] = collection
+    sets = {}
+    for base, collection in onsite.items():
+        if base in online:
+            sets[collection] = {"base": base, "meeting": None,
+                                "parts": [{"label": COMPANION_LABEL, "collection": online[base], "meeting": None}]}
+    for base, by_number in meetings.items():
+        first, *rest = sorted(by_number, key=int)
+        parts = [{"label": f"zjazd {n}", "collection": by_number[n], "meeting": n} for n in rest]
+        if base in meetings_online:
+            parts.append({"label": COMPANION_LABEL, "collection": meetings_online[base], "meeting": None})
+        if parts:
+            sets[by_number[first]] = {"base": base, "meeting": first, "parts": parts}
+    return sets
+
+
+def companion_pairs(db):
+    """{on-site / first meeting collection: on-line collection} (kept for callers that need
+    only the on-line half)."""
+    return {k: p["collection"] for k, s in companion_sets(db).items()
+            for p in s["parts"] if p["label"] == COMPANION_LABEL}
 
 
 def init_plan_routes(app, get_semester_collections, db):
@@ -82,26 +119,36 @@ def init_plan_routes(app, get_semester_collections, db):
             logger.warning(f"Meeting calendar lookup failed for {plan_name}: {e}")
             return None
 
-    def pairs_companion(collection_name, group_name=None):
-        """On-line classes attached to an on-site plan: {label, groups: {name: html}}.
-        When both sheets have the same groups only the student's own group is attached."""
-        online = companion_pairs(db).get(collection_name)
-        if not online:
-            return None
-        block = get_blocks(db).get(online)
-        if block and block["plan"]:
-            return None
-        doc = db[online].find_one({"groups": {"$exists": True}}, sort=[("timestamp", -1)])
-        if not doc or not isinstance(doc.get("groups"), dict):
-            return None
-        groups = {g: html.replace('\n', ' ') for g, html in doc["groups"].items()
-                  if not (block and g in block["groups"])}
-        if group_name in groups:
-            groups = {group_name: groups[group_name]}
-        if not groups:
-            return None
-        # the on-line sheet numbers its meetings on its own
-        return {"label": COMPANION_LABEL, "collection": online, "groups": groups, "zjazdy": plan_meetings(doc)}
+    def unblocked_sets():
+        blocks = get_blocks(db)
+        allowed = {c for c in current_plan_collections(db) if not (blocks.get(c) or {}).get("plan")}
+        return companion_sets(db, allowed), blocks
+
+    def plan_parts(collection_name, group_name=None):
+        """The other sheets of a plan published in parts: [{label, collection, groups: {name: html},
+        zjazdy, meeting}]. When a sheet has the student's group only that group is attached."""
+        sets, blocks = unblocked_sets()
+        entry = sets.get(collection_name)
+        if not entry:
+            return None, None
+        parts = []
+        for part in entry["parts"]:
+            block = blocks.get(part["collection"])
+            doc = db[part["collection"]].find_one({"groups": {"$exists": True}}, sort=[("timestamp", -1)])
+            if not doc or not isinstance(doc.get("groups"), dict):
+                continue
+            groups = {g: html.replace('\n', ' ') for g, html in doc["groups"].items()
+                      if not (block and g in block["groups"])}
+            if group_name in groups:
+                groups = {group_name: groups[group_name]}
+            elif part["meeting"]:
+                continue  # a meeting sheet without the student's group has nothing for them
+            if not groups:
+                continue
+            # every sheet numbers its meetings on its own
+            parts.append({"label": part["label"], "collection": part["collection"], "groups": groups,
+                          "zjazdy": plan_meetings(doc), "meeting": part["meeting"]})
+        return parts or None, entry["meeting"]
 
     @app.route('/api/faculties/<category>', methods=['GET'])
     def get_faculties(category: str):
@@ -135,9 +182,8 @@ def init_plan_routes(app, get_semester_collections, db):
             plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
             plans_config = plans_config_doc.get("plans", {}) if plans_config_doc else {}
 
-            pairs = {k: v for k, v in companion_pairs(db).items()
-                     if k in collections_data and v in collections_data}
-            hidden = set(pairs.values())
+            sets = companion_sets(db, set(collections_data))
+            hidden = {part["collection"] for entry in sets.values() for part in entry["parts"]}
 
             plans = []
             for collection_name, data in collections_data.items():
@@ -159,7 +205,9 @@ def init_plan_routes(app, get_semester_collections, db):
                     else:
                         mixed_bool = bool(mixed_value)
 
-                    naming = describe_plan(data["plan_name"])
+                    # a plan published in parts is named without the part ("zjazd 3", "w siedzibie")
+                    naming = describe_plan(sets[collection_name]["base"] if collection_name in sets
+                                           else data["plan_name"])
                     plan_data = {
                         "id": collection_name,
                         "name": data["plan_name"],
@@ -172,11 +220,8 @@ def init_plan_routes(app, get_semester_collections, db):
                         "groups": groups,
                         "mixed": mixed_bool
                     }
-                    if collection_name in pairs:
+                    if collection_name in sets:
                         plan_data["companion"] = True
-                        for key in ("display_name", "short_name"):
-                            plan_data[key] = re.sub(r",?\s*(?:zaj[eę]cia|zjazdy) w siedzibie|,?\s*zjazdy stacjonarne", "",
-                                                    plan_data[key] or "").replace("()", "").strip()
 
                     # If mixed flag is not in data, try to find it in plans_config
                     if not data.get("mixed", False):
@@ -208,7 +253,7 @@ def init_plan_routes(app, get_semester_collections, db):
             # Readable order: degree, year, then variant
             degree_order = {"I stopnia": 0, "jednolite magisterskie": 1, "II stopnia": 2}
             plans.sort(key=lambda p: (degree_order.get(p["degree"], 9), p["year"] or 99,
-                                      p["variant"] or "", p["name"]))
+                                      natural_key(p["variant"] or ""), natural_key(p["name"])))
             logger.debug(f"Found {len(plans)} plans for category {category} and faculty {faculty}")
             return jsonify({"plans": plans})
         except Exception as e:
@@ -266,9 +311,16 @@ def init_plan_routes(app, get_semester_collections, db):
                     "category": latest_plan.get("category", "st"),
                     "url": latest_plan.get("url", "")
                 }
-            companion = pairs_companion(collection_name, group_name) if group_name is not None else None
-            if companion:
-                response["companion"] = companion
+            if group_name is not None:
+                parts, meeting = plan_parts(collection_name, group_name)
+                if parts:
+                    response["parts"] = parts
+                    # older frontends read only the on-line half
+                    online = next((p for p in parts if p["label"] == COMPANION_LABEL), None)
+                    if online:
+                        response["companion"] = online
+                if meeting:
+                    response["meeting"] = meeting
             meetings = plan_meetings(latest_plan)
             if meetings:
                 response["zjazdy"] = meetings

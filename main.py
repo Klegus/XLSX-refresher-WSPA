@@ -1164,13 +1164,18 @@ async def main():
                     exam_session = _requests.Session()
                     if login_puw(exam_session):
                         refresh_exams(db, exam_session, get_system_config().get("exam_schedule_year"))
-                        # Meeting calendars (zjazdy -> dates), once a day or when none are stored yet
-                        last = (get_system_config().get("zjazdy_refreshed_at"))
-                        if not last or datetime.now() - last > timedelta(hours=24) or not db.zjazd_calendars.count_documents({}):
-                            from zjazdy import refresh as refresh_zjazdy
+                        # Meeting calendars (zjazdy -> dates), once a day, when none are stored yet
+                        # or when the calendar parser changed
+                        from zjazdy import refresh as refresh_zjazdy, CALENDAR_PARSER_VERSION
+                        config = get_system_config()
+                        last = config.get("zjazdy_refreshed_at")
+                        if (not last or datetime.now() - last > timedelta(hours=24)
+                                or config.get("zjazdy_parser") != CALENDAR_PARSER_VERSION
+                                or not db.zjazd_calendars.count_documents({})):
                             set_cycle_state(running=True, current_plan="Kalendarze zjazdów")
                             refresh_zjazdy(db, exam_session)
-                            db.system_config.update_one({"_id": "config"}, {"$set": {"zjazdy_refreshed_at": datetime.now()}})
+                            db.system_config.update_one({"_id": "config"}, {"$set": {
+                                "zjazdy_refreshed_at": datetime.now(), "zjazdy_parser": CALENDAR_PARSER_VERSION}})
                 except Exception as e:
                     logger.error(f"Exam timetable / meeting calendar refresh failed: {e}")
 

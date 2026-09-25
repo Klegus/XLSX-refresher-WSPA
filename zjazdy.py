@@ -25,6 +25,9 @@ from shared_utils import get_logger, fetch_bytes, UnsafeDownload
 
 logger = get_logger('Zjazdy')
 
+# bumped when parsing changes, so stored calendars are parsed again
+CALENDAR_PARSER_VERSION = 2
+
 _ROW_RE = re.compile(r'((?:\d{4}-\d{2}-\d{2}\s+)+)(\d{1,2})\s*$')
 _TITLE_RE = re.compile(r'organizacja\s+roku\s+akademickiego', re.I)
 
@@ -42,13 +45,19 @@ def parse_calendar(pdf_bytes):
 
 
 def parse_calendar_text(text):
-    seasons = {}
+    """One table per semester, each numbering its meetings from 1. A repeated number starts
+    the next table - the summer semester may start in February, so the month alone is not
+    enough to tell the tables apart."""
+    seasons, current, season = {}, None, None
     for line in text.splitlines():
         m = _ROW_RE.search(line.strip())
         if not m:
             continue
-        dates = m.group(1).split()
-        seasons.setdefault(_season(dates), {})[m.group(2)] = dates
+        dates, number = m.group(1).split(), m.group(2)
+        if current is None or number in current:
+            season = _season(dates) if season is None else ('letni' if season == 'zimowy' else 'zimowy')
+            current = seasons.setdefault(season, {})
+        current[number] = dates
     return seasons
 
 

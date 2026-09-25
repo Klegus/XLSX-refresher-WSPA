@@ -203,12 +203,35 @@ def test_weekend_onsite_plan_gets_online_companion():
     assert sorted(groups, key=natural_key) == ["Grupa 1 z", "Grupa 2 y", "Grupa 10 x"]
 
 
+def test_sheets_per_meeting_listed_as_one_plan():
+    from routes.plans import companion_sets
+    base = "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy"
+    db = mock.MagicMock()
+    db.plans_config.find_one.return_value = {"plans": {
+        n: {"name": f"{base} - {n}", "faculty": "Pielęgniarstwo"}
+        for n in ("zj12", "zj3", "zj5", "PIE st II zj on-line")}}
+    sets = companion_sets(db)
+    assert len(sets) == 1
+    listed, entry = next(iter(sets.items()))
+    assert listed.endswith("_zj3") and entry["meeting"] == "3" and entry["base"] == base
+    assert [(p["label"], p["meeting"]) for p in entry["parts"]] == [
+        ("zjazd 5", "5"), ("zjazd 12", "12"), ("zajęcia on-line", None)]
+    # a quarantined first meeting hands the listing over to the next one
+    allowed = {c for c in (p["collection"] for p in entry["parts"])}
+    listed, entry = next(iter(companion_sets(db, allowed).items()))
+    assert listed.endswith("_zj5") and entry["meeting"] == "5"
+    # a single meeting sheet stays as it is
+    db.plans_config.find_one.return_value = {"plans": {"a": {"name": f"{base} - zj3", "faculty": "P"}}}
+    assert companion_sets(db) == {}
+
+
 ZJAZDY_TEXT = """Szczegółowa organizacja roku akademickiego 2026/2027 - studia niestacjonarne
 PIĄTEK SOBOTA NIEDZIELA NR ZJAZDU
 2026-10-02 2026-10-03 2026-10-04 1
 2026-10-16 2026-10-17 2026-10-18 2
 PIĄTEK SOBOTA NIEDZIELA NR ZJAZDU
-2027-03-05 2027-03-06 2027-03-07 1
+2027-02-26 2027-02-27 2027-02-28 1
+2027-03-05 2027-03-06 2027-03-07 2
 """
 
 
@@ -216,7 +239,7 @@ def test_meeting_calendar_parsed_and_matched_to_plans():
     from zjazdy import parse_calendar_text, calendar_for
     seasons = parse_calendar_text(ZJAZDY_TEXT)
     assert seasons['zimowy']['2'] == ['2026-10-16', '2026-10-17', '2026-10-18']
-    assert seasons['letni']['1'][0] == '2027-03-05'
+    assert seasons['letni']['1'][0] == '2027-02-26' and seasons['zimowy']['1'][0] == '2026-10-02'
     weekend = {'1': ['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04']}
     cals = [
         {'course': 'Strefa studenta - kierunek Informatyka - studia I stopnia', 'title': 'NST - organizacja roku akademickiego 2026-2027', 'seasons': seasons},
