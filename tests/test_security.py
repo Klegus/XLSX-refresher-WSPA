@@ -203,6 +203,15 @@ def test_weekend_onsite_plan_gets_online_companion():
     assert sorted(groups, key=natural_key) == ["Grupa 1 z", "Grupa 2 y", "Grupa 10 x"]
 
 
+def test_classes_of_one_cell_are_separate_lessons():
+    from routes.plans import display_html
+    html = "<tr>\n<td>A - wykład\nzj.4,6\n\nB - projekt\nzj.0,1</td>\n<td>C - ćwiczenia\nzj.3</td>\n<td></td>\n</tr>"
+    out = display_html(html)
+    assert "\n" not in out
+    assert "<td><div data-lesson>A - wykład zj.4,6</div><div data-lesson>B - projekt zj.0,1</div></td>" in out
+    assert "<td>C - ćwiczenia zj.3</td>" in out and "<td></td>" in out
+
+
 def test_sheets_per_meeting_listed_as_one_plan():
     from routes.plans import companion_sets
     base = "Pielęgniarstwo - studia I stopnia - st II - semestr 3 - zimowy"
