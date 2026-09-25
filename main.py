@@ -10,7 +10,6 @@ from werkzeug.exceptions import BadRequest, InternalServerError
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from typing import Dict
-from fastapi import HTTPException
 from typing import Optional
 import pymongo
 import traceback
@@ -25,15 +24,19 @@ import logging
 import sys
 
 # Import shared logger
-from shared_utils import configure_root_logger, get_system_config, get_semester_collections, log_cycle_summary, log_plan_header
+from shared_utils import configure_root_logger, get_system_config, get_semester_collections, log_cycle_summary, log_plan_header, current_plan_collections
 
 # Setup app-specific logger
 logger = configure_root_logger(logging.INFO)
 
 load_dotenv()
 
+# Error reporting is opt-in: without SENTRY_DSN the sentry_sdk calls below are no-ops
+if os.getenv("SENTRY_DSN"):
+    sentry_sdk.init(dsn=os.getenv("SENTRY_DSN"), traces_sample_rate=0.1, send_default_pii=False)
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024  # public API only takes small JSON bodies
 
 # Load environment variables
 
@@ -322,8 +325,10 @@ init_suggestion_routes(app, db, public=True)
 
 
 def run_flask_app():
+    # Production WSGI server instead of the Werkzeug development server
+    from waitress import serve
     port = int(os.getenv("PORT", "5005"))
-    app.run(host="0.0.0.0", port=port)
+    serve(app, host="0.0.0.0", port=port, threads=8, ident=None)
 
 
 class LessonPlanManager:
@@ -377,7 +382,6 @@ class LessonPlanManager:
             discord_config = collection.find_one({"_id": "discord_config"})
             if discord_config and "webhook_url" in discord_config:
                 logger.info("Pobrano URL webhooka z konfiguracji Discord.")
-                logger.debug(f"Webhook URL: {discord_config['webhook_url']}")
                 return discord_config["webhook_url"]
         except Exception as e:
             logger.error(f"Błąd podczas pobierania webhook URL: {str(e)}")
@@ -461,7 +465,7 @@ class LessonPlanManager:
                                 "embeds": [embed]
                             }
 
-                            requests.post(webhook_url, json=webhook_data)
+                            requests.post(webhook_url, json=webhook_data, timeout=15)
                             logger.info("Webhook sent", extra={"plan_name": self.plan_name})
                         except Exception as e:
                             logger.error(f"Error sending webhook: {str(e)}", extra={"plan_name": self.plan_name})
@@ -566,10 +570,19 @@ def get_collections():
     return jsonify(collections)
 
 
+def _limit_arg(default, maximum=100):
+    try:
+        return max(1, min(maximum, int(request.args.get('limit', default))))
+    except (TypeError, ValueError):
+        return default
+
+
 @app.route("/api/changes/<collection_name>")
 def get_plan_changes(collection_name):
     """Get change history for a specific plan."""
-    limit = int(request.args.get('limit', 10))
+    if collection_name not in current_plan_collections(db):
+        return jsonify({"changes": []}), 404
+    limit = _limit_arg(10)
     changes = list(
         db.plan_changes.find(
             {"collection": collection_name},
@@ -582,7 +595,7 @@ def get_plan_changes(collection_name):
 @app.route("/api/changes")
 def get_all_changes():
     """Get recent changes across all plans."""
-    limit = int(request.args.get('limit', 20))
+    limit = _limit_arg(20)
     changes = list(
         db.plan_changes.find(
             {},

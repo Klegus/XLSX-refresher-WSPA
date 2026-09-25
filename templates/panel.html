@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WSPA Admin Panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{CSRF_TOKEN}}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         body { background: #f8f9fa; }
         .navbar-brand { font-weight: 700; letter-spacing: -0.02em; }
@@ -49,6 +50,10 @@
                     <input class="form-check-input" type="checkbox" id="maintenanceMode">
                     <label class="form-check-label text-light small" for="maintenanceMode">Maintenance</label>
                 </div>
+                <form method="post" action="/logout" class="mb-0">
+                    <input type="hidden" name="csrf_token" value="{{CSRF_TOKEN}}">
+                    <button class="btn btn-sm btn-outline-light" type="submit">Wyloguj</button>
+                </form>
             </div>
         </div>
     </nav>
@@ -396,9 +401,22 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // Every state-changing request carries the session CSRF token; an expired session goes back to login
+        (() => {
+            const token = document.querySelector('meta[name="csrf-token"]').content;
+            const nativeFetch = window.fetch.bind(window);
+            window.fetch = (url, opts = {}) => {
+                const o = { ...opts, headers: new Headers(opts.headers || {}), credentials: 'same-origin' };
+                if (o.method && !/^(GET|HEAD)$/i.test(o.method)) o.headers.set('X-CSRF-Token', token);
+                return nativeFetch(url, o).then(r => { if (r.status === 401) location.href = '/login'; return r; });
+            };
+        })();
+    </script>
     <script>
         let currentEditPlanName = null;
+        const logErrorStore = [];
 
         function showErrors(errors) {
             const errorMessages = errors.map(error =>
@@ -447,17 +465,17 @@
                         const hasUpdates = log.new_plans > 0;
                         const plans = log.updated_plans || [];
                         let details = '<span class="text-muted">-</span>';
-                        if (hasErrors) details = `<button class="btn btn-sm btn-outline-danger py-0" onclick='showErrors(${JSON.stringify(log.errors)})'>Błędy</button>`;
+                        if (hasErrors) { const k = logErrorStore.push(log.errors) - 1; details = `<button class="btn btn-sm btn-outline-danger py-0" onclick="showErrors(logErrorStore[${k}])">Błędy</button>`; }
                         if (hasUpdates && plans.length > 0) {
-                            const list = plans.map(p => `<li class="small">${p}</li>`).join('');
+                            const list = plans.map(p => `<li class="small">${esc(p)}</li>`).join('');
                             details = `<button class="btn btn-sm btn-outline-success py-0" onclick="this.nextElementSibling.classList.toggle('d-none')">${plans.length} planów</button><ul class="d-none mt-1 mb-0 ps-3 small" style="list-style:disc">${list}</ul>`;
                         }
                         table.innerHTML += `<tr>
                             <td class="small text-nowrap">${new Date(log.timestamp).toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' })}</td>
-                            <td>${log.successful_checks}</td>
-                            <td>${hasUpdates ? `<span class="badge bg-success">${log.new_plans}</span>` : '0'}</td>
+                            <td>${esc(log.successful_checks)}</td>
+                            <td>${hasUpdates ? `<span class="badge bg-success">${esc(log.new_plans)}</span>` : '0'}</td>
                             <td>${hasErrors ? '<span class="badge bg-danger">!</span>' : '-'}</td>
-                            <td>${log.execution_time || '-'}</td>
+                            <td>${esc(log.execution_time || '-')}</td>
                             <td>${details}</td>
                         </tr>`;
                     });
@@ -550,8 +568,13 @@
                 entries.forEach(([name, plan]) => {
                     const el = document.createElement('div');
                     el.className = 'list-group-item d-flex justify-content-between align-items-center py-2';
-                    el.innerHTML = `<div class="min-w-0"><h6 class="mb-0 small">${name}</h6><small class="text-muted text-truncate d-block" style="max-width:400px">${plan.download_url || ''}</small></div>
-                        <div class="btn-group btn-group-sm"><button class="btn btn-outline-primary" onclick="editPlan('${name}', ${JSON.stringify(plan).replace(/"/g, '&quot;')})">Edytuj</button><button class="btn btn-outline-danger" onclick="deletePlan('${name}')">Usuń</button></div>`;
+                    el.innerHTML = `<div class="min-w-0"><h6 class="mb-0 small"></h6><small class="text-muted text-truncate d-block" style="max-width:400px"></small></div>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-outline-primary">Edytuj</button><button class="btn btn-outline-danger">Usuń</button></div>`;
+                    el.querySelector('h6').textContent = name;
+                    el.querySelector('small').textContent = plan.download_url || '';
+                    const [editBtn, deleteBtn] = el.querySelectorAll('button');
+                    editBtn.addEventListener('click', () => editPlan(name, plan));
+                    deleteBtn.addEventListener('click', () => deletePlan(name));
                     container.appendChild(el);
                 });
             }).catch(e => console.error('Plans error:', e));
@@ -662,16 +685,16 @@
             const c = document.getElementById('validationResults');
             c.innerHTML = '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm"></div>Walidowanie...</div>';
             fetch('/api/validate').then(r => r.json()).then(data => {
-                if (data.error) { c.innerHTML = `<div class="alert alert-danger">${data.error}</div>`; return; }
+                if (data.error) { c.innerHTML = `<div class="alert alert-danger">${esc(data.error)}</div>`; return; }
                 let html = `<div class="d-flex gap-2 mb-3"><span class="badge bg-success">${data.ok} OK</span><span class="badge bg-danger">${data.errors} błędów</span></div>`;
                 if (data.errors === 0) { html += '<div class="alert alert-success py-2 mb-0">Wszystkie plany poprawne!</div>'; }
                 else {
                     html += `<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Plan</th><th>Grupa</th><th>Kat.</th><th>Problem</th></tr></thead><tbody>`;
-                    data.details.forEach(d => { html += `<tr><td class="small">${d.plan.substring(0,55)}</td><td class="small">${d.group}</td><td><span class="badge bg-secondary">${d.category}</span></td><td class="small text-danger">${d.issues.join('; ')}</td></tr>`; });
+                    data.details.forEach(d => { html += `<tr><td class="small">${esc(d.plan.substring(0,55))}</td><td class="small">${esc(d.group)}</td><td><span class="badge bg-secondary">${esc(d.category)}</span></td><td class="small text-danger">${esc(d.issues.join('; '))}</td></tr>`; });
                     html += `</tbody></table></div><button class="btn btn-warning btn-sm" onclick="reprocessInvalid()">Wymuś ponowne przetworzenie (${data.errors})</button>`;
                 }
                 c.innerHTML = html;
-            }).catch(e => { c.innerHTML = `<div class="alert alert-danger">Błąd: ${e}</div>`; });
+            }).catch(e => { c.innerHTML = `<div class="alert alert-danger">Błąd: ${esc(e)}</div>`; });
         }
 
         function reprocessInvalid() {
@@ -764,7 +787,7 @@
                     .map(([k, n]) => `<span class="badge ${kinds[k].severity >= 3 ? 'bg-danger-subtle text-danger-emphasis' : 'bg-light text-dark'} border">${esc(kinds[k].label)}: ${n}</span>`).join(' ');
                 const open = openValidation.has(r.plan_id);
                 return `<div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button ${open ? '' : 'collapsed'} py-2" type="button" data-bs-toggle="collapse" data-bs-target="#${id}" onclick="toggleValidationOpen('${esc(r.plan_id)}')">
+                    <h2 class="accordion-header"><button class="accordion-button ${open ? '' : 'collapsed'} py-2" type="button" data-bs-toggle="collapse" data-bs-target="#${id}" onclick="toggleValidationOpen(${jsq(r.plan_id)})">
                         <div class="d-flex flex-column gap-1 w-100 me-3 min-w-0">
                             <div class="d-flex gap-2 align-items-center"><span class="small fw-semibold text-truncate">${esc(r.plan)}</span></div>
                             <div class="d-flex flex-wrap gap-1 align-items-center">${badge} ${r.coverage != null ? `<span class="badge bg-light text-dark border">zgodność ${r.coverage}%</span>` : ''} ${chips}</div>
@@ -772,9 +795,9 @@
                     <div id="${id}" class="accordion-collapse collapse ${open ? 'show' : ''}"><div class="accordion-body pt-2">
                         ${renderIssues(r)}
                         <div class="d-flex flex-wrap gap-2 mt-3">
-                            ${r.has_blocking ? (r.acked ? `<button class="btn btn-outline-danger btn-sm" onclick="ackPlan('${esc(r.plan_id)}', true)">Cofnij zatwierdzenie</button>`
-                                : `<button class="btn btn-outline-primary btn-sm" onclick="ackPlan('${esc(r.plan_id)}')">Zatwierdź mimo to</button>`) : ''}
-                            <button class="btn btn-outline-secondary btn-sm" onclick="startDeepValidation(['${esc(r.plan_id)}'])">Waliduj ponownie</button>
+                            ${r.has_blocking ? (r.acked ? `<button class="btn btn-outline-danger btn-sm" onclick="ackPlan(${jsq(r.plan_id)}, true)">Cofnij zatwierdzenie</button>`
+                                : `<button class="btn btn-outline-primary btn-sm" onclick="ackPlan(${jsq(r.plan_id)})">Zatwierdź mimo to</button>`) : ''}
+                            <button class="btn btn-outline-secondary btn-sm" onclick="startDeepValidation([${jsq(r.plan_id)}])">Waliduj ponownie</button>
                             <span class="text-muted small align-self-center">Sprawdzono ${esc(fmtAgo(r.validated_at) || '–')}</span>
                         </div>
                     </div></div></div>`;
@@ -829,6 +852,8 @@
 
         // ─── Dashboard ──────────────────────────────────
         const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        // Value placed inside an inline handler (onclick="f(...)"): a JS string literal, HTML-escaped for the attribute
+        const jsq = v => esc(JSON.stringify(String(v ?? '')));
         const CATEGORY_LABELS = { st: 'Stacjonarne', nst: 'Niestacjonarne', 'nst-online': 'NST online', 'nst-puw': 'NST PUW' };
         let overviewTimer = null, lastOverview = null, planFilter = 'all', serverOffsetMs = 0;
 
@@ -1111,9 +1136,9 @@
             const c = document.getElementById('scanResults'); c.style.display = 'block';
             let html = `<p class="mb-2"><strong>Rok ${r.year}, sem. ${r.semester}</strong> — ${r.total_scraped} znalezionych (w bazie: ${r.total_current})</p>`;
             if (r.new_count + r.changed_count + r.removed_count === 0) { html += '<div class="alert alert-success py-2">Brak zmian!</div>'; c.innerHTML = html; return; }
-            if (r.new_count > 0) { html += `<h6 class="text-success mt-3 d-flex align-items-center gap-2">Nowe (${r.new_count}) <a href="#" class="small fw-normal" onclick="toggleScanGroup('scan-add', true); return false;">zaznacz wszystkie</a><a href="#" class="small fw-normal text-muted" onclick="toggleScanGroup('scan-add', false); return false;">odznacz</a></h6><div class="list-group mb-2" style="max-height:360px; overflow:auto">`; for (const [k,v] of Object.entries(r.new)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-add" value="${k}" checked><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
-            if (r.changed_count > 0) { html += `<h6 class="text-warning mt-3">Zmienione (${r.changed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.changed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-update" value="${k}" checked><small><strong>${k}</strong> — ${v.join(', ')}</small></label>`; html += '</div>'; }
-            if (r.removed_count > 0) { html += `<h6 class="text-danger mt-3">Usunięte (${r.removed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.removed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-remove" value="${k}"><small><strong>${k}</strong> — ${v}</small></label>`; html += '</div>'; }
+            if (r.new_count > 0) { html += `<h6 class="text-success mt-3 d-flex align-items-center gap-2">Nowe (${r.new_count}) <a href="#" class="small fw-normal" onclick="toggleScanGroup('scan-add', true); return false;">zaznacz wszystkie</a><a href="#" class="small fw-normal text-muted" onclick="toggleScanGroup('scan-add', false); return false;">odznacz</a></h6><div class="list-group mb-2" style="max-height:360px; overflow:auto">`; for (const [k,v] of Object.entries(r.new)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-add" value="${esc(k)}" checked><small><strong>${esc(k)}</strong> — ${esc(v)}</small></label>`; html += '</div>'; }
+            if (r.changed_count > 0) { html += `<h6 class="text-warning mt-3">Zmienione (${r.changed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.changed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-update" value="${esc(k)}" checked><small><strong>${esc(k)}</strong> — ${esc(v.join(', '))}</small></label>`; html += '</div>'; }
+            if (r.removed_count > 0) { html += `<h6 class="text-danger mt-3">Usunięte (${r.removed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.removed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-remove" value="${esc(k)}"><small><strong>${esc(k)}</strong> — ${esc(v)}</small></label>`; html += '</div>'; }
             html += `<div class="d-flex flex-wrap gap-2 align-items-center mt-3 pt-3 border-top">
                 <button class="btn btn-primary btn-sm" onclick="applyScanResults(true)">Zastosuj i pobierz plany teraz</button>
                 <button class="btn btn-outline-secondary btn-sm" onclick="applyScanResults(false)">Tylko zastosuj</button>

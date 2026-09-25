@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from typing import Optional
-from shared_utils import get_logger
+from shared_utils import get_logger, current_plan_collections
 from plan_naming import describe_plan
 from plan_notes import notes_for_groups
 
@@ -8,6 +8,7 @@ from plan_notes import notes_for_groups
 logger = get_logger('routes.plans')
 
 BLOCKED_MESSAGE = "Plan jest w trakcie weryfikacji – wkrótce będzie dostępny."
+MAX_MIXED_GROUPS = 20
 
 
 def init_plan_routes(app, get_semester_collections, db):
@@ -53,7 +54,7 @@ def init_plan_routes(app, get_semester_collections, db):
             return jsonify({"faculties": faculties})
         except Exception as e:
             logger.error(f"Error getting faculties for category {category}: {str(e)}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500
 
     @app.route('/api/plans/<category>/<faculty>', methods=['GET'])
     def get_plans(category: str, faculty: str):
@@ -134,13 +135,15 @@ def init_plan_routes(app, get_semester_collections, db):
             return jsonify({"plans": plans})
         except Exception as e:
             logger.error(f"Error getting plans for category {category}, faculty {faculty}: {str(e)}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500
 
     @app.route('/api/plan/<collection_name>', methods=['GET'])
     @app.route('/api/plan/<collection_name>/<group_name>', methods=['GET'])
     def get_plan(collection_name: str, group_name: Optional[str] = None):
         try:
             logger.info(f"Pobieranie planu dla kolekcji: {collection_name}, grupy: {group_name}")
+            if collection_name not in current_plan_collections(db):
+                return jsonify({"detail": "Plan not found"}), 404
             blocked = blocked_response(collection_name, [group_name] if group_name else [])
             if blocked:
                 return blocked
@@ -189,7 +192,7 @@ def init_plan_routes(app, get_semester_collections, db):
             return jsonify(response)
         except Exception as e:
             logger.error(f"Error retrieving plan {collection_name}, group {group_name}: {str(e)}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500
 
     @app.route('/api/plan/<collection_name>/mixed', methods=['POST'])
     def get_mixed_plan(collection_name: str):
@@ -198,13 +201,17 @@ def init_plan_routes(app, get_semester_collections, db):
         Request body: {"groups": ["group1", "group2", ...]}
         """
         try:
-            data = request.get_json()
-            if not data or "groups" not in data:
+            data = request.get_json(silent=True)
+            if not isinstance(data, dict) or "groups" not in data:
                 return jsonify({"detail": "Groups list is required in request body"}), 400
 
             requested_groups = data["groups"]
-            if not isinstance(requested_groups, list) or len(requested_groups) == 0:
-                return jsonify({"detail": "Groups must be a non-empty list"}), 400
+            if (not isinstance(requested_groups, list) or not requested_groups
+                    or len(requested_groups) > MAX_MIXED_GROUPS
+                    or not all(isinstance(g, str) for g in requested_groups)):
+                return jsonify({"detail": "Groups must be a non-empty list of names"}), 400
+            if collection_name not in current_plan_collections(db):
+                return jsonify({"detail": "Plan not found"}), 404
 
             logger.info(f"Getting mixed plan for collection: {collection_name}, groups: {requested_groups}")
             blocked = blocked_response(collection_name, requested_groups)
@@ -254,4 +261,4 @@ def init_plan_routes(app, get_semester_collections, db):
 
         except Exception as e:
             logger.error(f"Error retrieving mixed plan {collection_name}: {str(e)}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500

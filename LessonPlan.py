@@ -4,9 +4,8 @@ from colorama import init, Style
 from difflib import SequenceMatcher
 from bs4 import BeautifulSoup
 import requests
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
 import datetime
+from html import escape as html_escape
 import pytz
 import json
 import pymongo
@@ -23,7 +22,8 @@ logger = get_logger('LessonPlan')
 
 # Bump when HTML generation changes - stored plans with another version get
 # re-processed even if the Excel file itself did not change.
-PARSER_VERSION = 6
+# v7: cell text is HTML-escaped (the plan HTML is rendered as markup in the browser)
+PARSER_VERSION = 7
 
 _DAY_NAMES = {
     'PONIEDZIALEK': 'Poniedziałek', 'WTOREK': 'Wtorek', 'SRODA': 'Środa',
@@ -36,7 +36,7 @@ def config_fingerprint(plan_config):
     """Hash of config fields that change the generated HTML."""
     import hashlib
     relevant = {k: plan_config.get(k) for k in ("sheet_name", "groups", "group_aliases", "category", "mixed")}
-    return hashlib.md5(json.dumps(relevant, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    return hashlib.md5(json.dumps(relevant, sort_keys=True, ensure_ascii=False).encode(), usedforsecurity=False).hexdigest()
 
 
 def _squash(text):
@@ -287,7 +287,7 @@ class LessonPlan(LessonPlanDownloader):
             result = {}
             for group, cols in group_cols.items():
                 parts = ["<table border='1'>\n<tr>\n<th><b>Godziny</b></th>\n"]
-                parts += [f"<th><b>{day}</b></th>\n" for day, _, _ in spans]
+                parts += [f"<th><b>{html_escape(day)}</b></th>\n" for day, _, _ in spans]
                 parts.append("</tr>\n")
                 rows_written = 0
                 for r, time_label in time_rows:
@@ -299,7 +299,7 @@ class LessonPlan(LessonPlanDownloader):
                             text = str(value).strip() if value is not None else ''
                             if text and text not in texts:
                                 texts.append(text)
-                        texts_per_day.append("\n\n".join(texts))
+                        texts_per_day.append("\n\n".join(html_escape(t) for t in texts))
                     if not any(texts_per_day):
                         continue
                     parts.append(f"<tr>\n<td>{time_label}</td>\n")
@@ -315,6 +315,22 @@ class LessonPlan(LessonPlanDownloader):
             return result
         finally:
             wb.close()
+
+    def _record_changes(self, collection, collection_name, new_groups, new_checksum):
+        """Diff the new groups against the latest stored version and store the changes
+        in plan_changes. Never blocks saving the new version."""
+        try:
+            from plan_differ import diff_plans, save_diff_to_db
+            latest = collection.find_one({"groups": {"$exists": True}}, sort=[("_id", -1)])
+            if not latest or not latest.get("groups"):
+                return
+            changes = diff_plans(latest["groups"], new_groups)
+            if changes:
+                save_diff_to_db(self.db, collection_name, self.plan_config["name"], changes,
+                                latest.get("checksum", ""), new_checksum)
+                logger.info(f"Detected {len(changes)} changes in {collection_name}")
+        except Exception as e:
+            logger.warning(f"Diff failed (non-critical): {e}")
 
     def _generate_html_direct(self, checksum):
         """Generate HTML table directly from Excel using openpyxl.
@@ -376,7 +392,7 @@ class LessonPlan(LessonPlanDownloader):
         headers = ['Godziny'] + [name for _, name in day_cols]
         html = "<table border='1'>\n<tr>\n"
         for h in headers:
-            html += f"<th><b>{h}</b></th>\n"
+            html += f"<th><b>{html_escape(h)}</b></th>\n"
         html += "</tr>\n"
 
         # Stop words — rows with these indicate end of schedule data
@@ -398,7 +414,7 @@ class LessonPlan(LessonPlanDownloader):
 
             # Format time with superscript
             import re
-            time_formatted = re.sub(r'(\d+)(\d{2})', r'\1<sup>\2</sup>', time_str)
+            time_formatted = re.sub(r'(\d+)(\d{2})', r'\1<sup>\2</sup>', html_escape(time_str))
 
             html += "<tr>\n"
             html += f"<td>{time_formatted}</td>\n"
@@ -409,7 +425,7 @@ class LessonPlan(LessonPlanDownloader):
                 # Skip non-schedule content in data cells
                 if cell_text and any(sw in cell_text.lower() for sw in ['egzamin', 'program studiów', 'praktyka zawodowa']):
                     cell_text = ''
-                html += f"<td>{cell_text}</td>\n"
+                html += f"<td>{html_escape(cell_text)}</td>\n"
 
             html += "</tr>\n"
 
@@ -763,7 +779,7 @@ class LessonPlan(LessonPlanDownloader):
                 <div class="plan-message">
                     <p>Przepraszamy, ale ten plan nie jest obecnie możliwy do przetworzenia.</p>
                     <p>Możemy jedynie sprawdzić jego ostatnią aktualizację. Jeśli coś się zmieni w przyszłości, poinformujemy o tym.</p>
-                    <p><a href="{self.plan_config['download_url']}" class="download-btn" target="_blank">Pobierz oryginalny plan</a></p>
+                    <p><a href="{html_escape(self.plan_config['download_url'], quote=True)}" class="download-btn" target="_blank" rel="noopener noreferrer">Pobierz oryginalny plan</a></p>
                 </div>
                 """
                 
@@ -847,6 +863,7 @@ class LessonPlan(LessonPlanDownloader):
                         if self.is_mixed:
                             document["mixed"] = True
                             document["group_column_info"] = self.group_column_counts
+                        self._record_changes(collection, collection_name, groups_html, new_checksum)
                         collection.insert_one(document)
                         logger.info(f"Saved plan via sheet generator to {collection_name}")
                     return new_checksum
@@ -1564,25 +1581,7 @@ class LessonPlan(LessonPlanDownloader):
                         )
                         return
 
-                    # Diff with previous version before saving
-                    try:
-                        from plan_differ import diff_plans, save_diff_to_db
-                        latest = collection.find_one(sort=[("_id", -1)])
-                        if latest and latest.get("groups"):
-                            old_groups = latest["groups"]
-                            new_groups = plans_data["groups"]
-                            changes = diff_plans(old_groups, new_groups)
-                            if changes:
-                                save_diff_to_db(
-                                    self.db, collection_name,
-                                    self.plan_config["name"],
-                                    changes,
-                                    latest.get("checksum", ""),
-                                    checksum
-                                )
-                                logger.info(f"Detected {len(changes)} changes in {collection_name}")
-                    except Exception as e:
-                        logger.warning(f"Diff failed (non-critical): {e}")
+                    self._record_changes(collection, collection_name, plans_data["groups"], checksum)
 
                     # Insert the new plan with all groups
                     result = collection.insert_one(plans_data)
@@ -1627,7 +1626,7 @@ class LessonPlan(LessonPlanDownloader):
 
         # Add header row
         for col in df.columns:
-            bolded_header = " ".join(f"<b>{word}</b>" for word in col.split())
+            bolded_header = " ".join(f"<b>{html_escape(word)}</b>" for word in str(col).split())
             parts.append(f"<th>{bolded_header}</th>\n")
         parts.append("</tr>\n")
 
@@ -1650,10 +1649,10 @@ class LessonPlan(LessonPlanDownloader):
             parts = cell.replace(" ", "").split("-")
             if len(parts) == 2:
                 start, end = parts
-                formatted_start = self.format_time(start)
-                formatted_end = self.format_time(end)
+                formatted_start = self.format_time(html_escape(start))
+                formatted_end = self.format_time(html_escape(end))
                 return f"{formatted_start} - {formatted_end}"
-        return cell
+        return html_escape(cell)
 
     def format_time(self, time):
         if len(time) == 3:

@@ -5,10 +5,12 @@ Shares MongoDB connection with the main app.
 """
 import os
 import threading
+from html import escape
 from flask import Flask, Response, jsonify, request
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from shared_utils import get_logger, get_system_config, to_iso
+from admin_auth import init_admin_auth, csrf_token
 
 load_dotenv()
 
@@ -21,6 +23,9 @@ mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 mongo_db_name = os.getenv("MONGO_DB", "Lesson_dev")
 admin_mongo_client = MongoClient(mongo_uri)
 admin_db = admin_mongo_client[mongo_db_name]
+
+# Login, CSRF, security headers and audit log for every route below
+init_admin_auth(admin_app, admin_db)
 
 
 def get_admin_system_config():
@@ -60,7 +65,9 @@ def update_admin_plans_config(plans):
 @admin_app.route("/")
 @admin_app.route("/panel")
 def show_panel():
-    return Response(open("templates/panel.html").read(), mimetype="text/html")
+    with open("templates/panel.html", encoding="utf-8") as f:
+        page = f.read().replace("{{CSRF_TOKEN}}", escape(csrf_token()))
+    return Response(page, mimetype="text/html")
 
 
 # ─── Status (read-only, for panel display) ────────────────
@@ -369,8 +376,10 @@ def deep_validation_results():
 def ack_validation():
     """Admin accepts the current file version of a plan despite issues (or revokes it)."""
     from datetime import datetime
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     plan_id = data.get("plan_id")
+    if not isinstance(plan_id, str):  # never let a JSON object reach the query as an operator
+        return jsonify({"success": False, "error": "plan_id must be a string"}), 400
     doc = admin_db.plan_validation.find_one({"_id": plan_id})
     if not doc:
         return jsonify({"success": False, "error": "Brak walidacji dla tego planu"}), 404
@@ -479,9 +488,10 @@ def reprocess_invalid():
 
 
 def run_admin_app():
+    from waitress import serve
     port = int(os.getenv("ADMIN_PORT", "5006"))
     logger.info(f"Starting admin panel on port {port}")
-    admin_app.run(host="0.0.0.0", port=port)
+    serve(admin_app, host="0.0.0.0", port=port, threads=4, ident=None)
 
 
 def start_admin_in_thread():

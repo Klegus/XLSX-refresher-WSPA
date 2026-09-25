@@ -1,5 +1,5 @@
 from flask import jsonify
-from shared_utils import get_logger
+from shared_utils import get_logger, current_plan_collections
 
 # Setup logger
 logger = get_logger('routes.comparisons')
@@ -12,6 +12,9 @@ def init_comparison_routes(app, db):
         """
         try:
             logger.debug(f"Fetching comparisons for collection: {collection_name}, group: {group_name}")
+            # group_name becomes part of a field path below
+            if collection_name not in current_plan_collections(db) or '.' in group_name or group_name.startswith('$'):
+                return jsonify({"detail": "Not found"}), 404
 
             # Primary source: per-plan comparison collection used by comparer.py
             comparisons = []

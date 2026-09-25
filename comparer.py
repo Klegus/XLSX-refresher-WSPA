@@ -122,7 +122,7 @@ class LessonPlanComparator:
         }
 
         try:
-            response = requests.post(self.openrouter_api_url, headers=headers, json=data)
+            response = requests.post(self.openrouter_api_url, headers=headers, json=data, timeout=60)
             response.raise_for_status()
             return response.json()['choices'][0]['message']['content'].strip()
         except requests.exceptions.RequestException as e:
