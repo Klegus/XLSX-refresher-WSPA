@@ -210,6 +210,11 @@ def test_classes_of_one_cell_are_separate_lessons():
     assert "\n" not in out
     assert "<td><div data-lesson>A - wykład zj.4,6</div><div data-lesson>B - projekt zj.0,1</div></td>" in out
     assert "<td>C - ćwiczenia zj.3</td>" in out and "<td></td>" in out
+    # an empty line where the lecturer is missing does not start a new class
+    out = display_html("<td>Język angielski - lektorat 15h\n\nzj.1,2,3\nzajęcia w siedzibie Uczelni\n\n"
+                       "Psychiatria - wykład\nmgr X\n\nzj.4</td>")
+    assert out == ("<td><div data-lesson>Język angielski - lektorat 15h zj.1,2,3 zajęcia w siedzibie Uczelni</div>"
+                   "<div data-lesson>Psychiatria - wykład mgr X zj.4</div></td>")
 
 
 def test_sheets_per_meeting_listed_as_one_plan():

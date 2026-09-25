@@ -23,6 +23,11 @@ COMPANION_LABEL = "zajęcia on-line"
 
 _CELL_RE = re.compile(r'(<td\b[^>]*>)(.*?)(</td>)', re.S)
 _LESSON_SEP_RE = re.compile(r'\n[ \t]*\n\s*')
+# An empty line also stands where a class has no lecturer ("Język angielski - lektorat 15h",
+# "", "zj.1,2,3") - a part starting like the rest of a class belongs to the class before it
+_CONTINUATION_RE = re.compile(
+    r'^(?:zj\b|zj[.,]|dat[yae]\b|sala\b|mgr\b|dr\b|prof\b|in[zż]\.|lic\.|zaj[eę]cia\s+(?:w\s+siedzibie|on-?\s?line)'
+    r'|na\s+zj|w\s+godz|\+|\d)', re.I)
 
 
 def display_html(html):
@@ -31,7 +36,14 @@ def display_html(html):
     wrapped in <div data-lesson> so the week filter and the calendar judge them one by one.
     Line breaks inside a class become spaces, as before."""
     def cell(m):
-        lessons = [part for part in _LESSON_SEP_RE.split(m.group(2).strip()) if part.strip()]
+        lessons = []
+        for part in _LESSON_SEP_RE.split(m.group(2).strip()):
+            if not part.strip():
+                continue
+            if lessons and _CONTINUATION_RE.match(part.strip()):
+                lessons[-1] += '\n' + part
+            else:
+                lessons.append(part)
         if len(lessons) > 1:
             body = ''.join(f'<div data-lesson>{part.replace(chr(10), " ")}</div>' for part in lessons)
         else:
@@ -143,9 +155,9 @@ def init_plan_routes(app, get_semester_collections, db):
         allowed = {c for c in current_plan_collections(db) if not (blocks.get(c) or {}).get("plan")}
         return companion_sets(db, allowed), blocks
 
-    def plan_parts(collection_name, group_name=None):
+    def plan_parts(collection_name, group_names=()):
         """The other sheets of a plan published in parts: [{label, collection, groups: {name: html},
-        zjazdy, meeting}]. When a sheet has the student's group only that group is attached."""
+        zjazdy, meeting}]. When a sheet has the student's groups only those groups are attached."""
         sets, blocks = unblocked_sets()
         entry = sets.get(collection_name)
         if not entry:
@@ -158,8 +170,9 @@ def init_plan_routes(app, get_semester_collections, db):
                 continue
             groups = {g: display_html(html) for g, html in doc["groups"].items()
                       if not (block and g in block["groups"])}
-            if group_name in groups:
-                groups = {group_name: groups[group_name]}
+            own = {g: html for g, html in groups.items() if g in group_names}
+            if own:
+                groups = own
             elif part["meeting"]:
                 continue  # a meeting sheet without the student's group has nothing for them
             if not groups:
@@ -331,7 +344,7 @@ def init_plan_routes(app, get_semester_collections, db):
                     "url": latest_plan.get("url", "")
                 }
             if group_name is not None:
-                parts, meeting = plan_parts(collection_name, group_name)
+                parts, meeting = plan_parts(collection_name, [group_name])
                 if parts:
                     response["parts"] = parts
                     # older frontends read only the on-line half
@@ -414,6 +427,9 @@ def init_plan_routes(app, get_semester_collections, db):
             meetings = plan_meetings(latest_plan)
             if meetings:
                 response["zjazdy"] = meetings
+            parts, _ = plan_parts(collection_name, requested_groups)
+            if parts:
+                response["parts"] = parts
             logger.debug(f"Returning HTML for {len(group_htmls)} groups")
             return jsonify(response)
 
