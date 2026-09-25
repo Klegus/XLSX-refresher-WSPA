@@ -21,6 +21,25 @@ _ONLINE_RE = re.compile(r'\s*-\s*(?:zaj[eę]cia|z\.?)\s+on-?\s?line\s*$', re.I)
 COMPANION_LABEL = "zajęcia on-line"
 
 
+_CELL_RE = re.compile(r'(<td\b[^>]*>)(.*?)(</td>)', re.S)
+_LESSON_SEP_RE = re.compile(r'\n[ \t]*\n\s*')
+
+
+def display_html(html):
+    """Plan HTML for the frontend. A cell may hold several classes separated by an empty
+    line, each with its own dates or meetings ("zj.4,6" and "zj.0,1,2"): every class is
+    wrapped in <div data-lesson> so the week filter and the calendar judge them one by one.
+    Line breaks inside a class become spaces, as before."""
+    def cell(m):
+        lessons = [part for part in _LESSON_SEP_RE.split(m.group(2).strip()) if part.strip()]
+        if len(lessons) > 1:
+            body = ''.join(f'<div data-lesson>{part.replace(chr(10), " ")}</div>' for part in lessons)
+        else:
+            body = m.group(2).replace('\n', ' ')
+        return m.group(1) + body + m.group(3)
+    return _CELL_RE.sub(cell, html or '').replace('\n', ' ')
+
+
 def natural_key(text):
     """Sort key: numbers compared as numbers ("Grupa 2" before "Grupa 10")."""
     return [int(part) if part.isdigit() else part.casefold() for part in re.split(r'(\d+)', text)]
@@ -137,7 +156,7 @@ def init_plan_routes(app, get_semester_collections, db):
             doc = db[part["collection"]].find_one({"groups": {"$exists": True}}, sort=[("timestamp", -1)])
             if not doc or not isinstance(doc.get("groups"), dict):
                 continue
-            groups = {g: html.replace('\n', ' ') for g, html in doc["groups"].items()
+            groups = {g: display_html(html) for g, html in doc["groups"].items()
                       if not (block and g in block["groups"])}
             if group_name in groups:
                 groups = {group_name: groups[group_name]}
@@ -300,7 +319,7 @@ def init_plan_routes(app, get_semester_collections, db):
                     "groups": None
                 }
             else:
-                plan_html = latest_plan["groups"][group_name].replace('\n', ' ') if group_name else latest_plan.get("plan_html", "")
+                plan_html = display_html(latest_plan["groups"][group_name]) if group_name else latest_plan.get("plan_html", "")
                 response = {
                     "plan_name": latest_plan["plan_name"],
                     "group_name": group_name,
@@ -366,7 +385,7 @@ def init_plan_routes(app, get_semester_collections, db):
 
             for group_name in requested_groups:
                 if group_name in latest_plan["groups"]:
-                    group_htmls[group_name] = latest_plan["groups"][group_name].replace('\n', ' ')
+                    group_htmls[group_name] = display_html(latest_plan["groups"][group_name])
                 else:
                     missing_groups.append(group_name)
 
