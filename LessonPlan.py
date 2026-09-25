@@ -23,7 +23,8 @@ logger = get_logger('LessonPlan')
 # Bump when HTML generation changes - stored plans with another version get
 # re-processed even if the Excel file itself did not change.
 # v7: cell text is HTML-escaped (the plan HTML is rendered as markup in the browser)
-PARSER_VERSION = 7
+# v8: meeting calendar from the sheet header stored with the plan ("zjazdy")
+PARSER_VERSION = 8
 
 _DAY_NAMES = {
     'PONIEDZIALEK': 'Poniedziałek', 'WTOREK': 'Wtorek', 'SRODA': 'Środa',
@@ -280,9 +281,12 @@ class LessonPlan(LessonPlanDownloader):
                 last_time_row = time_rows[-1][0]
                 self.last_notes = parse_notes(row_texts(range(1, days_row)),
                                               row_texts(range(last_time_row + 1, max_row + 1)))
+                from zjazdy import parse_header_calendar
+                self.last_zjazdy = parse_header_calendar('\n'.join(row_texts(range(1, days_row))))
             except Exception as e:
                 logger.warning(f"Could not parse notes around the table: {e}")
                 self.last_notes = None
+                self.last_zjazdy = None
 
             result = {}
             for group, cols in group_cols.items():
@@ -857,6 +861,8 @@ class LessonPlan(LessonPlanDownloader):
                             "category": self.schedule_type,
                             "groups": groups_html,
                             "notes": getattr(self, "last_notes", None),
+                            # meeting dates listed in the sheet header (e-learning programmes)
+                            "zjazdy": getattr(self, "last_zjazdy", None),
                             "parser_version": PARSER_VERSION,
                             "config_fingerprint": config_fingerprint(self.plan_config),
                         }

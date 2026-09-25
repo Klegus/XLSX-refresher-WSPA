@@ -14,3 +14,4 @@ numpy==2.0.2
 boto3==1.35.77
 watchtower==2.0.1
 defusedxml==0.7.1
+pypdf==6.19.0
