@@ -1,6 +1,7 @@
+import re
 from flask import jsonify, request
 from typing import Optional
-from shared_utils import get_logger, current_plan_collections
+from shared_utils import get_logger, current_plan_collections, plan_collection_name
 from plan_naming import describe_plan
 from plan_notes import notes_for_groups
 
@@ -9,6 +10,33 @@ logger = get_logger('routes.plans')
 
 BLOCKED_MESSAGE = "Plan jest w trakcie weryfikacji – wkrótce będzie dostępny."
 MAX_MIXED_GROUPS = 20
+
+# Weekend studies are published as two sheets: classes on site (per group) and on-line
+# lectures (whole year). A student needs both, so the on-line sheet is attached to the
+# on-site plan as its companion and not listed separately.
+# "... - zajęcia w siedzibie" / "... - zajęcia on-line" (nursing), "... - z stacjonarne" /
+# "... - z on-line" (part-time and e-learning programmes)
+_ONSITE_RE = re.compile(r'\s*-\s*(?:zaj[eę]cia\s+w\s+siedzibie|z\.?\s*stac(?:jonarn[eya])?\.?)\s*$', re.I)
+_ONLINE_RE = re.compile(r'\s*-\s*(?:zaj[eę]cia|z\.?)\s+on-?\s?line\s*$', re.I)
+COMPANION_LABEL = "zajęcia on-line"
+
+
+def natural_key(text):
+    """Sort key: numbers compared as numbers ("Grupa 2" before "Grupa 10")."""
+    return [int(part) if part.isdigit() else part.casefold() for part in re.split(r'(\d+)', text)]
+
+
+def companion_pairs(db):
+    """{on-site plan collection: on-line plan collection} for plans published as a pair."""
+    config = db.plans_config.find_one({"_id": "plans_json"}, {"plans": 1}) or {}
+    onsite, online = {}, {}
+    for plan in (config.get("plans") or {}).values():
+        name = plan.get("name", "")
+        if _ONSITE_RE.search(name):
+            onsite[_ONSITE_RE.sub("", name)] = plan_collection_name(plan)
+        elif _ONLINE_RE.search(name):
+            online[_ONLINE_RE.sub("", name)] = plan_collection_name(plan)
+    return {onsite[base]: online[base] for base in onsite if base in online}
 
 
 def init_plan_routes(app, get_semester_collections, db):
@@ -36,6 +64,44 @@ def init_plan_routes(app, get_semester_collections, db):
         if block["plan"] or any(g in block["groups"] for g in group_names):
             return jsonify({"detail": {"message": BLOCKED_MESSAGE, "blocked": True}}), 423
         return None
+
+    def plan_meetings(doc):
+        """Dates of the meetings ("zj.3" -> dates) for plans that list meeting numbers:
+        the calendar in the sheet header first, else the programme's PDF calendar."""
+        if not doc:
+            return None
+        if doc.get("zjazdy"):
+            return doc["zjazdy"]
+        plan_name = doc.get("plan_name")
+        if not plan_name:
+            return None
+        from zjazdy import calendar_for, calendars
+        try:
+            return calendar_for(plan_name, calendars(db))
+        except Exception as e:
+            logger.warning(f"Meeting calendar lookup failed for {plan_name}: {e}")
+            return None
+
+    def pairs_companion(collection_name, group_name=None):
+        """On-line classes attached to an on-site plan: {label, groups: {name: html}}.
+        When both sheets have the same groups only the student's own group is attached."""
+        online = companion_pairs(db).get(collection_name)
+        if not online:
+            return None
+        block = get_blocks(db).get(online)
+        if block and block["plan"]:
+            return None
+        doc = db[online].find_one({"groups": {"$exists": True}}, sort=[("timestamp", -1)])
+        if not doc or not isinstance(doc.get("groups"), dict):
+            return None
+        groups = {g: html.replace('\n', ' ') for g, html in doc["groups"].items()
+                  if not (block and g in block["groups"])}
+        if group_name in groups:
+            groups = {group_name: groups[group_name]}
+        if not groups:
+            return None
+        # the on-line sheet numbers its meetings on its own
+        return {"label": COMPANION_LABEL, "collection": online, "groups": groups, "zjazdy": plan_meetings(doc)}
 
     @app.route('/api/faculties/<category>', methods=['GET'])
     def get_faculties(category: str):
@@ -69,8 +135,14 @@ def init_plan_routes(app, get_semester_collections, db):
             plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
             plans_config = plans_config_doc.get("plans", {}) if plans_config_doc else {}
 
+            pairs = {k: v for k, v in companion_pairs(db).items()
+                     if k in collections_data and v in collections_data}
+            hidden = set(pairs.values())
+
             plans = []
             for collection_name, data in collections_data.items():
+                if collection_name in hidden:
+                    continue
                 if data["category"] == category and data["faculty"] == faculty:
                     # Convert groups to just the keys if it's a dict with HTML values
                     groups = data["groups"]
@@ -78,6 +150,7 @@ def init_plan_routes(app, get_semester_collections, db):
                         # If values are HTML strings (contain '<table'), just use keys
                         if any(isinstance(v, str) and '<table' in v for v in groups.values()):
                             groups = {k: k for k in groups.keys()}
+                        groups = {k: groups[k] for k in sorted(groups, key=natural_key)}
 
                     # Convert mixed to boolean (handle string "true"/"false" from MongoDB)
                     mixed_value = data.get("mixed", False)
@@ -99,6 +172,11 @@ def init_plan_routes(app, get_semester_collections, db):
                         "groups": groups,
                         "mixed": mixed_bool
                     }
+                    if collection_name in pairs:
+                        plan_data["companion"] = True
+                        for key in ("display_name", "short_name"):
+                            plan_data[key] = re.sub(r",?\s*(?:zaj[eę]cia|zjazdy) w siedzibie|,?\s*zjazdy stacjonarne", "",
+                                                    plan_data[key] or "").replace("()", "").strip()
 
                     # If mixed flag is not in data, try to find it in plans_config
                     if not data.get("mixed", False):
@@ -188,6 +266,12 @@ def init_plan_routes(app, get_semester_collections, db):
                     "category": latest_plan.get("category", "st"),
                     "url": latest_plan.get("url", "")
                 }
+            companion = pairs_companion(collection_name, group_name) if group_name is not None else None
+            if companion:
+                response["companion"] = companion
+            meetings = plan_meetings(latest_plan)
+            if meetings:
+                response["zjazdy"] = meetings
             logger.debug("Wysyłanie odpowiedzi")
             return jsonify(response)
         except Exception as e:
@@ -256,6 +340,9 @@ def init_plan_routes(app, get_semester_collections, db):
                 "url": latest_plan.get("url", "")
             }
 
+            meetings = plan_meetings(latest_plan)
+            if meetings:
+                response["zjazdy"] = meetings
             logger.debug(f"Returning HTML for {len(group_htmls)} groups")
             return jsonify(response)
 

@@ -36,6 +36,8 @@ if os.getenv("SENTRY_DSN"):
     sentry_sdk.init(dsn=os.getenv("SENTRY_DSN"), traces_sample_rate=0.1, send_default_pii=False)
 
 app = Flask(__name__)
+# Keep the order of dict keys (e.g. groups sorted naturally: 1, 2, ..., 10) - Flask sorts them by default
+app.json.sort_keys = False
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024  # public API only takes small JSON bodies
 
 # Load environment variables
@@ -1162,8 +1164,15 @@ async def main():
                     exam_session = _requests.Session()
                     if login_puw(exam_session):
                         refresh_exams(db, exam_session, get_system_config().get("exam_schedule_year"))
+                        # Meeting calendars (zjazdy -> dates), once a day or when none are stored yet
+                        last = (get_system_config().get("zjazdy_refreshed_at"))
+                        if not last or datetime.now() - last > timedelta(hours=24) or not db.zjazd_calendars.count_documents({}):
+                            from zjazdy import refresh as refresh_zjazdy
+                            set_cycle_state(running=True, current_plan="Kalendarze zjazdów")
+                            refresh_zjazdy(db, exam_session)
+                            db.system_config.update_one({"_id": "config"}, {"$set": {"zjazdy_refreshed_at": datetime.now()}})
                 except Exception as e:
-                    logger.error(f"Exam timetable refresh failed: {e}")
+                    logger.error(f"Exam timetable / meeting calendar refresh failed: {e}")
 
                 set_cycle_state(
                     running=False,

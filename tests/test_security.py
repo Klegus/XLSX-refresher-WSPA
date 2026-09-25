@@ -179,3 +179,77 @@ def test_fetch_rejects_redirect_to_other_host_and_non_xlsx():
         fetch_bytes(session, "https://puw.wspa.pl/plan.xlsx", require_xlsx=True)
     session.get.return_value = Resp(200, body=b"PK\x03\x04rest")
     assert fetch_bytes(session, "https://puw.wspa.pl/plan.xlsx", require_xlsx=True).startswith(b"PK")
+
+
+def test_weekend_onsite_plan_gets_online_companion():
+    from routes.plans import companion_pairs, natural_key
+    base = "Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (weekendowe)"
+    db = mock.MagicMock()
+    db.plans_config.find_one.return_value = {"plans": {
+        "a": {"name": base + " - zajęcia w siedzibie", "faculty": "Pielęgniarstwo"},
+        "b": {"name": base + " - zajęcia on-line", "faculty": "Pielęgniarstwo"},
+        "c": {"name": "Informatyka - studia I stopnia - st III - semestr zimowy", "faculty": "Informatyka"},
+    }}
+    pairs = companion_pairs(db)
+    assert len(pairs) == 1
+    onsite, online = next(iter(pairs.items()))
+    assert onsite.endswith("zajęcia_w_siedzibie") and online.endswith("zajęcia_on-line")
+    db.plans_config.find_one.return_value = {"plans": {
+        "x": {"name": "Informatyka - studia I stopnia - nst III - semestr zimowy - INF nst III - z stacjonarne", "faculty": "Informatyka"},
+        "y": {"name": "Informatyka - studia I stopnia - nst III - semestr zimowy - INF nst III - z on-line", "faculty": "Informatyka"},
+    }}
+    assert len(companion_pairs(db)) == 1
+    groups = ["Grupa 10 x", "Grupa 2 y", "Grupa 1 z"]
+    assert sorted(groups, key=natural_key) == ["Grupa 1 z", "Grupa 2 y", "Grupa 10 x"]
+
+
+ZJAZDY_TEXT = """Szczegółowa organizacja roku akademickiego 2026/2027 - studia niestacjonarne
+PIĄTEK SOBOTA NIEDZIELA NR ZJAZDU
+2026-10-02 2026-10-03 2026-10-04 1
+2026-10-16 2026-10-17 2026-10-18 2
+PIĄTEK SOBOTA NIEDZIELA NR ZJAZDU
+2027-03-05 2027-03-06 2027-03-07 1
+"""
+
+
+def test_meeting_calendar_parsed_and_matched_to_plans():
+    from zjazdy import parse_calendar_text, calendar_for
+    seasons = parse_calendar_text(ZJAZDY_TEXT)
+    assert seasons['zimowy']['2'] == ['2026-10-16', '2026-10-17', '2026-10-18']
+    assert seasons['letni']['1'][0] == '2027-03-05'
+    weekend = {'1': ['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04']}
+    cals = [
+        {'course': 'Strefa studenta - kierunek Informatyka - studia I stopnia', 'title': 'NST - organizacja roku akademickiego 2026-2027', 'seasons': seasons},
+        {'course': 'Strefa studenta - kierunek Pielęgniarstwo', 'title': 'PIE ST - sem. 1 - organizacja roku akademickiego 2026-2027', 'seasons': {'zimowy': {'1': ['2026-10-05']}}},
+        {'course': 'Strefa studenta - kierunek Pielęgniarstwo', 'title': 'PIE ST - sem. 1 weekendowy - organizacja roku akademickiego 2026-2027', 'seasons': {'zimowy': weekend}},
+    ]
+    assert calendar_for('Informatyka - studia I stopnia - nst III - semestr zimowy - INF nst II', cals) == seasons['zimowy']
+    assert calendar_for('Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (weekendowe) - zajęcia w siedzibie', cals) == weekend
+    assert calendar_for('Pielęgniarstwo - studia I stopnia - st I - semestr 1 - zimowy (dzienne) - PIE ST I', cals) == {'1': ['2026-10-05']}
+    # e-learning studies publish no calendar; other degree does not match
+    assert calendar_for('Informatyka - studia I stopnia - nst puw II - semestr zimowy - INF II', cals) is None
+    assert calendar_for('Informatyka - studia II stopnia - nst I - semestr zimowy - INF MUZ', cals) is None
+
+
+def test_meeting_calendar_from_sheet_header():
+    from zjazdy import parse_header_calendar
+    text = ("ZARZĄDZANIE III SEMESTR rok akademicki 2026/2027\nzjazdy stacjonarne (w siedzibie Uczelni)\n\n"
+            "• zjazd nr 1: 16 października 2026 r. – 18 października 2026 r. \n"
+            "• zjazd nr 2:  4 grudnia 2026 r. – 6 grudnia 2026 r.\n"
+            "zjazd nr 3: 31 grudnia 2026 r. - 2 stycznia 2027 r.")
+    cal = parse_header_calendar(text)
+    assert cal['1'] == ['2026-10-16', '2026-10-17', '2026-10-18']
+    assert cal['2'] == ['2026-12-04', '2026-12-05', '2026-12-06']
+    assert cal['3'] == ['2026-12-31', '2027-01-01', '2027-01-02']
+    assert parse_header_calendar('INFORMATYKA V SEMESTR zjazdy on-line') is None
+
+
+def test_every_elearning_fixture_with_dates_in_header_is_parsed():
+    import openpyxl
+    from zjazdy import parse_header_calendar
+    for cfg in load_plans().values():
+        if 'puw' not in cfg['name'].lower():
+            continue
+        header = openpyxl.load_workbook(fixture_path(cfg), read_only=True)[cfg['sheet_name']]['A1'].value or ''
+        if 'zjazd nr' in header:
+            assert parse_header_calendar(header), cfg['sheet_name']

@@ -139,13 +139,9 @@ def scrape_course_for_xlsx(session, course_url):
     return xlsx_links
 
 
-def scrape_all_xlsx_links(session, progress_cb=None):
-    year_label = get_academic_year_label()
-    semester = get_current_semester()
-
-    if progress_cb:
-        progress_cb(f"Szukam kursów Strefa studenta ({year_label})...")
-
+def list_strefa_courses(session, year_label=None):
+    """(name, url) of every "Strefa studenta" course of the current academic year."""
+    year_label = year_label or get_academic_year_label()
     all_courses = []
     subcats, courses = scrape_strefa_courses(session, CATEGORY_URL, year_label)
     all_courses.extend(courses)
@@ -164,6 +160,17 @@ def scrape_all_xlsx_links(session, progress_cb=None):
         if url not in seen:
             seen.add(url)
             unique_courses.append((name, url))
+    return unique_courses
+
+
+def scrape_all_xlsx_links(session, progress_cb=None):
+    year_label = get_academic_year_label()
+    semester = get_current_semester()
+
+    if progress_cb:
+        progress_cb(f"Szukam kursów Strefa studenta ({year_label})...")
+
+    unique_courses = list_strefa_courses(session, year_label)
 
     if progress_cb:
         progress_cb(f"Znaleziono {len(unique_courses)} kursów, szukam .xlsx...")
