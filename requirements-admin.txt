@@ -6,7 +6,7 @@ requests==2.33.0
 beautifulsoup4==4.12.3
 openpyxl==3.1.5
 lxml==6.1.0
-pytz==2024.2
+pytz==2026.3.post1
 colorama==0.4.6
 boto3==1.35.77
 watchtower==2.0.1
