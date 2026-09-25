@@ -467,9 +467,8 @@ def reconcile_all(db, session, plans, progress_cb=None):  # noqa: C901
         url = plan_cfg.get('download_url')
         try:
             if url not in files:
-                resp = session.get(url, timeout=60)
-                resp.raise_for_status()
-                files[url] = resp.content
+                from shared_utils import fetch_bytes
+                files[url] = fetch_bytes(session, url, timeout=60, require_xlsx=True)
             doc = db[plan_collection_name(plan_cfg)].find_one(
                 {"groups": {"$exists": True}}, sort=[("timestamp", pymongo.DESCENDING)])
             result = reconcile_plan(plan_id, plan_cfg, files[url], doc)

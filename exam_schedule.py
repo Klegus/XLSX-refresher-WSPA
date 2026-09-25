@@ -360,11 +360,12 @@ def refresh(db, session, year=None):
     if not files:
         raise RuntimeError("Nie znaleziono terminarza na PUW (kategoria Terminarze)")
     chosen = wanted if wanted in files else sorted(files)[-1]
-    resp = session.get(files[chosen], timeout=60, allow_redirects=True)
-    resp.raise_for_status()
-    if resp.content[:2] != b'PK':
-        raise RuntimeError(f"Terminarz {chosen} nie jest plikiem .xlsx ({resp.headers.get('content-type')})")
-    checksum = hashlib.md5(resp.content, usedforsecurity=False).hexdigest()
+    from shared_utils import fetch_bytes, UnsafeDownload
+    try:
+        content = fetch_bytes(session, files[chosen], timeout=60, require_xlsx=True)
+    except UnsafeDownload as e:
+        raise RuntimeError(f"Terminarz {chosen}: {e}")
+    checksum = hashlib.md5(content, usedforsecurity=False).hexdigest()
 
     # Same file as last cycle: only note that it was checked
     previous = db.exam_schedule.find_one({"_id": "current"}, {"checksum": 1, "academic_year": 1, "requested_year": 1})
@@ -377,7 +378,7 @@ def refresh(db, session, year=None):
 
     config = db.plans_config.find_one({"_id": "plans_json"}) or {}
     faculties = sorted({p.get('name', '').split(' - ')[0].strip() for p in (config.get('plans') or {}).values()} - {''})
-    entries, problems = parse_workbook(resp.content, faculties)
+    entries, problems = parse_workbook(content, faculties)
 
     doc = {
         "_id": "current",

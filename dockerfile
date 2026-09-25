@@ -4,37 +4,14 @@ FROM python:3.12-slim AS builder
 WORKDIR /app
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y gcc
+RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
 # Upgrade pip first to ensure we have the latest version
 RUN pip install --upgrade pip
-# Install with retries and increased timeout
-# Split into groups to avoid timeouts on large packages
-RUN pip install --no-cache-dir --timeout=120 --retries=5 \
-    Flask==3.0.3 \
-    pymongo==4.10.0 \
-    python-dotenv==1.0.1 \
-    requests==2.32.3 \
-    pytz==2024.2 \
-    colorama==0.4.6
-RUN pip install --no-cache-dir --timeout=120 --retries=5 \
-    pandas==2.2.3 \
-    numpy==2.0.2
-RUN pip install --no-cache-dir --timeout=120 --retries=5 \
-    beautifulsoup4==4.12.3 \
-    openpyxl==3.1.5 \
-    lxml==5.3.0
-RUN pip install --no-cache-dir --timeout=120 --retries=5 \
-    selenium==4.25.0
-RUN pip install --no-cache-dir --timeout=120 --retries=5 \
-    sentry-sdk==2.18.0 \
-    fastapi==0.115.0 \
-    pywebpush==2.0.3 \
-    discord.py==2.4.0 \
-    boto3==1.35.77 \
-    watchtower==2.0.1
+# Versions are pinned in requirements.txt (single source of truth, audited with pip-audit)
+RUN pip install --no-cache-dir --timeout=120 --retries=5 -r requirements.txt
 
 # Copy application files
 COPY *.py ./
@@ -45,7 +22,8 @@ COPY templates/ templates/
 # no network, no database). A failing test stops the build.
 FROM builder AS test
 COPY tests/ tests/
-RUN pip install --no-cache-dir pytest==8.3.3 \
+COPY requirements-dev.txt .
+RUN pip install --no-cache-dir -r requirements-dev.txt \
     && python -m pytest -q -p no:cacheprovider tests \
     && touch /tmp/tests-passed
 
@@ -70,8 +48,8 @@ RUN addgroup --system app && adduser --system --group app \
 # Switch to non-root user
 USER app
 
-# Expose port
-EXPOSE 80
+# Expose port (PORT, default 5005)
+EXPOSE 5005
 
 # Run the application
 CMD ["python", "main.py"]

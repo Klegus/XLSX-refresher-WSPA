@@ -4,7 +4,7 @@ from flask import jsonify, request
 
 from exam_schedule import ALL, entry_matches, squash
 from plan_naming import describe_plan
-from shared_utils import get_logger, to_iso
+from shared_utils import get_logger, to_iso, current_plan_collections
 
 logger = get_logger('routes.exams')
 
@@ -58,6 +58,8 @@ def init_exam_routes(app, db):
             groups = [g for g in (request.args.get("groups") or "").split(",") if g]
 
             plan_collection = request.args.get("plan")
+            if plan_collection and plan_collection not in current_plan_collections(db):
+                plan_collection = None
             if plan_collection:
                 latest = db[plan_collection].find_one({"plan_name": {"$exists": True}}, sort=[("timestamp", -1)])
                 if latest:
@@ -94,7 +96,7 @@ def init_exam_routes(app, db):
             })
         except Exception as e:
             logger.error(f"Error getting exams: {e}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500
 
     @app.route('/api/exams/faculties', methods=['GET'])
     def get_exam_faculties():

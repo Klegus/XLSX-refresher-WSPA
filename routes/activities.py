@@ -12,7 +12,7 @@ def init_activity_routes(app, db):
         try:
             logger.debug("Reading activities with query parameters")
             skip = max(0, int(request.args.get('skip', 0)))
-            limit = min(50, int(request.args.get('limit', 20)))
+            limit = max(1, min(50, int(request.args.get('limit', 20))))
             start_date = request.args.get('start_date')
             end_date = request.args.get('end_date')
             
@@ -81,4 +81,4 @@ def init_activity_routes(app, db):
             return jsonify({"detail": str(e)}), 400
         except Exception as e:
             logger.error(f"Error retrieving activities: {str(e)}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500

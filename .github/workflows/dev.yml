@@ -107,19 +107,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install bandit safety
-      - name: Run security checks
+          pip install bandit pip-audit
+      - name: Static analysis (bandit)
+        run: bandit -r . -c .bandit.yml --confidence-level medium --severity-level medium
+      - name: Dependency vulnerabilities (pip-audit)
         run: |
-          echo "Running Bandit security checks..."
-          bandit -r . --confidence-level medium --severity-level medium -c .bandit.yml || true
-          
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "Production branch - enforcing strict security checks"
-            safety scan --output screen --policy-file .safety-policy.yml
-          else
-            echo "Development branch - running security checks in report-only mode"
-            safety scan --output screen || true
-          fi
+          pip-audit -r requirements.txt
+          pip-audit -r requirements-admin.txt
 
   test:
     name: Run Tests

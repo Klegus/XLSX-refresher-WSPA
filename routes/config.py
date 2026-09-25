@@ -6,6 +6,26 @@ from shared_utils import get_logger
 # Setup logger
 logger = get_logger('routes.config')
 
+# Fields of system_config the panel may set directly, with their validators.
+# Everything else (cycle state, scan results, flags) is written only by the backend.
+EDITABLE_SYSTEM_CONFIG = {
+    "check_interval": lambda v: isinstance(v, int) and not isinstance(v, bool) and 60 <= v <= 86400,
+    "auto_scan_hours": lambda v: isinstance(v, int) and not isinstance(v, bool) and 1 <= v <= 168,
+}
+
+
+def _editable_system_config(values):
+    if not isinstance(values, dict):
+        raise ValueError("system_config must be an object")
+    unknown = set(values) - set(EDITABLE_SYSTEM_CONFIG)
+    if unknown:
+        raise ValueError(f"Fields not editable: {', '.join(sorted(unknown))}")
+    bad = [k for k, v in values.items() if not EDITABLE_SYSTEM_CONFIG[k](v)]
+    if bad:
+        raise ValueError(f"Invalid value for: {', '.join(bad)}")
+    return values
+
+
 def init_config_routes(app, get_system_config, get_plans_config, update_system_config, update_plans_config, db):
     @app.route("/api/config", methods=["GET", "POST", "PUT"])
     def manage_config():
@@ -33,7 +53,9 @@ def init_config_routes(app, get_system_config, get_plans_config, update_system_c
             if "system_config" in data:
                 try:
                     logger.info("Updating system configuration")
-                    update_system_config(data["system_config"])
+                    update_system_config(_editable_system_config(data["system_config"]))
+                except ValueError as e:
+                    return jsonify({"error": str(e)}), 400
                 except Exception as e:
                     logger.error(f"Failed to update system config: {str(e)}")
                     return jsonify({"error": f"Failed to update system config: {str(e)}"}), 500
@@ -140,7 +162,7 @@ def init_config_routes(app, get_system_config, get_plans_config, update_system_c
             # Get current state
             current_config = get_system_config()
             current_state = current_config.get("maintenance_mode", False)
-            new_state = data["maintenance_mode"]
+            new_state = bool(data["maintenance_mode"])
             
             # Only update if state is changing
             if current_state != new_state:

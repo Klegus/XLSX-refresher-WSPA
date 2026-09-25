@@ -101,6 +101,17 @@ def scrape_strefa_courses(session, url, year_label):
     return list(set(subcategory_urls)), courses
 
 
+def _allowed(href):
+    """Only links on the university platform become download URLs / get followed."""
+    from shared_utils import check_download_url, UnsafeDownload
+    try:
+        check_download_url(href)
+        return True
+    except UnsafeDownload:
+        logger.warning(f"Skipping link outside the allowed hosts: {href[:120]}")
+        return False
+
+
 def scrape_course_for_xlsx(session, course_url):
     resp = session.get(course_url, timeout=30)
     soup = BeautifulSoup(resp.text, 'html.parser')
@@ -108,20 +119,20 @@ def scrape_course_for_xlsx(session, course_url):
 
     for link in soup.find_all('a', href=True):
         href = link.get('href', '')
-        if '.xlsx' in href.lower():
+        if '.xlsx' in href.lower() and _allowed(href):
             text = link.get_text(strip=True)
             if is_plan_xlsx(text or unquote(href.split('/')[-1].split('?')[0])):
                 xlsx_links.append((text, href))
 
     for link in soup.find_all('a', href=True):
         href = link.get('href', '')
-        if 'mod/folder/view.php' in href:
+        if 'mod/folder/view.php' in href and _allowed(href):
             folder_resp = session.get(href, timeout=30)
             folder_soup = BeautifulSoup(folder_resp.text, 'html.parser')
             for flink in folder_soup.find_all('a', href=True):
                 fhref = flink.get('href', '')
                 fname = flink.get_text(strip=True)
-                if '.xlsx' in fhref.lower():
+                if '.xlsx' in fhref.lower() and _allowed(fhref):
                     display = fname if fname else unquote(fhref.split('/')[-1].split('?')[0])
                     if is_plan_xlsx(display):
                         xlsx_links.append((display, fhref))

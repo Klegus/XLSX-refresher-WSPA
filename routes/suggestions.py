@@ -2,6 +2,8 @@ from flask import jsonify, request
 from werkzeug.exceptions import BadRequest
 from datetime import datetime, timedelta
 import hashlib
+import hmac
+import secrets
 from bson.objectid import ObjectId
 import requests
 import os
@@ -24,7 +26,8 @@ def send_pushover_notification(content):
                 "token": pushover_key,
                 "user": os.getenv("PUSHOVER_USER", pushover_key),  # Using same key as user if not specified
                 "message": f"Nowa sugestia: {content}"
-            }
+            },
+            timeout=10,
         )
         
         if response.status_code == 200:
@@ -37,12 +40,17 @@ def send_pushover_notification(content):
         logger.error(f"Error sending Pushover notification: {str(e)}")
         return False
 
+# Keyed hash: the stored device id cannot be reversed to an IP address by
+# hashing the whole IPv4 space (pseudonymisation, GDPR art. 4(5))
+_DEVICE_KEY = (os.getenv("DEVICE_ID_SECRET") or secrets.token_hex(32)).encode()
+
+
 def _device_id():
     """Visitor identity for the daily limit - the real client IP comes from the proxy."""
-    # Set by the frontend from Cloudflare's CF-Connecting-IP (not client-controlled)
+    # Set by the frontend from the trusted proxy header (not client-controlled)
     client_ip = request.headers.get('X-Client-IP', '').strip()[:64] or request.remote_addr
-    user_agent = request.headers.get('User-Agent', '')
-    return hashlib.md5(f"{client_ip}:{user_agent}".encode()).hexdigest()
+    user_agent = request.headers.get('User-Agent', '')[:256]
+    return hmac.new(_DEVICE_KEY, f"{client_ip}:{user_agent}".encode(), hashlib.sha256).hexdigest()
 
 
 def _today_count(db, device_id):
@@ -138,13 +146,12 @@ def init_suggestion_routes(app, db, public=False):
     @app.route('/api/suggestions', methods=['GET'])
     def get_suggestions():
         try:
-            # In a real app, you would add authentication here
-            # For now, just demonstrating the structure
+            # Admin panel only - protected by the panel's login (admin_auth)
             logger.debug("Getting suggestions")
             
             # Get query parameters
             skip = max(0, int(request.args.get('skip', 0)))
-            limit = min(50, int(request.args.get('limit', 20)))
+            limit = max(1, min(50, int(request.args.get('limit', 20))))
             status = request.args.get('status')
             
             # Build query
@@ -185,17 +192,18 @@ def init_suggestion_routes(app, db, public=False):
             return jsonify({"detail": str(e)}), 400
         except Exception as e:
             logger.error(f"Error getting suggestions: {str(e)}")
-            return jsonify({"detail": str(e)}), 500
+            return jsonify({"detail": "Wewnętrzny błąd serwera"}), 500
             
     # Endpoint to update a suggestion status (for approve/reject)
     @app.route('/api/suggestions/<suggestion_id>', methods=['PATCH'])
     def update_suggestion_status(suggestion_id):
         try:
-            # In a real app, you would add authentication here
             logger.debug(f"Updating suggestion status for id: {suggestion_id}")
-            
-            data = request.get_json()
-            if not data or 'status' not in data:
+            if not ObjectId.is_valid(suggestion_id):
+                raise BadRequest("Invalid suggestion id")
+
+            data = request.get_json(silent=True)
+            if not isinstance(data, dict) or 'status' not in data:
                 logger.warning("Status field missing in update request")
                 raise BadRequest("Status field is required")
                 

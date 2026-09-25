@@ -103,7 +103,6 @@ def configure_root_logger(log_level=logging.INFO):
 
     logging.getLogger('pymongo').setLevel(logging.WARNING)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
-    logging.getLogger('selenium').setLevel(logging.WARNING)
 
     console_format = '%(asctime)s - %(name)-20s - %(levelname)-8s - %(message)s'
     file_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -222,6 +221,74 @@ def get_system_config():
         }
         db.system_config.insert_one(config)
     return config
+
+# ─── Safe downloads from the university platform ──────────────────────────
+# Download URLs come from the plans config (admin panel, scanner): only HTTPS
+# on the allowed hosts is fetched, redirects are checked hop by hop and the
+# body size is capped, so a bad config entry cannot turn the backend into a
+# proxy to internal addresses (SSRF) or fill the disk.
+ALLOWED_DOWNLOAD_HOSTS = {h.strip().lower() for h in os.getenv("ALLOWED_DOWNLOAD_HOSTS", "puw.wspa.pl").split(",")
+                          if h.strip()}
+MAX_DOWNLOAD_BYTES = int(os.getenv("MAX_DOWNLOAD_MB", "25")) * 1024 * 1024
+MAX_REDIRECTS = 5
+
+
+class UnsafeDownload(Exception):
+    pass
+
+
+def check_download_url(url):
+    from urllib.parse import urlparse
+    parsed = urlparse(url or "")
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme != "https" or host not in ALLOWED_DOWNLOAD_HOSTS:
+        raise UnsafeDownload(f"Download URL not allowed: {parsed.scheme}://{host}")
+
+
+def fetch_bytes(session, url, timeout=60, require_xlsx=False):
+    """GET url with the (logged-in) session and return the body as bytes.
+    Raises UnsafeDownload for disallowed hosts, oversized bodies or non-XLSX files
+    and requests.HTTPError for error statuses."""
+    from urllib.parse import urljoin
+    for _ in range(MAX_REDIRECTS + 1):
+        check_download_url(url)
+        resp = session.get(url, timeout=timeout, stream=True, allow_redirects=False)
+        if resp.is_redirect:
+            url = urljoin(url, resp.headers.get("Location", ""))
+            resp.close()
+            continue
+        try:
+            resp.raise_for_status()
+            declared = int(resp.headers.get("Content-Length") or 0)
+            if declared > MAX_DOWNLOAD_BYTES:
+                raise UnsafeDownload(f"File too large: {declared} bytes")
+            chunks, size = [], 0
+            for chunk in resp.iter_content(64 * 1024):
+                size += len(chunk)
+                if size > MAX_DOWNLOAD_BYTES:
+                    raise UnsafeDownload(f"File larger than {MAX_DOWNLOAD_BYTES} bytes")
+                chunks.append(chunk)
+        finally:
+            resp.close()
+        data = b"".join(chunks)
+        if require_xlsx and data[:4] != b"PK\x03\x04":
+            raise UnsafeDownload("Downloaded file is not an XLSX (ZIP) file")
+        return data
+    raise UnsafeDownload("Too many redirects")
+
+
+def plan_collection_name(plan_config):
+    """MongoDB collection that stores the versions of one configured plan."""
+    faculty = plan_config.get('faculty', '').replace(' ', '-').replace('_', '-')
+    return f"plans_{faculty}_{plan_config.get('name', '').lower().replace(' ', '_')}"
+
+
+def current_plan_collections(db):
+    """Names of plan collections in the current configuration - used as an
+    allow-list for collection names that arrive in request URLs."""
+    config = db.plans_config.find_one({"_id": "plans_json"}, {"plans": 1}) or {}
+    return {plan_collection_name(p) for p in (config.get("plans") or {}).values()}
+
 
 def get_semester_collections():
     """
