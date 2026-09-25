@@ -3,7 +3,7 @@
 # ===========================================
 
 # --- Build Stage ---
-FROM python:3.12-slim as builder
+FROM python:3.14-slim as builder
 
 # Ustaw zmienne środowiskowe dla Pythona
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -35,7 +35,7 @@ RUN pip install --upgrade pip wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
 # --- Runtime Stage ---
-FROM python:3.12-slim as runtime
+FROM python:3.14-slim as runtime
 
 # Ustaw zmienne środowiskowe
 ENV PYTHONDONTWRITEBYTECODE=1 \
