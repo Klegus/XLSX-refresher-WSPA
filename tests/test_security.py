@@ -290,3 +290,29 @@ def test_every_elearning_fixture_with_dates_in_header_is_parsed():
         header = openpyxl.load_workbook(fixture_path(cfg), read_only=True)[cfg['sheet_name']]['A1'].value or ''
         if 'zjazd nr' in header:
             assert parse_header_calendar(header), cfg['sheet_name']
+
+
+def test_downloader_logs_in_again_when_session_expired(tmp_path):
+    """An expired Moodle session returns the login page (HTTP 200) instead of the file:
+    the downloader must log in again and retry instead of failing every cycle."""
+    import LessonPlanDownloader as L
+    from shared_utils import UnsafeDownload
+    L._shared_session, L._shared_session_user = object(), "u"  # stale session
+    L._download_cache.clear()
+    calls = {"fetch": 0, "login": 0}
+
+    def fake_fetch(session, url, timeout=60, require_xlsx=False):
+        calls["fetch"] += 1
+        if calls["fetch"] == 1:
+            raise UnsafeDownload("Downloaded file is not an XLSX (ZIP) file")
+        return b"PK\x03\x04data"
+
+    def fake_login(session, username=None, password=None):
+        calls["login"] += 1
+        return True
+
+    with mock.patch.object(L, "fetch_bytes", fake_fetch), mock.patch("moodle_scanner.login_puw", fake_login):
+        d = L.LessonPlanDownloader("u", "p", directory=str(tmp_path), download_url="https://puw.wspa.pl/x.xlsx")
+        assert d.download_file()
+    assert calls == {"fetch": 2, "login": 1}
+    L._shared_session = None

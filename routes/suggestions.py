@@ -12,7 +12,7 @@ from shared_utils import get_logger
 # Setup logger
 logger = get_logger('routes.suggestions')
 
-def send_pushover_notification(content):
+def send_pushover_notification(content, prefix="Nowa sugestia: "):
     """Send a notification to Pushover with the provided content"""
     try:
         pushover_key = os.getenv("PUSHOVER_KEY")
@@ -25,7 +25,7 @@ def send_pushover_notification(content):
             data={
                 "token": pushover_key,
                 "user": os.getenv("PUSHOVER_USER", pushover_key),  # Using same key as user if not specified
-                "message": f"Nowa sugestia: {content}"
+                "message": f"{prefix}{content}"
             },
             timeout=10,
         )

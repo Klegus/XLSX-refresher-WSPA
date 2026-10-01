@@ -333,6 +333,28 @@ def run_flask_app():
     serve(app, host="0.0.0.0", port=port, threads=8, ident=None)
 
 
+DOWNLOAD_ALERT_EVERY = timedelta(hours=6)
+
+
+def alert_on_failed_plans(failed, total):
+    """Pushover alert when a large part of the plans failed in one cycle (e.g. PUW login
+    broken) - at most once every 6 hours. Without it a stale site goes unnoticed for days."""
+    if not total or failed < max(3, total // 4):
+        return
+    config = db.system_config.find_one({"_id": "config"}, {"download_alert_at": 1}) or {}
+    last = config.get("download_alert_at")
+    if last and datetime.now() - last < DOWNLOAD_ALERT_EVERY:
+        return
+    from routes.suggestions import send_pushover_notification
+    if send_pushover_notification(f"{failed} z {total} planów nie udało się pobrać w ostatnim cyklu. "
+                                  f"Sprawdź logowanie do PUW i logi backendu.", prefix="Plan zajęć: "):
+        db.system_config.update_one({"_id": "config"}, {"$set": {"download_alert_at": datetime.now()}})
+
+
+class PlanCheckFailed(Exception):
+    """A plan could not be downloaded or processed in this cycle."""
+
+
 class LessonPlanManager:
     def __init__(
         self,
@@ -403,7 +425,7 @@ class LessonPlanManager:
                 self.cached_plans[group] = parse_html_to_dataframe(html_content)
         logger.debug("Zaktualizowano pamięć podręczną planów lekcji.")
 
-    async def check_once(self):
+    async def check_once(self):  # raises PlanCheckFailed when the plan cannot be fetched
         """Wykonuje pojedynczy cykl sprawdzania planu"""
         # Reload plan config from DB
         plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
@@ -421,6 +443,8 @@ class LessonPlanManager:
 
             if new_checksum is None:
                 logger.error("Error checking plan", extra={"plan_name": self.plan_name})
+                # counted as an error of the cycle (it used to pass as a successful check)
+                raise PlanCheckFailed("Plan could not be downloaded or processed")
             else:
                 if new_checksum:
                     logger.info("Plan updated", extra={"plan_name": self.plan_name, "checksum": new_checksum})
@@ -1028,9 +1052,13 @@ async def main():
                                 "plan_name": plan_name,
                                 "type": "plan_check_error"
                             }
+                            if isinstance(e, PlanCheckFailed):
+                                error_info["type"] = "plan_download_error"
+                                error_info.pop("traceback")
                             # Store in errors collection
                             db.errors.insert_one(error_info)
-                            sentry_sdk.capture_exception(e)
+                            if not isinstance(e, PlanCheckFailed):  # already logged, no Sentry event per cycle
+                                sentry_sdk.capture_exception(e)
                             errors.append(error_info)
                             logger.error(f"Error in manager for {plan_name}: {str(e)}")
 
@@ -1044,6 +1072,7 @@ async def main():
 
                     total_plans = len(lesson_plan_managers)
                     next_check = datetime.now() + timedelta(seconds=check_interval)
+                    alert_on_failed_plans(len(errors), total_plans)
 
                     log_cycle_summary(
                         duration=cycle_execution_time,
