@@ -18,20 +18,25 @@ def _get_shared_session(username, password):
     if _shared_session and _shared_session_user == username:
         return _shared_session
 
+    from moodle_scanner import login_puw
     session = requests.Session()
-    url_login = "https://puw.wspa.pl/login/index.php"
-    payload = {'password': password, 'username': username}
-    headers = {'anchor': ''}
-
-    response = session.post(url_login, headers=headers, data=payload, timeout=30)
-    if response.ok:
-        _shared_session = session
-        _shared_session_user = username
-        logger.info("Shared PUW session created")
-        return session
-    else:
-        logger.error(f"Login failed: {response.status_code}")
+    try:
+        logged_in = login_puw(session, username, password)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Login failed: {e}")
         return None
+    if not logged_in:
+        logger.error("Login failed: PUW kept the login page")
+        return None
+    _shared_session = session
+    _shared_session_user = username
+    logger.info("Shared PUW session created")
+    return session
+
+
+def _reset_shared_session():
+    global _shared_session
+    _shared_session = None
 
 
 class LessonPlanDownloader:
@@ -73,9 +78,17 @@ class LessonPlanDownloader:
         url_hash = hashlib.md5(self.download_url.encode(), usedforsecurity=False).hexdigest()[:12]
         file_save_path = os.path.join(self.directory, f"downloaded_{url_hash}.xlsx")
 
-        global _shared_session
         try:
-            content = fetch_bytes(session, self.download_url, timeout=30, require_xlsx=True)
+            try:
+                content = fetch_bytes(session, self.download_url, timeout=30, require_xlsx=True)
+            except UnsafeDownload:
+                # An expired Moodle session answers 200 with the login page instead of
+                # the file - log in again and try once more
+                _reset_shared_session()
+                session = _get_shared_session(self.username, self.password)
+                if not session:
+                    return None
+                content = fetch_bytes(session, self.download_url, timeout=30, require_xlsx=True)
         except UnsafeDownload as e:
             logger.error(f"Refused to download {self.download_url}: {e}")
             return None
@@ -84,12 +97,12 @@ class LessonPlanDownloader:
             logger.error(f"Error downloading the file: {status}")
             # If 403/401, session expired
             if status in (401, 403):
-                _shared_session = None
+                _reset_shared_session()
             return None
         except requests.exceptions.RequestException as e:
             logger.error(f"Error downloading the file: {e}")
             # Session might be expired, reset it
-            _shared_session = None
+            _reset_shared_session()
             return None
 
         with open(file_save_path, 'wb') as file:

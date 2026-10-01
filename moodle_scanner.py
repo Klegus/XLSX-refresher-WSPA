@@ -45,8 +45,8 @@ def get_current_semester():
     return "letni" if 2 <= month <= 8 else "zimowy"
 
 
-def login_puw(session):
-    """Login to PUW using backend credentials (EMAIL/PASSWORD)."""
+def login_puw(session, username=None, password=None):
+    """Login to PUW (backend credentials EMAIL/PASSWORD unless given)."""
     url_login = "https://puw.wspa.pl/login/index.php"
     page = session.get(url_login, timeout=30)
     token_match = re.search(r'name="logintoken"\s+value="([^"]+)"', page.text)
@@ -55,8 +55,8 @@ def login_puw(session):
     resp = session.post(url_login, data={
         'anchor': '',
         'logintoken': logintoken,
-        'username': os.getenv('EMAIL'),
-        'password': os.getenv('PASSWORD')
+        'username': username or os.getenv('EMAIL'),
+        'password': password or os.getenv('PASSWORD')
     }, allow_redirects=True, timeout=30)
 
     # Strona logowania też zawiera "wyloguj"/"logout", więc sprawdzamy URL:
