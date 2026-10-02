@@ -34,6 +34,9 @@ def get_scan_summary():
     }
 
 
+from moodle_scanner import group_renames
+
+
 def init_scanner_routes(app, get_plans_config, update_plans_config, request_check_now=None):
 
     @app.route("/api/scanner/start", methods=["POST"])
@@ -142,7 +145,11 @@ def init_scanner_routes(app, get_plans_config, update_plans_config, request_chec
         # Update changed plans
         for key in keys_to_update:
             if key in scan_result["changed"]:
-                current_plans[key] = scan_result["changed"][key]["new"]
+                old, new = current_plans.get(key) or {}, dict(scan_result["changed"][key]["new"])
+                renames = group_renames(old, new)
+                if renames:
+                    new["group_renames"] = renames
+                current_plans[key] = new
                 updated += 1
 
         # Also accept plans from scraped_plans (for add/update)
