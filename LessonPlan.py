@@ -114,7 +114,8 @@ class LessonPlan(LessonPlanDownloader):
 
         if self.save_to_mongodb:
             try:
-                self.mongo_client = pymongo.MongoClient(mongo_uri)
+                from shared_utils import mongo_client
+                self.mongo_client = mongo_client(mongo_uri)  # shared - one client per process
                 self.db = self.mongo_client[os.getenv("MONGO_DB", "Lesson_dev")]
                 logger.info("Successfully connected to MongoDB")
             except pymongo.errors.ConnectionFailure as e:
