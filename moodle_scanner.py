@@ -544,6 +544,22 @@ def run_full_scan(progress_cb=None):
     return all_plans, year_label, semester
 
 
+def group_renames(old_plan, new_plan):
+    """{old group name: new name} for groups the university renamed, so the old names (saved
+    selections, calendar subscriptions) keep working. Renamed groups are paired in sheet
+    order when as many disappeared as appeared; earlier renames are carried over."""
+    old = list((old_plan.get('groups') or {}).keys())
+    new = list((new_plan.get('groups') or {}).keys())
+    gone = [g for g in old if g not in new]
+    came = [g for g in new if g not in old]
+    renames = dict(old_plan.get('group_renames') or {})
+    if gone and len(gone) == len(came):
+        renames.update(zip(gone, came))
+    # an older name that pointed at a renamed group follows it
+    renames = {k: renames.get(v, v) if v in renames and v not in new else v for k, v in renames.items()}
+    return {k: v for k, v in renames.items() if v in new and k not in new}
+
+
 def compare_plans(scraped, current):
     """
     Compare scraped plans with current MongoDB plans.

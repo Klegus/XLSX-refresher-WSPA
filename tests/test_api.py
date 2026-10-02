@@ -211,6 +211,22 @@ def test_mixed_plan_gets_its_on_line_sheet(env):
     assert [p['label'] for p in data['parts']] == ['zajęcia on-line']
 
 
+def test_renamed_group_keeps_working_under_its_old_name(env):
+    """The university renames groups mid-semester; saved selections and calendar links use
+    the old name."""
+    key = 'pielęgniarstwo_zj_3'
+    group = next(iter(PLANS[key]['groups']))
+    plans = env['db'].plans_config.find_one({'_id': 'plans_json'})['plans']
+    plans[key]['group_renames'] = {'Grupa dawna nazwa': group}
+    env['db'].plans_config.update_one({'_id': 'plans_json'}, {'$set': {'plans': plans}})
+    try:
+        data = _plan(env, key, 'Grupa dawna nazwa').get_json()
+        assert data['group_name'] == group and data['plan_html']
+    finally:
+        del plans[key]['group_renames']
+        env['db'].plans_config.update_one({'_id': 'plans_json'}, {'$set': {'plans': plans}})
+
+
 def test_unknown_plan_or_group_is_404(env):
     assert env['client'].get('/api/plan/plans_nope/x').status_code == 404
     assert _plan(env, 'pielęgniarstwo_zj_3', 'Grupa 99 nie istnieje').status_code == 404

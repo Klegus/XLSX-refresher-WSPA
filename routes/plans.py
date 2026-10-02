@@ -155,6 +155,15 @@ def init_plan_routes(app, get_semester_collections, db):
         allowed = {c for c in current_plan_collections(db) if not (blocks.get(c) or {}).get("plan")}
         return companion_sets(db, allowed), blocks
 
+    def renamed(collection_name, names):
+        """Current names of groups the university renamed (plan config "group_renames":
+        {old: new}, written when the change is applied), so saved selections and calendar
+        subscriptions made with the old name keep working."""
+        config = db.plans_config.find_one({"_id": "plans_json"}, {"plans": 1}) or {}
+        renames = next((p.get("group_renames") or {} for p in (config.get("plans") or {}).values()
+                        if plan_collection_name(p) == collection_name), {})
+        return [renames.get(n, n) for n in names]
+
     def plan_parts(collection_name, group_names=()):
         """The other sheets of a plan published in parts: [{label, collection, groups: {name: html},
         zjazdy, meeting}]. When a sheet has the student's groups only those groups are attached."""
@@ -297,6 +306,8 @@ def init_plan_routes(app, get_semester_collections, db):
     def get_plan(collection_name: str, group_name: Optional[str] = None):
         try:
             logger.info(f"Pobieranie planu dla kolekcji: {collection_name}, grupy: {group_name}")
+            if group_name is not None:
+                group_name = renamed(collection_name, [group_name])[0]
             if collection_name not in current_plan_collections(db):
                 return jsonify({"detail": "Plan not found"}), 404
             blocked = blocked_response(collection_name, [group_name] if group_name else [])
@@ -382,6 +393,7 @@ def init_plan_routes(app, get_semester_collections, db):
                 return jsonify({"detail": "Plan not found"}), 404
 
             logger.info(f"Getting mixed plan for collection: {collection_name}, groups: {requested_groups}")
+            requested_groups = renamed(collection_name, requested_groups)
             blocked = blocked_response(collection_name, requested_groups)
             if blocked:
                 return blocked

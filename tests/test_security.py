@@ -316,3 +316,17 @@ def test_downloader_logs_in_again_when_session_expired(tmp_path):
         assert d.download_file()
     assert calls == {"fetch": 2, "login": 1}
     L._shared_session = None
+
+
+def test_group_renames_pair_renamed_groups_in_sheet_order():
+    from moodle_scanner import group_renames
+    old = {'groups': {'grupa 1 podział wg nazwisk': 'a', 'grupa 2 podział wg nazwisk': 'b'}}
+    new = {'groups': {'gr.1 wg nazwisk:A-J': 'a', 'gr.2 wg nazwisk:K-Z': 'b'}}
+    assert group_renames(old, new) == {'grupa 1 podział wg nazwisk': 'gr.1 wg nazwisk:A-J',
+                                       'grupa 2 podział wg nazwisk': 'gr.2 wg nazwisk:K-Z'}
+    # a second rename keeps the first names working
+    newer = {'groups': {'Grupa 1': 'a', 'Grupa 2': 'b'}}
+    chained = group_renames(dict(new, group_renames=group_renames(old, new)), newer)
+    assert chained['grupa 1 podział wg nazwisk'] == 'Grupa 1' and chained['gr.1 wg nazwisk:A-J'] == 'Grupa 1'
+    # groups that only appeared (no counterpart) are not guessed
+    assert group_renames({'groups': {'cały kierunek': 'all'}}, {'groups': {'Grupa 1': 'a', 'Grupa 2': 'b'}}) == {}
