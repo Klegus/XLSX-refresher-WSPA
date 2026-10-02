@@ -24,7 +24,7 @@ import logging
 import sys
 
 # Import shared logger
-from shared_utils import configure_root_logger, get_system_config, get_semester_collections, log_cycle_summary, log_plan_header, current_plan_collections
+from shared_utils import configure_root_logger, mongo_client, get_system_config, get_semester_collections, log_cycle_summary, log_plan_header, current_plan_collections
 
 # Setup app-specific logger
 logger = configure_root_logger(logging.INFO)
@@ -45,7 +45,7 @@ app.config["MAX_CONTENT_LENGTH"] = 64 * 1024  # public API only takes small JSON
 USE_TEST_TIME = False
 TEST_TIME = None
 mongo_uri = os.getenv("MONGO_URI")
-client = MongoClient(mongo_uri)
+client = mongo_client(mongo_uri)  # the process-wide client (see shared_utils.mongo_client)
 db = client[os.getenv("MONGO_DB")]
 PLANS_JSON_URL = os.getenv("PLANS_JSON_URL")
 # Global variable for lesson plan managers

@@ -45,7 +45,8 @@ class MoodleFileParser:
         self.html_file_path = html_file_path
         self.supported_types = ['folder', 'resource', 'page', 'label']
         self.activities_hierarchy = []
-        self.mongo_client = MongoClient(mongodb_uri)
+        from shared_utils import mongo_client
+        self.mongo_client = mongo_client(mongodb_uri)
         self.db = self.mongo_client[os.getenv('MONGO_DB', 'Lesson_dev')]
         self.collection = self.db['Activities']
 

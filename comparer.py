@@ -11,7 +11,8 @@ logger = get_logger('comparer')
 
 class LessonPlanComparator:
     def __init__(self, mongo_uri, openrouter_api_key, selected_model):
-        self.client = MongoClient(mongo_uri)
+        from shared_utils import mongo_client
+        self.client = mongo_client(mongo_uri)
         self.db = self.client[os.getenv("MONGO_DB", "Lesson_dev")]
         self.openrouter_api_key = openrouter_api_key
         self.openrouter_api_url = "https://openrouter.ai/api/v1/chat/completions"

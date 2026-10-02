@@ -61,6 +61,8 @@ def env(tmp_path_factory):
     ]
     for p in patches:
         p.start()
+    import shared_utils
+    shared_utils._mongo_clients.clear()  # the process-wide client cache must not keep a real client
     L._shared_session = None
     L._download_cache.clear()
 
@@ -70,7 +72,6 @@ def env(tmp_path_factory):
         results[key] = lp.process_and_save_plan()
 
     from flask import Flask
-    import shared_utils
     from routes.plans import init_plan_routes
     app = Flask(__name__)
     app.json.sort_keys = False
@@ -80,6 +81,7 @@ def env(tmp_path_factory):
            'collection': {k: plan_collection_name(_config(k)) for k in WANTED}}
     for p in patches:
         p.stop()
+    shared_utils._mongo_clients.clear()
     L._shared_session = None
 
 
@@ -126,6 +128,16 @@ def test_failed_download_is_reported_not_hidden(env):
     with mock.patch.object(L, 'fetch_bytes', login_page):
         assert LessonPlan('user', 'pass', 'mongodb://test', _config(key)).process_and_save_plan() is None
     assert env['db'][env['collection'][key]].count_documents({}) == before
+
+
+def test_one_mongo_client_per_process():
+    """A client per call or per plan exhausted mongod's file descriptors in production."""
+    import shared_utils
+    shared_utils._mongo_clients.clear()
+    with mock.patch('shared_utils.MongoClient', side_effect=lambda uri: object()) as factory:
+        assert shared_utils.mongo_client('mongodb://a') is shared_utils.mongo_client('mongodb://a')
+        assert factory.call_count == 1
+    shared_utils._mongo_clients.clear()
 
 
 def test_check_cycle_counts_failed_plan_as_error():

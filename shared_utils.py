@@ -1,6 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pymongo import MongoClient
+import threading
 import os
 import time
 
@@ -201,10 +202,26 @@ def log_plan_header(plan_name, plan_id, operation="check"):
     logger.info("─" * 70)
     logger.info(f"  {operation.upper()}: {plan_name} (ID: {plan_id})")
     logger.info("─" * 70)
+_mongo_clients = {}
+_mongo_clients_lock = threading.Lock()
+
+
+def mongo_client(uri=None):
+    """One MongoClient per URI for the whole process. A client keeps a connection pool and
+    monitoring connections of its own, so a client created per call (per request, per
+    plan) piled up hundreds of connections until mongod ran out of file descriptors
+    ("Too many open files") and aborted. pymongo clients are thread-safe."""
+    uri = uri or os.getenv("MONGO_URI")
+    with _mongo_clients_lock:
+        client = _mongo_clients.get(uri)
+        if client is None:
+            client = _mongo_clients[uri] = MongoClient(uri)
+        return client
+
+
 def get_system_config():
     """Get system configuration from MongoDB"""
-    client = MongoClient(os.getenv("MONGO_URI"))
-    db = client[os.getenv("MONGO_DB")]
+    db = mongo_client()[os.getenv("MONGO_DB")]
     config = db.system_config.find_one({"_id": "config"})
     if not config:
         # Initialize default configuration
@@ -295,8 +312,7 @@ def get_semester_collections():
     Pobiera listę wszystkich kolekcji planów i ich najnowsze dokumenty.
     Zwraca słownik z nazwami kolekcji i odpowiadającymi im informacjami.
     """
-    client = MongoClient(os.getenv("MONGO_URI"))
-    db = client[os.getenv("MONGO_DB")]
+    db = mongo_client()[os.getenv("MONGO_DB")]
     # Only plans in the current configuration - collections of removed plans
     # (e.g. last semester) stay in the database as history but are not listed
     config = db.plans_config.find_one({"_id": "plans_json"}) or {}
