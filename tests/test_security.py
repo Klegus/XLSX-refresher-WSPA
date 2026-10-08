@@ -330,3 +330,21 @@ def test_group_renames_pair_renamed_groups_in_sheet_order():
     assert chained['grupa 1 podział wg nazwisk'] == 'Grupa 1' and chained['gr.1 wg nazwisk:A-J'] == 'Grupa 1'
     # groups that only appeared (no counterpart) are not guessed
     assert group_renames({'groups': {'cały kierunek': 'all'}}, {'groups': {'Grupa 1': 'a', 'Grupa 2': 'b'}}) == {}
+
+
+def test_scan_applies_only_safe_group_renames():
+    from moodle_scanner import safe_group_change, apply_change
+    old = {'name': 'Plan X', 'groups': {'gr.1': 'a', 'gr.2': 'b'}, 'download_url': 'u'}
+    renamed = {'name': 'Plan X2', 'groups': {'gr.1 wg nazwisk: A-K': 'a', 'gr.2 wg nazwisk: L-Z': 'b'}, 'download_url': 'u'}
+    change = {'old': old, 'new': renamed, 'diff_fields': ['groups']}
+    assert safe_group_change(change)
+    current = {'x': old}
+    apply_change(current, 'x', change)
+    assert current['x']['name'] == 'Plan X'  # plan id and collection unchanged
+    assert current['x']['group_renames'] == {'gr.1': 'gr.1 wg nazwisk: A-K', 'gr.2': 'gr.2 wg nazwisk: L-Z'}
+    # a whole-programme plan getting its groups is safe too
+    assert safe_group_change({'old': {'groups': {}}, 'new': renamed, 'diff_fields': ['groups']})
+    # a moved file, a dropped group or a group that cannot be paired waits for an admin
+    assert not safe_group_change({'old': old, 'new': dict(renamed, download_url='v'), 'diff_fields': ['groups', 'download_url']})
+    assert not safe_group_change({'old': old, 'new': {'groups': {'gr.1': 'a'}}, 'diff_fields': ['groups']})
+    assert not safe_group_change({'old': old, 'new': {'groups': {'A': 1, 'B': 2, 'C': 3}}, 'diff_fields': ['groups']})

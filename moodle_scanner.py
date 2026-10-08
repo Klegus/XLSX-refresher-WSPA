@@ -604,6 +604,34 @@ def compare_plans(scraped, current):
 
 # ─── Automatic scan (called from the backend loop) ─────────────────
 
+GROUP_ONLY_FIELDS = {'groups', 'group_aliases'}
+
+
+def safe_group_change(change):
+    """A change the scan may apply on its own: only the group names moved (the university
+    adds name ranges, "gr.1" -> "gr.1 wg nazwisk: A-K") and every old group has a
+    successor, or the whole-programme plan got its groups. Until it is applied the
+    generator cannot find the old columns and the plan is quarantined, so waiting for an
+    admin left students without a plan for days."""
+    if not set(change['diff_fields']) <= GROUP_ONLY_FIELDS:
+        return False
+    old = [g for g in (change['old'].get('groups') or {}) if g != 'cały kierunek']
+    new = change['new'].get('groups') or {}
+    renames = group_renames(change['old'], change['new'])
+    return bool(new) and all(g in new or g in renames for g in old)
+
+
+def apply_change(current, key, change):
+    """Write a scanned change into the plan config, keeping the plan's name (its id and
+    collection) and a map of old to new group names."""
+    new = dict(change['new'])
+    renames = group_renames(change['old'], new)
+    if renames:
+        new['group_renames'] = renames
+    new['name'] = change['old'].get('name', new.get('name'))
+    current[key] = new
+
+
 def auto_scan(db):
     """Scan PUW and add plans that appeared since the last scan.
 
@@ -620,7 +648,13 @@ def auto_scan(db):
         current = config.get("plans") or {}
         diff = compare_plans(scraped, current)
 
-        if diff["new"]:
+        renamed = [k for k, change in diff["changed"].items() if safe_group_change(change)]
+        for key in renamed:
+            apply_change(current, key, diff["changed"][key])
+        if renamed:
+            logger.info(f"Auto-scan applied renamed groups of {len(renamed)} plans")
+
+        if diff["new"] or renamed:
             current.update(diff["new"])
             db.plans_config.update_one(
                 {"_id": "plans_json"},
@@ -631,7 +665,8 @@ def auto_scan(db):
         summary.update(
             year=year_label, semester=semester, scraped=len(scraped),
             added=[p.get("name", k) for k, p in diff["new"].items()],
-            pending_changed=sorted(diff["changed"]),
+            renamed_groups=sorted(renamed),
+            pending_changed=sorted(k for k in diff["changed"] if k not in renamed),
             pending_removed=sorted(diff["removed"]),
         )
     except Exception as e:
