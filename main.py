@@ -1175,7 +1175,13 @@ async def main():
                         from moodle_scanner import auto_scan
                         set_cycle_state(running=True, current_plan="Automatyczny skan PUW")
                         summary = auto_scan(db)
-                        if summary.get("added"):
+                        pending = (summary.get("pending_changed") or []) + (summary.get("pending_removed") or [])
+                        if pending:
+                            from routes.suggestions import send_pushover_notification
+                            send_pushover_notification(
+                                f"Skaner wykrył {len(pending)} zmienionych lub usuniętych planów do zatwierdzenia "
+                                f"w panelu admina: {', '.join(pending[:5])}", prefix="Plan zajęć: ")
+                        if summary.get("added") or summary.get("renamed_groups"):
                             # Download the new plans right away
                             db.system_config.update_one(
                                 {"_id": "config"}, {"$set": {"force_check_requested": datetime.now()}})
