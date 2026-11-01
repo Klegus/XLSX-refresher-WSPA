@@ -52,7 +52,7 @@ jobs:
     name: Type Checking
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -79,7 +79,7 @@ jobs:
     name: Style Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -98,7 +98,7 @@ jobs:
     name: Security Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -124,7 +124,7 @@ jobs:
         ports:
           - 27017:27017
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -180,7 +180,7 @@ jobs:
     needs: [type-check, style, security, test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
