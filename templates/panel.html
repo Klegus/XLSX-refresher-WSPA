@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WSPA Admin Panel</title>
+    <title>Panel administracyjny – Plan zajęć WSPA</title>
     <meta name="csrf-token" content="{{CSRF_TOKEN}}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
@@ -34,7 +34,13 @@
         .step.todo .step-num { background: #cfe2ff; color: #0a58ca; }
         .stat { font-size: 1.6rem; font-weight: 700; line-height: 1; }
         .stat-label { font-size: .75rem; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; }
-        .plan-row-name { max-width: min(520px, 45vw); }
+        .plan-row-name { max-width: min(560px, 48vw); white-space: normal; line-height: 1.3; }
+        /* the page's sticky bar stays above sticky table headers */
+        .navbar.sticky-top { z-index: 1030; }
+        .card thead.sticky-top { z-index: 1; }
+        .danger-zone { border: 1px solid #f1aeb5; border-radius: .75rem; background: #fff5f5; }
+        .attention-list { margin: 0; padding-left: 1.1rem; }
+        .attention-list li { margin-bottom: .2rem; }
         #plansStatusTable td { vertical-align: middle; }
     </style>
 </head>
@@ -42,13 +48,13 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">WSPA Admin</a>
+            <a class="navbar-brand" href="#">Plan zajęć WSPA <span class="fw-normal opacity-75">· panel administracyjny</span></a>
             <div class="d-flex align-items-center gap-3">
                 <span class="status-dot" id="statusDot"></span>
                 <span class="text-light small" id="statusBadge">...</span>
                 <div class="form-check form-switch mb-0">
                     <input class="form-check-input" type="checkbox" id="maintenanceMode">
-                    <label class="form-check-label text-light small" for="maintenanceMode">Maintenance</label>
+                    <label class="form-check-label text-light small" for="maintenanceMode" title="Studenci widzą komunikat o przerwie zamiast planów">Tryb przerwy</label>
                 </div>
                 <form method="post" action="/logout" class="mb-0">
                     <input type="hidden" name="csrf_token" value="{{CSRF_TOKEN}}">
@@ -65,14 +71,12 @@
                 <div class="d-flex flex-wrap gap-3 align-items-center">
                     <span class="text-muted small" id="lastCheck"></span>
                     <span class="text-danger small" id="maintenanceReason" style="display:none;"></span>
-                    <div class="ms-auto d-flex gap-2 align-items-center">
-                        <label class="text-muted small mb-0">Interwał (s):</label>
-                        <input type="number" class="form-control form-control-sm" id="checkInterval" min="60" step="60" style="width:90px">
-                        <button class="btn btn-sm btn-outline-primary" onclick="updateInterval()">Zapisz</button>
-                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Czy wszystko działa i co wymaga reakcji -->
+        <div id="attention" class="mb-4"></div>
 
         <!-- Tab navigation -->
         <ul class="nav nav-pills mb-4" role="tablist">
@@ -82,7 +86,7 @@
             <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-plans">Plany <span class="badge bg-secondary" id="plansCount"></span></a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-logs">Logi</a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-suggestions">Sugestie</a></li>
-            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-database">Baza danych</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tab-database">Ustawienia</a></li>
         </ul>
 
         <!-- Tab content -->
@@ -208,11 +212,12 @@
             <div class="tab-pane fade" id="tab-scanner">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        Moodle Plan Scanner
+                        Skaner planów na PUW
                         <button class="btn btn-warning btn-sm" id="startScanBtn" onclick="startMoodleScan()">Skanuj Moodle</button>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted small">Skanuje "Strefa studenta" na PUW, pobiera pliki .xlsx, porównuje z aktualnymi planami w bazie.</p>
+                        <p class="text-muted small">Skanuje „Strefę studenta” na PUW, pobiera pliki .xlsx i porównuje je z planami w konfiguracji. Nowe plany i zmiany samych nazw grup stosują się automatycznie raz dziennie; pozostałe zmiany zatwierdzasz tutaj.</p>
+                        <div id="scanAutoHint"></div>
                         <div id="scanStatus" style="display:none;">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="spinner-border spinner-border-sm text-primary me-2" id="scanSpinner"></div>
@@ -297,7 +302,7 @@
             <div class="tab-pane fade" id="tab-logs">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        System Logs
+                        Logi cykli sprawdzania
                         <div class="form-check form-switch mb-0">
                             <input class="form-check-input" type="checkbox" id="showAllLogs">
                             <label class="form-check-label small" for="showAllLogs">Pokaż wszystkie</label>
@@ -308,7 +313,7 @@
                         <div class="table-responsive">
                             <table class="table table-sm table-hover">
                                 <thead><tr>
-                                    <th>Czas</th><th>Sprawdzono</th><th>Zmiany</th><th>Błędy</th><th>Czas (s)</th><th>Szczegóły</th>
+                                    <th>Kiedy</th><th>Sprawdzono planów</th><th>Zmienione</th><th>Błędy</th><th>Trwało</th><th>Szczegóły</th>
                                 </tr></thead>
                                 <tbody id="logsTable"></tbody>
                             </table>
@@ -335,10 +340,10 @@
                                 <div class="spinner-border text-primary spinner-border-sm"></div>
                             </div>
                             <div id="noSuggestions" class="text-center py-4 d-none">
-                                <p class="text-muted small">Brak sugestii.</p>
+                                <p class="text-muted small mb-0">Brak sugestii w tym widoku. Studenci wysyłają je przyciskiem „Zgłoś sugestię lub błąd” pod planem.</p>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex justify-content-between align-items-center mt-3" id="suggestionsPager">
                             <button class="btn btn-sm btn-outline-secondary" onclick="previousSuggestionsPage()">Poprzednia</button>
                             <span class="small text-muted" id="suggestionsPagination">Strona 1</span>
                             <button class="btn btn-sm btn-outline-secondary" onclick="nextSuggestionsPage()">Następna</button>
@@ -347,34 +352,45 @@
                 </div>
             </div>
 
-            <!-- Database Tab -->
+            <!-- Settings Tab -->
             <div class="tab-pane fade" id="tab-database">
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="card border-warning">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
                             <div class="card-body">
-                                <h6 class="card-title">Reset semestru</h6>
-                                <p class="card-text small text-muted">Wyczyść dane planów i aktywności. Zachowaj konfigurację plans.json.</p>
-                                <button class="btn btn-warning btn-sm" onclick="purgeDatabase()">Wyczyść plany + aktywności</button>
+                                <h6 class="card-title">Częstotliwość sprawdzania</h6>
+                                <p class="card-text small text-muted">Co ile minut backend sprawdza na PUW, czy plany się zmieniły.</p>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="number" class="form-control form-control-sm" id="checkInterval" min="1" step="1" style="width:90px">
+                                    <span class="small text-muted">minut</span>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="updateInterval()">Zapisz</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card border-danger">
-                            <div class="card-body">
-                                <h6 class="card-title">Pełny reset</h6>
-                                <p class="card-text small text-muted">Wyczyść wszystko łącznie z konfiguracją plans.json.</p>
-                                <button class="btn btn-outline-danger btn-sm" onclick="purgeDatabaseFull()">Pełny reset bazy</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-primary">
+                    <div class="col-md-6">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <h6 class="card-title">Sprawdź plany teraz</h6>
-                                <p class="card-text small text-muted">Wyłącza maintenance i od razu startuje cykl pobierania, bez czekania na interwał.</p>
+                                <p class="card-text small text-muted">Od razu startuje cykl pobierania, bez czekania na następny termin. Wyłącza też tryb przerwy.</p>
                                 <button class="btn btn-primary btn-sm" onclick="forceCheck()">Uruchom sprawdzanie</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="danger-zone p-3">
+                    <h6 class="text-danger mb-1">Strefa niebezpieczna</h6>
+                    <p class="small text-muted mb-3">Tych operacji nie da się cofnąć. Każda wymaga wpisania słowa potwierdzenia.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="fw-semibold small">Reset semestru</div>
+                            <p class="small text-muted mb-2">Usuwa pobrane plany, historię zmian i aktualności. Konfiguracja planów zostaje, więc następny cykl pobierze wszystko od nowa.</p>
+                            <button class="btn btn-outline-danger btn-sm" onclick="purgeDatabase()">Wyczyść plany i aktualności…</button>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="fw-semibold small">Pełny reset</div>
+                            <p class="small text-muted mb-2">Usuwa wszystko, także konfigurację planów. Strona dla studentów będzie pusta do czasu nowego skanu PUW.</p>
+                            <button class="btn btn-danger btn-sm" onclick="purgeDatabaseFull()">Pełny reset bazy…</button>
                         </div>
                     </div>
                 </div>
@@ -438,9 +454,8 @@
             const input = document.getElementById('planSearch');
             if (input) input.addEventListener('input', e => {
                 const term = e.target.value.toLowerCase();
-                document.querySelectorAll('#currentPlans .list-group-item').forEach(p => {
-                    const text = (p.querySelector('h6')?.textContent || '').toLowerCase();
-                    p.style.display = text.includes(term) ? '' : 'none';
+                document.querySelectorAll('#currentPlans .plan-item').forEach(p => {
+                    p.classList.toggle('d-none', !(p.dataset.search || '').includes(term));
                 });
             });
         }
@@ -465,17 +480,18 @@
                         const hasUpdates = log.new_plans > 0;
                         const plans = log.updated_plans || [];
                         let details = '<span class="text-muted">-</span>';
-                        if (hasErrors) { const k = logErrorStore.push(log.errors) - 1; details = `<button class="btn btn-sm btn-outline-danger py-0" onclick="showErrors(logErrorStore[${k}])">Błędy</button>`; }
+                        const errorCount = (log.errors || []).length || (hasErrors ? 1 : 0);
+                        if (hasErrors) { const k = logErrorStore.push(log.errors) - 1; details = `<button class="btn btn-sm btn-outline-danger py-0" onclick="showErrors(logErrorStore[${k}])">Pokaż błędy</button>`; }
                         if (hasUpdates && plans.length > 0) {
                             const list = plans.map(p => `<li class="small">${esc(p)}</li>`).join('');
-                            details = `<button class="btn btn-sm btn-outline-success py-0" onclick="this.nextElementSibling.classList.toggle('d-none')">${plans.length} planów</button><ul class="d-none mt-1 mb-0 ps-3 small" style="list-style:disc">${list}</ul>`;
+                            details = (hasErrors ? details + ' ' : '') + `<button class="btn btn-sm btn-outline-success py-0" onclick="this.nextElementSibling.classList.toggle('d-none')">Zmienione plany</button><ul class="d-none mt-1 mb-0 ps-3 small" style="list-style:disc">${list}</ul>`;
                         }
                         table.innerHTML += `<tr>
                             <td class="small text-nowrap">${new Date(log.timestamp).toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' })}</td>
                             <td>${esc(log.successful_checks)}</td>
                             <td>${hasUpdates ? `<span class="badge bg-success">${esc(log.new_plans)}</span>` : '0'}</td>
-                            <td>${hasErrors ? '<span class="badge bg-danger">!</span>' : '-'}</td>
-                            <td>${esc(log.execution_time || '-')}</td>
+                            <td>${hasErrors ? `<span class="badge bg-danger">${errorCount}</span>` : '<span class="text-muted">0</span>'}</td>
+                            <td class="text-nowrap">${esc(fmtDuration(log.execution_time))}</td>
                             <td>${details}</td>
                         </tr>`;
                     });
@@ -552,7 +568,7 @@
         function loadConfig() {
             fetch('/api/config').then(r => r.json()).then(data => {
                 const el = document.getElementById('checkInterval');
-                if (el) el.value = data.system_config.check_interval;
+                if (el) el.value = Math.round((data.system_config.check_interval || 900) / 60);
             }).catch(e => console.error('Config error:', e));
         }
 
@@ -565,16 +581,27 @@
                 if (!data.plans_config) return;
                 const entries = Object.entries(data.plans_config);
                 if (countBadge) countBadge.textContent = entries.length;
+                const info = Object.fromEntries(((lastOverview || {}).plans || []).map(p => [p.id, p]));
+                entries.sort((x, y) => ((info[x[0]] || {}).display_name || x[0]).localeCompare((info[y[0]] || {}).display_name || y[0], 'pl', { numeric: true }));
                 entries.forEach(([name, plan]) => {
+                    const meta = info[name] || {};
+                    const groups = Object.keys(plan.groups || {}).length || 1;
+                    const state = meta.blocked === 'plan' ? '<span class="badge bg-danger">ukryty przed studentami</span>'
+                        : meta.blocked ? `<span class="badge bg-danger">${meta.blocked} gr. ukryte</span>`
+                        : meta.downloaded_at ? `<span class="text-muted">pobrany ${esc(fmtAgo(meta.downloaded_at))}</span>` : '<span class="badge bg-secondary">jeszcze niepobrany</span>';
                     const el = document.createElement('div');
-                    el.className = 'list-group-item d-flex justify-content-between align-items-center py-2';
-                    el.innerHTML = `<div class="min-w-0"><h6 class="mb-0 small"></h6><small class="text-muted text-truncate d-block" style="max-width:400px"></small></div>
-                        <div class="btn-group btn-group-sm"><button class="btn btn-outline-primary">Edytuj</button><button class="btn btn-outline-danger">Usuń</button></div>`;
-                    el.querySelector('h6').textContent = name;
-                    el.querySelector('small').textContent = plan.download_url || '';
+                    el.className = 'list-group-item d-flex justify-content-between align-items-center gap-3 py-2 plan-item';
+                    el.innerHTML = `<div class="min-w-0"><div class="small fw-semibold plan-title"></div>
+                        <div class="small mt-1 d-flex flex-wrap gap-2 align-items-center"><span class="badge bg-light text-dark border plan-mode"></span><span class="text-muted">${groups} ${groups === 1 ? 'grupa' : groups < 5 ? 'grupy' : 'grup'}</span>${state}</div>
+                        <div class="text-muted font-monospace mt-1 plan-id" style="font-size:.7rem"></div></div>
+                        <div class="d-flex gap-3 flex-shrink-0"><button class="btn btn-sm btn-outline-primary">Edytuj</button><button class="btn btn-sm btn-link text-danger text-decoration-none px-0">Usuń</button></div>`;
+                    el.querySelector('.plan-title').textContent = meta.display_name || plan.name || name;
+                    el.querySelector('.plan-mode').textContent = meta.mode_label || '–';
+                    el.querySelector('.plan-id').textContent = name;
+                    el.dataset.search = `${meta.display_name || ''} ${plan.name || ''} ${name}`.toLowerCase();
                     const [editBtn, deleteBtn] = el.querySelectorAll('button');
                     editBtn.addEventListener('click', () => editPlan(name, plan));
-                    deleteBtn.addEventListener('click', () => deletePlan(name));
+                    deleteBtn.addEventListener('click', () => deletePlan(name, meta.display_name || plan.name || name));
                     container.appendChild(el);
                 });
             }).catch(e => console.error('Plans error:', e));
@@ -583,8 +610,8 @@
         function updateInterval() {
             const val = document.getElementById('checkInterval').value;
             fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ system_config: { check_interval: parseInt(val) } })
-            }).then(() => { alert('Interwał zaktualizowany'); loadConfig(); }).catch(e => alert('Błąd'));
+                body: JSON.stringify({ system_config: { check_interval: Math.max(1, parseInt(val) || 15) * 60 } })
+            }).then(() => { alert('Zapisano: sprawdzanie co ' + Math.max(1, parseInt(val) || 15) + ' min'); loadConfig(); loadOverview(); }).catch(e => alert('Błąd zapisu'));
         }
 
         setInterval(loadLogs, 60000);
@@ -593,11 +620,12 @@
         function initializeMaintenanceMode() {
             const cb = document.getElementById('maintenanceMode');
             if (cb) cb.addEventListener('change', function(e) {
+                if (e.target.checked && !confirm('Włączyć tryb przerwy? Studenci zobaczą komunikat o przerwie technicznej zamiast planów.')) { cb.checked = false; return; }
                 fetch('/api/maintenance-toggle', { method: 'POST', headers: {'Content-Type':'application/json'},
                     body: JSON.stringify({ maintenance_mode: e.target.checked })
                 }).then(r => r.json()).then(data => {
                     if (!data.success) cb.checked = !e.target.checked;
-                    setTimeout(loadStatus, 500);
+                    setTimeout(() => { loadStatus(); loadOverview(); }, 500);
                 }).catch(() => { cb.checked = !e.target.checked; alert('Błąd'); });
             });
         }
@@ -614,8 +642,8 @@
             } catch (e) { alert('Nieprawidłowy JSON: ' + e.message); }
         }
 
-        function deletePlan(name) {
-            if (!confirm(`Usunąć plan "${name}"?`)) return;
+        function deletePlan(name, label) {
+            if (!confirm(`Usunąć plan z konfiguracji?\n\n${label || name}\n\nStudenci przestaną go widzieć. Pobrane wersje zostają w bazie.`)) return;
             fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ plans_config: { [name]: null } })
             }).then(r => r.json()).then(() => { alert('Plan usunięty'); loadPlans(); }).catch(e => alert('Błąd'));
@@ -676,6 +704,7 @@
         function updateSuggestionsPagination() {
             const pages = Math.ceil(totalSuggestions / suggestionsPerPage);
             document.getElementById('suggestionsPagination').textContent = `Strona ${currentSuggestionsPage + 1} z ${pages || 1}`;
+            document.getElementById('suggestionsPager').classList.toggle('d-none', pages <= 1);
         }
         function nextSuggestionsPage() { if (currentSuggestionsPage < Math.ceil(totalSuggestions / suggestionsPerPage) - 1) { currentSuggestionsPage++; loadSuggestions(); } }
         function previousSuggestionsPage() { if (currentSuggestionsPage > 0) { currentSuggestionsPage--; loadSuggestions(); } }
@@ -828,14 +857,13 @@
 
         // ─── Database ───────────────────────────────────
         function purgeDatabase() {
-            if (!confirm('Wyczyścić dane planów i aktywności?')) return;
+            if (prompt('Usunie pobrane plany, historię zmian i aktualności.\nAby potwierdzić, wpisz: RESET') !== 'RESET') return;
             fetch('/api/purge', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plans: true, activities: true, config: false }) })
                 .then(r => r.json()).then(d => { alert(d.success ? 'Baza wyczyszczona! Skanuj Moodle.' : 'Błąd: ' + d.error); loadPlans(); });
         }
 
         function purgeDatabaseFull() {
-            if (!confirm('UWAGA: Pełny reset bazy?')) return;
-            if (!confirm('Na pewno? To usunie też plans.json.')) return;
+            if (prompt('PEŁNY RESET: usunie wszystko, także konfigurację planów. Strona dla studentów będzie pusta.\nAby potwierdzić, wpisz: USUN WSZYSTKO') !== 'USUN WSZYSTKO') return;
             fetch('/api/purge', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plans: true, activities: true, config: true }) })
                 .then(r => r.json()).then(d => { alert(d.success ? 'Pełny reset!' : 'Błąd: ' + d.error); loadPlans(); });
         }
@@ -857,6 +885,13 @@
         const CATEGORY_LABELS = { st: 'Stacjonarne', nst: 'Niestacjonarne', 'nst-online': 'NST online', 'nst-puw': 'NST PUW' };
         let overviewTimer = null, lastOverview = null, planFilter = 'all', serverOffsetMs = 0;
 
+        function fmtDuration(seconds) {
+            const s = Math.round(Number(seconds) || 0);
+            if (!s) return '–';
+            if (s < 90) return s + ' s';
+            if (s < 5400) return Math.round(s / 60) + ' min';
+            return (s / 3600).toFixed(1).replace('.', ',') + ' godz.';
+        }
         function fmtDate(iso) { return iso ? new Date(iso).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }) : '–'; }
         function fmtAgo(iso) {
             if (!iso) return null;
@@ -876,13 +911,37 @@
 
         function loadOverview() {
             fetch('/api/overview').then(r => r.json()).then(d => {
+                const firstOverview = !lastOverview;
                 lastOverview = d;
+                if (firstOverview) loadPlans();  // the plan list takes its readable names from the overview
                 if (d.now) serverOffsetMs = new Date(d.now) - Date.now();
-                renderNow(d); renderStats(d); renderSteps(d); renderPlanStatus(); renderLastCycles(d); renderCoverage(d); renderAutoScan(d); renderExamStep(d);
+                renderNow(d); renderStats(d); renderSteps(d); renderPlanStatus(); renderLastCycles(d); renderCoverage(d); renderAutoScan(d); renderExamStep(d); renderAttention(d);
                 const running = d.cycle.running || d.force_check_pending || d.scan.status === 'running';
                 clearTimeout(overviewTimer);
                 overviewTimer = setTimeout(loadOverview, running ? 3000 : 10000);
             }).catch(e => { console.error('Overview error:', e); clearTimeout(overviewTimer); overviewTimer = setTimeout(loadOverview, 10000); });
+        }
+
+        // One answer on top of every tab: does everything work, and what needs a reaction
+        function renderAttention(d) {
+            const items = [];
+            const goTo = (tab, text) => `<a href="#" onclick="bootstrap.Tab.getOrCreateInstance(document.querySelector('[href=&quot;#${tab}&quot;]')).show(); return false;">${text}</a>`;
+            if (d.maintenance_mode) items.push(`<strong>Tryb przerwy jest włączony</strong> – studenci nie widzą planów${d.maintenance_reason ? ` (powód: ${esc(d.maintenance_reason)})` : ''}. Wyłącz przełącznikiem w górnym pasku.`);
+            const hidden = d.plans.filter(p => p.blocked === 'plan').length, partly = d.plans.filter(p => p.blocked && p.blocked !== 'plan').length;
+            if (hidden || partly) items.push(`${hidden ? `<strong>${hidden}</strong> planów ukrytych przed studentami` : ''}${hidden && partly ? ', ' : ''}${partly ? `<strong>${partly}</strong> z ukrytymi grupami` : ''} – ${goTo('tab-validation', 'zobacz Walidację')}.`);
+            const last = d.last_cycles[0];
+            if (last && last.has_errors) items.push(`Ostatni cykl (${esc(fmtDate(last.timestamp))}) zakończył się z <strong>${last.error_count || 1}</strong> błędami – ${goTo('tab-logs', 'zobacz Logi')}.`);
+            const a = d.auto_scan || {}, pending = (a.pending_changed || []).length + (a.pending_removed || []).length;
+            const manual = d.scan.status === 'done' ? d.scan.new_count + d.scan.changed_count + d.scan.removed_count : 0;
+            if (manual || pending) items.push(`<strong>${manual || pending}</strong> zmian planów na PUW czeka na zatwierdzenie – ${goTo('tab-scanner', 'otwórz Skaner')}.`);
+            if (a.error) items.push(`Automatyczny skan PUW nie powiódł się: ${esc(a.error)}.`);
+            const missing = d.plans.filter(p => !p.downloaded_at).length;
+            if (missing && !(d.cycle || {}).running) items.push(`<strong>${missing}</strong> planów jeszcze niepobranych.`);
+            if (!d.plans.length) items.push(`Brak planów w konfiguracji – ${goTo('tab-scanner', 'uruchom skan PUW')}.`);
+            const el = document.getElementById('attention');
+            el.innerHTML = items.length
+                ? `<div class="alert ${d.maintenance_mode || hidden ? 'alert-danger' : 'alert-warning'} mb-0"><div class="fw-semibold mb-1">Wymaga uwagi (${items.length})</div><ul class="attention-list small">${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`
+                : `<div class="alert alert-success mb-0 py-2 small"><strong>Wszystko działa.</strong> ${d.plans.length} planów pobranych, nic nie wymaga reakcji${last ? ` · ostatni cykl ${esc(fmtAgo(last.timestamp))}` : ''}.</div>`;
         }
 
         function renderNow(d) {
@@ -988,8 +1047,8 @@
                     : p.downloaded_at ? `<span title="${esc(fmtDate(p.downloaded_at))}">${esc(fmtAgo(p.downloaded_at))}</span>`
                     : '<span class="badge bg-secondary">jeszcze nie</span>';
                 return `<tr class="${isCurrent ? 'table-warning' : ''}">
-                    <td class="ps-3"><div class="small fw-semibold text-truncate plan-row-name" title="${esc(p.name)}">${esc(p.display_name || p.name)}</div>${blockBadge ? `<div>${blockBadge}</div>` : ''}<div class="text-muted" style="font-size:.75rem">${esc(p.faculty)}</div></td>
-                    <td><span class="badge bg-light text-dark border">${esc(CATEGORY_LABELS[p.category] || p.category || '–')}</span></td>
+                    <td class="ps-3"><div class="small fw-semibold plan-row-name" title="${esc(p.name)}">${esc(p.display_name || p.name)}</div>${blockBadge ? `<div>${blockBadge}</div>` : ''}<div class="text-muted" style="font-size:.75rem">${esc(p.faculty)}</div></td>
+                    <td><span class="badge bg-light text-dark border">${esc(p.mode_label || CATEGORY_LABELS[p.category] || '–')}</span></td>
                     <td class="small">${p.downloaded_at ? p.groups_downloaded : p.groups_config}</td>
                     <td class="small text-nowrap">${state}</td>
                 </tr>`;
@@ -1017,18 +1076,23 @@
             if (!a.at) { el.innerHTML = `<span class="text-muted">Automatyczny skan: co ${d.auto_scan_hours} h, pierwszy po najbliższym cyklu.</span>`; return; }
             if (a.error) { el.innerHTML = `<span class="text-danger">Automatyczny skan ${esc(fmtAgo(a.at))}: błąd – ${esc(a.error)}</span>`; return; }
             const pending = (a.pending_changed || []).length + (a.pending_removed || []).length;
+            const hint = document.getElementById('scanAutoHint');
+            if (hint) hint.innerHTML = pending && d.scan.status !== 'done'
+                ? `<div class="alert alert-warning small py-2">Automatyczny skan ${esc(fmtAgo(a.at))} wykrył <strong>${pending}</strong> zmian wymagających zatwierdzenia (${esc([...(a.pending_changed || []), ...(a.pending_removed || [])].slice(0, 6).join(', '))}${pending > 6 ? '…' : ''}). Kliknij „Skanuj Moodle”, żeby je przejrzeć i zastosować.</div>` : '';
+            const badge = document.getElementById('scanPendingBadge');
+            if (d.scan.status !== 'done' && pending) { badge.style.display = ''; badge.textContent = pending; }
             el.innerHTML = `<span class="text-muted">Automatyczny skan ${esc(fmtAgo(a.at))}${a.added && a.added.length ? `: <strong class="text-success">dodano ${a.added.length} nowych</strong>` : ': bez nowych planów'}.</span>`
-                + (pending ? ` <span class="badge bg-warning text-dark">${pending} zmian czeka – uruchom skan, żeby przejrzeć</span>` : '');
+                + (pending ? ` <span class="badge bg-warning text-dark">${pending} zmian czeka na zatwierdzenie</span>` : '');
         }
 
         function renderLastCycles(d) {
             const list = document.getElementById('lastCyclesList');
             if (!d.last_cycles.length) { list.innerHTML = '<li class="list-group-item text-muted small">Jeszcze nie było cyklu z planami</li>'; return; }
             list.innerHTML = d.last_cycles.map(c => {
-                const badge = c.has_errors ? '<span class="badge bg-danger">błędy</span>'
+                const badge = c.has_errors ? `<span class="badge bg-danger">${c.error_count || 1} ${(c.error_count || 1) === 1 ? 'błąd' : 'błędów'}</span>`
                     : c.new_plans ? `<span class="badge bg-success">${c.new_plans} zmian</span>` : '<span class="badge bg-light text-muted border">bez zmian</span>';
                 return `<li class="list-group-item d-flex justify-content-between align-items-center small">
-                    <span>${esc(fmtDate(c.timestamp))} <span class="text-muted">· ${c.successful_checks} planów${c.execution_time ? ' · ' + Math.round(c.execution_time) + ' s' : ''}</span></span>${badge}</li>`;
+                    <span>${esc(fmtDate(c.timestamp))} <span class="text-muted">· ${c.successful_checks} planów${c.execution_time ? ' · ' + fmtDuration(c.execution_time) : ''}</span></span>${badge}</li>`;
             }).join('');
         }
 

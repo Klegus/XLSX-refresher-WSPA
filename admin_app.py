@@ -218,7 +218,7 @@ def overview():
     from shared_utils import to_iso as iso
 
     from plan_reconciler import get_blocks
-    from plan_naming import describe_plan
+    from plan_naming import describe_plan, MODES_SHORT
     blocks = get_blocks(admin_db)
     validations = {v["_id"]: v.get("status") for v in admin_db.plan_validation.find({}, {"status": 1})}
 
@@ -237,6 +237,9 @@ def overview():
             "id": plan_id,
             "name": plan.get("name", plan_id),
             "display_name": describe_plan(plan.get("name", plan_id))["display_name"],
+            # mode of study from the plan's name; "category" is only the layout of its sheet
+            "mode_label": MODES_SHORT.get(describe_plan(plan.get("name", plan_id))["mode"]),
+            "variant": describe_plan(plan.get("name", plan_id))["variant"],
             "faculty": plan.get("faculty", ""),
             "category": plan.get("category", ""),
             "download_url": plan.get("download_url", ""),
@@ -250,12 +253,13 @@ def overview():
     last_cycles = list(admin_db.check_cycles.find(
         {"successful_checks": {"$exists": True}},
         {"_id": 0, "timestamp": 1, "successful_checks": 1, "new_plans": 1,
-         "has_errors": 1, "execution_time": 1, "updated_plans": 1},
+         "has_errors": 1, "execution_time": 1, "updated_plans": 1, "errors": 1},
     ).sort("timestamp", pymongo.DESCENDING).limit(5))
 
     cycle = {k: iso(v) for k, v in (config.get("cycle") or {}).items()}
     for c in last_cycles:
         c["timestamp"] = iso(c.get("timestamp"))
+        c["error_count"] = len(c.pop("errors", None) or []) or (1 if c.get("has_errors") else 0)
 
     # Coverage: which years of each programme have a plan (gaps = not published yet)
     typical_years = {"I stopnia": 3, "II stopnia": 2, "jednolite magisterskie": 5}

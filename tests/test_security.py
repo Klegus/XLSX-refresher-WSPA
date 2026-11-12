@@ -351,3 +351,19 @@ def test_scan_applies_only_safe_group_renames():
     assert not safe_group_change({'old': old, 'new': dict(renamed, download_url='v'), 'diff_fields': ['groups', 'download_url']})
     assert not safe_group_change({'old': old, 'new': {'groups': {'gr.1': 'a'}}, 'diff_fields': ['groups']})
     assert not safe_group_change({'old': old, 'new': {'groups': {'A': 1, 'B': 2, 'C': 3}}, 'diff_fields': ['groups']})
+
+
+def test_automatic_maintenance_ends_when_plans_are_back():
+    """The backend turns maintenance on when it has no plan configuration - and must turn
+    it off again; a break set by an admin stays."""
+    import main
+    for reason, cleared in (("No plans.json found", True), ("Plans data unavailable", True),
+                            ("Aktualizacja semestru", False), (None, False)):
+        with mock.patch.object(main, "get_system_config", return_value={"maintenance_mode": True, "maintenance_reason": reason}), \
+                mock.patch.object(main, "update_system_config") as update:
+            main.clear_automatic_maintenance({"plan": {}})
+            assert update.called is cleared, reason
+    with mock.patch.object(main, "get_system_config", return_value={"maintenance_mode": True, "maintenance_reason": "No plans.json found"}), \
+            mock.patch.object(main, "update_system_config") as update:
+        main.clear_automatic_maintenance({})
+        assert not update.called

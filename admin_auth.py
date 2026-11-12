@@ -110,7 +110,9 @@ def _login_page(error="", status=200):
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>Panel administracyjny – logowanie</title>
 <link rel="stylesheet" href="{href}" integrity="{sri}" crossorigin="anonymous"></head>
 <body class="bg-light"><main class="container" style="max-width:380px;margin-top:12vh">
-<h1 class="h4 mb-3">Panel administracyjny</h1>{msg}
+<div class="text-uppercase text-muted small fw-semibold mb-1" style="letter-spacing:.06em">Plan zajęć WSPA</div>
+<h1 class="h4 mb-1">Panel administracyjny</h1>
+<p class="text-muted small mb-3">Dostęp tylko dla administratora. Po kilku błędnych próbach logowanie jest czasowo blokowane.</p>{msg}
 <form method="post" action="/login" autocomplete="off">
 <input type="hidden" name="csrf_token" value="{escape(csrf_token())}">
 <div class="mb-2"><label class="form-label" for="u">Login</label>

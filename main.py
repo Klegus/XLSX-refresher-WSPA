@@ -333,6 +333,22 @@ def run_flask_app():
     serve(app, host="0.0.0.0", port=port, threads=8, ident=None)
 
 
+AUTOMATIC_MAINTENANCE_REASONS = ("No plans.json found", "Plans data unavailable", "Error loading plans.json")
+
+
+def clear_automatic_maintenance(plans_config):
+    """The backend turns maintenance on by itself when it has no plan configuration; once
+    plans exist again it must turn it off too - it used to stay on until an admin noticed
+    that students saw "maintenance" for no reason. A break set by an admin is left alone."""
+    if not plans_config:
+        return
+    config = get_system_config()
+    reason = config.get("maintenance_reason") or ""
+    if config.get("maintenance_mode") and reason.startswith(AUTOMATIC_MAINTENANCE_REASONS):
+        update_system_config({"maintenance_mode": False, "maintenance_reason": None})
+        logger.info(f"Plans are configured again - automatic maintenance ({reason}) turned off")
+
+
 DOWNLOAD_ALERT_EVERY = timedelta(hours=6)
 
 
@@ -901,6 +917,7 @@ async def main():
                     plans_config_doc = db.plans_config.find_one({"_id": "plans_json"})
                     if plans_config_doc and "plans" in plans_config_doc:
                         plans_config = plans_config_doc["plans"]
+                        clear_automatic_maintenance(plans_config)
                     
                     # Compare plan configuration with URL and update if needed
                     # This will also delete last documents for changed plans
