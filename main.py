@@ -1198,7 +1198,7 @@ async def main():
                             send_pushover_notification(
                                 f"Skaner wykrył {len(pending)} zmienionych lub usuniętych planów do zatwierdzenia "
                                 f"w panelu admina: {', '.join(pending[:5])}", prefix="Plan zajęć: ")
-                        if summary.get("added") or summary.get("renamed_groups"):
+                        if summary.get("added") or summary.get("renamed_groups") or summary.get("removed_sheets"):
                             # Download the new plans right away
                             db.system_config.update_one(
                                 {"_id": "config"}, {"$set": {"force_check_requested": datetime.now()}})
@@ -1215,7 +1215,15 @@ async def main():
                     set_cycle_state(running=True, current_plan="Terminarz egzaminów")
                     exam_session = _requests.Session()
                     if login_puw(exam_session):
-                        refresh_exams(db, exam_session, get_system_config().get("exam_schedule_year"))
+                        # a timetable the university has not published yet is not an error,
+                        # and must not stop the meeting calendars below
+                        try:
+                            refresh_exams(db, exam_session, get_system_config().get("exam_schedule_year"))
+                        except Exception as e:
+                            if "Nie znaleziono terminarza" in str(e):
+                                logger.info(f"Exam timetable not published on PUW yet: {e}")
+                            else:
+                                logger.error(f"Exam timetable refresh failed: {e}")
                         # Meeting calendars (zjazdy -> dates), once a day, when none are stored yet
                         # or when the calendar parser changed
                         from zjazdy import refresh as refresh_zjazdy, CALENDAR_PARSER_VERSION
@@ -1229,7 +1237,7 @@ async def main():
                             db.system_config.update_one({"_id": "config"}, {"$set": {
                                 "zjazdy_refreshed_at": datetime.now(), "zjazdy_parser": CALENDAR_PARSER_VERSION}})
                 except Exception as e:
-                    logger.error(f"Exam timetable / meeting calendar refresh failed: {e}")
+                    logger.error(f"Meeting calendar refresh failed: {e}")
 
                 set_cycle_state(
                     running=False,

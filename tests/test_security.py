@@ -367,3 +367,29 @@ def test_automatic_maintenance_ends_when_plans_are_back():
             mock.patch.object(main, "update_system_config") as update:
         main.clear_automatic_maintenance({})
         assert not update.called
+
+
+def test_scan_applies_split_groups_and_deleted_sheets():
+    """November 2026: the university split groups (2 -> 4) and deleted a duplicate sheet; both
+    waited for an admin while the validator hid the plans from students."""
+    from moodle_scanner import safe_group_change, group_renames, safe_removal
+    old = {'groups': {'grupa 1 podzuał wg nazwisk': 'a', 'grupa 2 podzuał wg nazwisk': 'b'}}
+    new = {'groups': {'grupa 1 podzuał wg nazwisk: A-K': 1, 'grupa 2 podzuał wg nazwisk: L-N': 2,
+                      'grupa 3 podzuał wg nazwisk: O-P': 3, 'grupa 4 podzuał wg nazwisk:R-Z': 4}}
+    assert safe_group_change({'old': old, 'new': new, 'diff_fields': ['groups']})
+    assert group_renames(old, new) == {'grupa 1 podzuał wg nazwisk': 'grupa 1 podzuał wg nazwisk: A-K',
+                                       'grupa 2 podzuał wg nazwisk': 'grupa 2 podzuał wg nazwisk: L-N'}
+    # a group split in two: the old name leads to the first part
+    old = {'groups': {'Grupa 2 kolejność wg nazwisk': 'b'}, 'mixed': True}
+    new = {'groups': {'Grupa 2 kolejność wg nazwisk: Kos-Ła': 1, 'Grupa 2 kolejność wg nazwisk: Łb-Pa': 2}}
+    assert safe_group_change({'old': old, 'new': new, 'diff_fields': ['mixed', 'groups']})
+    assert group_renames(old, new) == {'Grupa 2 kolejność wg nazwisk': 'Grupa 2 kolejność wg nazwisk: Kos-Ła'}
+    # a group added next to the existing ones
+    assert safe_group_change({'old': {'groups': {'Sp.: A': 1}}, 'new': {'groups': {'Sp.: A': 1, 'Sp.: B': 2}, 'mixed': True},
+                              'diff_fields': ['mixed', 'groups']})
+    # "gr.1" must not be taken for the predecessor of "gr.10 ..."
+    assert group_renames({'groups': {'gr.1': 1}}, {'groups': {'gr.10 wg nazwisk': 1, 'x': 2}}) == {}
+    # deleted sheet of a file that is still there vs a file the scan did not see at all
+    scraped = {'a': {'download_url': 'https://puw/f.xlsx'}}
+    assert safe_removal({'download_url': 'https://puw/f.xlsx'}, scraped)
+    assert not safe_removal({'download_url': 'https://puw/other.xlsx'}, scraped)

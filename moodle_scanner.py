@@ -553,6 +553,15 @@ def group_renames(old_plan, new_plan):
     gone = [g for g in old if g not in new]
     came = [g for g in new if g not in old]
     renames = dict(old_plan.get('group_renames') or {})
+    # a name range added to the old name ("gr.1 wg nazwisk" -> "gr.1 wg nazwisk: A-K"); when
+    # a group was split in two, the old name leads to the first part
+    key = lambda name: re.sub(r'[\s:.]+', ' ', name).strip().casefold()
+    for g in list(gone):
+        successor = next((c for c in came if key(c).startswith(key(g) + ' ')), None)
+        if successor:
+            renames[g] = successor
+            gone.remove(g)
+    came = [c for c in came if c not in renames.values()]
     if gone and len(gone) == len(came):
         renames.update(zip(gone, came))
     # an older name that pointed at a renamed group follows it
@@ -604,13 +613,14 @@ def compare_plans(scraped, current):
 
 # ─── Automatic scan (called from the backend loop) ─────────────────
 
-GROUP_ONLY_FIELDS = {'groups', 'group_aliases'}
+# "mixed" follows from the group columns (a plan with several groups per student)
+GROUP_ONLY_FIELDS = {'groups', 'group_aliases', 'mixed', 'groups_column_info'}
 
 
 def safe_group_change(change):
     """A change the scan may apply on its own: only the group names moved (the university
-    adds name ranges, "gr.1" -> "gr.1 wg nazwisk: A-K") and every old group has a
-    successor, or the whole-programme plan got its groups. Until it is applied the
+    adds name ranges, "gr.1" -> "gr.1 wg nazwisk: A-K", splits a group in two, adds a
+    group) and every old group has a successor, or the whole-programme plan got its groups. Until it is applied the
     generator cannot find the old columns and the plan is quarantined, so waiting for an
     admin left students without a plan for days."""
     if not set(change['diff_fields']) <= GROUP_ONLY_FIELDS:
@@ -619,6 +629,15 @@ def safe_group_change(change):
     new = change['new'].get('groups') or {}
     renames = group_renames(change['old'], change['new'])
     return bool(new) and all(g in new or g in renames for g in old)
+
+
+def safe_removal(plan, scraped):
+    """A plan the scan may drop on its own: its file was scanned (other sheets of the same
+    file are there) but its sheet is gone, e.g. a duplicate "... (2)" sheet the university
+    deleted. Its check fails in every cycle and it shows stale data. A plan whose whole
+    file is missing waits for an admin - that may be a scan that did not reach the file."""
+    url = plan.get('download_url')
+    return bool(url) and any(p.get('download_url') == url for p in scraped.values())
 
 
 def apply_change(current, key, change):
@@ -654,7 +673,13 @@ def auto_scan(db):
         if renamed:
             logger.info(f"Auto-scan applied renamed groups of {len(renamed)} plans")
 
-        if diff["new"] or renamed:
+        removed = [k for k, plan in diff["removed"].items() if safe_removal(plan, scraped)]
+        for key in removed:
+            current.pop(key, None)
+        if removed:
+            logger.info(f"Auto-scan dropped {len(removed)} plans whose sheet was deleted: {removed}")
+
+        if diff["new"] or renamed or removed:
             current.update(diff["new"])
             db.plans_config.update_one(
                 {"_id": "plans_json"},
@@ -667,7 +692,8 @@ def auto_scan(db):
             added=[p.get("name", k) for k, p in diff["new"].items()],
             renamed_groups=sorted(renamed),
             pending_changed=sorted(k for k in diff["changed"] if k not in renamed),
-            pending_removed=sorted(diff["removed"]),
+            removed_sheets=sorted(removed),
+            pending_removed=sorted(k for k in diff["removed"] if k not in removed),
         )
     except Exception as e:
         logger.error(f"Auto-scan failed: {e}")
