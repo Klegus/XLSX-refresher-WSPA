@@ -562,7 +562,10 @@ def group_renames(old_plan, new_plan):
             renames[g] = successor
             gone.remove(g)
     came = [c for c in came if c not in renames.values()]
-    if gone and len(gone) == len(came):
+    # Pairing by order is a guess, so it needs the group number to agree ("grupa 1 ..." ->
+    # "gr.1 ..."): after a reshuffle the old name would silently lead to another group's plan
+    number = lambda name: (re.findall(r'\d+', name) or [None])[0]
+    if gone and len(gone) == len(came) and all(number(g) and number(g) == number(c) for g, c in zip(gone, came)):
         renames.update(zip(gone, came))
     # an older name that pointed at a renamed group follows it
     renames = {k: renames.get(v, v) if v in renames and v not in new else v for k, v in renames.items()}

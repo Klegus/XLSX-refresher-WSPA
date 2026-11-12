@@ -367,6 +367,37 @@ def alert_on_failed_plans(failed, total):
         db.system_config.update_one({"_id": "config"}, {"$set": {"download_alert_at": datetime.now()}})
 
 
+def record_plan_health(manager, plan_name):
+    """Keep the outcome of the check per plan (plan_health) - never breaks the cycle."""
+    try:
+        import plan_health
+        outcome = getattr(manager.lesson_plan, "outcome", None)
+        if isinstance(outcome, dict):
+            plan_health.record(db, manager.lesson_plan.collection_name, plan_name, outcome)
+    except Exception as e:
+        logger.error(f"Could not store the health of {plan_name}: {e}")
+
+
+def alert_on_stale_plans(current):
+    """Pushover alert for single plans that went out of date: the new version was withheld,
+    the sheet cannot be read, or the file is unreachable for several checks. Once per
+    failing streak. alert_on_failed_plans only speaks when a quarter of all plans fail, so
+    one plan could show old data for weeks unnoticed."""
+    try:
+        import plan_health
+        fresh = plan_health.take_alerts(db, current)
+        if not fresh:
+            return
+        from routes.suggestions import send_pushover_notification
+        lines = [f"{h.get('plan')}: {h.get('reason') or h.get('state')}" for h in fresh[:5]]
+        more = f"\n… i {len(fresh) - 5} kolejnych" if len(fresh) > 5 else ""
+        send_pushover_notification(
+            f"{len(fresh)} planów pokazuje starszą wersję niż plik na PUW:\n" + "\n".join(lines) + more,
+            prefix="Plan zajęć: ")
+    except Exception as e:
+        logger.error(f"Stale plan alert failed: {e}")
+
+
 class PlanCheckFailed(Exception):
     """A plan could not be downloaded or processed in this cycle."""
 
@@ -460,7 +491,9 @@ class LessonPlanManager:
             if new_checksum is None:
                 logger.error("Error checking plan", extra={"plan_name": self.plan_name})
                 # counted as an error of the cycle (it used to pass as a successful check)
-                raise PlanCheckFailed("Plan could not be downloaded or processed")
+                outcome = getattr(self.lesson_plan, "outcome", None)
+                reason = outcome.get("reason") if isinstance(outcome, dict) else None
+                raise PlanCheckFailed(reason or "Plan could not be downloaded or processed")
             else:
                 if new_checksum:
                     logger.info("Plan updated", extra={"plan_name": self.plan_name, "checksum": new_checksum})
@@ -1078,6 +1111,9 @@ async def main():
                                 sentry_sdk.capture_exception(e)
                             errors.append(error_info)
                             logger.error(f"Error in manager for {plan_name}: {str(e)}")
+                            if not isinstance(e, PlanCheckFailed):
+                                manager.lesson_plan.outcome = {"state": "failed", "reason": f"Błąd sprawdzania: {e}"}
+                        record_plan_health(manager, plan_name)
 
                     cycle_execution_time = round(time.time() - cycle_start_time, 2)
                     set_cycle_state(
@@ -1090,6 +1126,7 @@ async def main():
                     total_plans = len(lesson_plan_managers)
                     next_check = datetime.now() + timedelta(seconds=check_interval)
                     alert_on_failed_plans(len(errors), total_plans)
+                    alert_on_stale_plans({m.lesson_plan.collection_name for m in lesson_plan_managers.values()})
 
                     log_cycle_summary(
                         duration=cycle_execution_time,

@@ -468,7 +468,16 @@ def reconcile_all(db, session, plans, progress_cb=None):  # noqa: C901
         try:
             if url not in files:
                 from shared_utils import fetch_bytes
-                files[url] = fetch_bytes(session, url, timeout=60, require_xlsx=True)
+                try:
+                    files[url] = fetch_bytes(session, url, timeout=60, require_xlsx=True)
+                except Exception as e:
+                    files[url] = e
+            if isinstance(files[url], Exception):
+                # A file that could not be fetched (timeout, expired session) says nothing
+                # about the plan: its previous result stays. It used to be saved as a
+                # blocking "structure" issue, which hid a good plan until its file changed.
+                logger.error(f"Validation of {plan_id} skipped, source not fetched: {files[url]}")
+                continue
             doc = db[plan_collection_name(plan_cfg)].find_one(
                 {"groups": {"$exists": True}}, sort=[("timestamp", pymongo.DESCENDING)])
             result = reconcile_plan(plan_id, plan_cfg, files[url], doc)

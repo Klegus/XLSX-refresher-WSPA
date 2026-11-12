@@ -983,6 +983,10 @@
             if (d.maintenance_mode) items.push(`<strong>Tryb przerwy jest włączony</strong> – studenci nie widzą planów${d.maintenance_reason ? ` (powód: ${esc(d.maintenance_reason)})` : ''}. Wyłącz przełącznikiem w górnym pasku.`);
             const hidden = d.plans.filter(p => p.blocked === 'plan').length, partly = d.plans.filter(p => p.blocked && p.blocked !== 'plan').length;
             if (hidden || partly) items.push(`${hidden ? `<strong>${hidden}</strong> planów ukrytych przed studentami` : ''}${hidden && partly ? ', ' : ''}${partly ? `<strong>${partly}</strong> z ukrytymi grupami` : ''} – ${goTo('tab-validation', 'zobacz Walidację')}.`);
+            const withheld = d.plans.filter(p => p.health && p.health.state === 'withheld').length;
+            const failing = d.plans.filter(p => p.health && p.health.state === 'failed' && (p.health.stale || p.health.fails >= 3)).length;
+            if (withheld) items.push(`Plany ze wstrzymaną nową wersją (nie zgadza się z plikiem): <strong>${withheld}</strong> – studenci widzą poprzednią z ostrzeżeniem. Szczegóły w „Status planów”.`);
+            if (failing) items.push(`Plany, których nie da się sprawdzić od kilku cykli: <strong>${failing}</strong> – powód w „Status planów”.`);
             const last = d.last_cycles[0];
             if (last && last.has_errors) items.push(`Ostatni cykl (${esc(fmtDate(last.timestamp))}) zakończył się z <strong>${last.error_count || 1}</strong> błędami – ${goTo('tab-logs', 'zobacz Logi')}.`);
             const a = d.auto_scan || {}, pending = (a.pending_changed || []).length + (a.pending_removed || []).length;
@@ -1095,22 +1099,38 @@
             let rows = lastOverview.plans.filter(p =>
                 (planFilter === 'all' || (planFilter === 'ok') === !!p.downloaded_at) &&
                 (!term || (p.name + ' ' + (p.display_name || '') + ' ' + p.faculty).toLowerCase().includes(term)));
-            rows.sort((a, b) => (!!a.downloaded_at - !!b.downloaded_at) || a.name.localeCompare(b.name, 'pl'));
+            const troubled = p => p.health && p.health.state !== 'ok' ? 0 : 1;
+            rows.sort((a, b) => (troubled(a) - troubled(b)) || (!!a.downloaded_at - !!b.downloaded_at) || a.name.localeCompare(b.name, 'pl'));
             if (!rows.length) { body.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">${lastOverview.plans.length ? 'Brak planów dla filtra' : 'Brak planów – zacznij od skanu Moodle'}</td></tr>`; return; }
             body.innerHTML = rows.map(p => {
                 const isCurrent = current && current === p.name;
                 const blockBadge = p.blocked === 'plan' ? ' <span class="badge bg-danger" title="Ukryty przed studentami – zobacz zakładkę Walidacja">ukryty</span>'
                     : p.blocked ? ` <span class="badge bg-danger" title="Część grup ukryta przed studentami">${p.blocked} gr. ukryte</span>` : '';
+                const h = p.health && p.health.state !== 'ok' ? p.health : null;
+                const healthLine = !h ? '' : `<div class="small ${h.stale ? 'text-danger' : 'text-muted'}">${h.state === 'withheld' ? 'Nowa wersja wstrzymana' : 'Sprawdzanie przestało działać'} ${esc(fmtAgo(h.since))}${h.fails > 1 ? ` (${h.fails} prób)` : ''}: ${esc(h.reason || '')}${p.downloaded_at ? ' Studenci widzą poprzednią wersję' + (h.stale ? ' z ostrzeżeniem.' : '.') : ''}${h.state === 'withheld' ? (h.accepted ? ' <span class="text-success">Zaakceptowana, wejdzie przy najbliższym sprawdzeniu.</span>' : ` <a href="#" data-plan="${esc(p.id)}" onclick="showWithheld(this.dataset.plan); return false;">Pokaż różnice</a> · <a href="#" data-plan="${esc(p.id)}" onclick="acceptWithheld(this.dataset.plan); return false;">Opublikuj mimo to</a>`) : ''}</div>`;
                 const state = isCurrent ? '<span class="badge bg-warning text-dark">sprawdzam</span>'
                     : p.downloaded_at ? `<span title="${esc(fmtDate(p.downloaded_at))}">${esc(fmtAgo(p.downloaded_at))}</span>`
                     : '<span class="badge bg-secondary">jeszcze nie</span>';
                 return `<tr class="${isCurrent ? 'table-warning' : ''}">
-                    <td class="ps-3"><div class="small fw-semibold plan-row-name" title="${esc(p.name)}">${esc(p.display_name || p.name)}</div>${blockBadge ? `<div>${blockBadge}</div>` : ''}<div class="text-muted" style="font-size:.75rem">${esc(p.faculty)}</div></td>
+                    <td class="ps-3"><div class="small fw-semibold plan-row-name" title="${esc(p.name)}">${esc(p.display_name || p.name)}</div>${blockBadge ? `<div>${blockBadge}</div>` : ''}<div class="text-muted" style="font-size:.75rem">${esc(p.faculty)}</div>${healthLine}</td>
                     <td><span class="badge bg-light text-dark border">${esc(p.mode_label || CATEGORY_LABELS[p.category] || '–')}</span></td>
                     <td class="small">${p.downloaded_at ? p.groups_downloaded : p.groups_config}</td>
                     <td class="small text-nowrap">${state}</td>
                 </tr>`;
             }).join('');
+        }
+
+        function showWithheld(planId) {
+            fetch('/api/health/' + encodeURIComponent(planId)).then(r => r.json()).then(d => {
+                const lines = (d.issues || []).map(i => `• ${[i.group, i.day, i.text].filter(Boolean).join(' · ')}${i.detail ? ' – ' + i.detail : ''}`);
+                alert(`${d.reason || ''}\n\n${lines.slice(0, 20).join('\n') || 'Brak szczegółów'}${lines.length > 20 ? `\n… i ${lines.length - 20} kolejnych` : ''}`);
+            });
+        }
+
+        function acceptWithheld(planId) {
+            if (!confirm('Opublikować tę wersję pliku mimo wykrytych różnic? Zgoda dotyczy tylko tej wersji.')) return;
+            fetch('/api/health/accept', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan_id: planId }) })
+                .then(r => r.json()).then(d => { alert(d.message || d.error); loadOverview(); });
         }
 
         function renderCoverage(d) {

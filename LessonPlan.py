@@ -189,6 +189,7 @@ class LessonPlan(LessonPlanDownloader):
         wb = openpyxl.load_workbook(file_path)
         try:
             if self.sheet_name not in wb.sheetnames:
+                self.layout_problem = f"W pliku nie ma arkusza „{self.sheet_name}”"
                 return None
             ws = wb[self.sheet_name]
 
@@ -216,6 +217,7 @@ class LessonPlan(LessonPlanDownloader):
                 if len(found) > len(day_starts):
                     days_row, day_starts = r, found
             if not day_starts:
+                self.layout_problem = "Nie znaleziono wiersza z dniami tygodnia"
                 return None
 
             # Header row under the days: GRUPA row if present, used for group mapping
@@ -232,6 +234,7 @@ class LessonPlan(LessonPlanDownloader):
                     if hits > best_hits:
                         header_row, best_hits = r, hits
                 if header_row is None:
+                    self.layout_problem = "W arkuszu nie ma żadnej grupy z konfiguracji (zmienione nazwy grup?)"
                     return None
                 for name, keys in wanted.items():
                     group_cols[name] = [c for c in range(2, max_col + 1)
@@ -239,6 +242,7 @@ class LessonPlan(LessonPlanDownloader):
                 if any(not cols for cols in group_cols.values()):
                     missing = [n for n, cols in group_cols.items() if not cols]
                     logger.warning(f"Groups not found in sheet header: {missing}")
+                    self.layout_problem = "W arkuszu nie ma grup: " + ", ".join(missing)
                     return None
 
             # Column span of each day: up to the next day; last day ends at the
@@ -265,6 +269,7 @@ class LessonPlan(LessonPlanDownloader):
                     h1, m1, h2, m2 = m.groups()
                     time_rows.append((r, f"{int(h1)}<sup>{m1}</sup> - {int(h2)}<sup>{m2}</sup>"))
             if not time_rows:
+                self.layout_problem = "Nie znaleziono wierszy z godzinami zajęć"
                 return None
 
             # Exams and extra information printed above / below the table
@@ -336,6 +341,28 @@ class LessonPlan(LessonPlanDownloader):
                 logger.info(f"Detected {len(changes)} changes in {collection_name}")
         except Exception as e:
             logger.warning(f"Diff failed (non-critical): {e}")
+
+    def _blocking_issues(self, document, file_path):
+        """Blocking differences between the generated plan and its Excel source, checked
+        before the plan is published. Empty when it may be published: no differences,
+        blocking switched off, or an admin accepted this exact file version."""
+        try:
+            from plan_health import accepted
+            from plan_reconciler import BLOCKING_SEVERITY, SEVERITY, compute_blocks, reconcile_plan, summarize
+            config = self.db.system_config.find_one({"_id": "config"}, {"validation_blocking": 1}) or {}
+            if not config.get("validation_blocking", True) or accepted(self.db, self.collection_name, document["checksum"]):
+                return []
+            with open(file_path, "rb") as f:
+                result = summarize(reconcile_plan(self.collection_name, self.plan_config, f.read(), document))
+            whole, groups = compute_blocks(result)
+            if not whole and not groups:
+                return []
+            return [i for i in result["issues"] if SEVERITY.get(i["kind"], 0) >= BLOCKING_SEVERITY]
+        except Exception as e:
+            # a crash of the check says nothing about the plan; the validation after the
+            # cycle runs again on what was published
+            logger.error(f"Pre-publish check failed for {self.collection_name}: {e}", exc_info=True)
+            return []
 
     def _generate_html_direct(self, checksum):
         """Generate HTML table directly from Excel using openpyxl.
@@ -758,11 +785,16 @@ class LessonPlan(LessonPlanDownloader):
         return new_df
 
     def process_and_save_plan(self):
-        """Process and save the lesson plan, returns checksum if plan was processed"""
+        """Process and save the lesson plan. Returns the checksum when a new version was
+        published, False when nothing was published (no change, or the new version was
+        withheld) and None when the plan could not be downloaded or read. ``self.outcome``
+        says which, for plan_health."""
+        self.outcome = {"state": "failed", "reason": "Nie udało się pobrać pliku z PUW", "unreachable": True}
         new_checksum = self.download_file()
         if not new_checksum:
             logger.error("Failed to download file.")
             return None
+        self.outcome = {"state": "ok", "checksum": new_checksum}
 
         # Check if category is None - if so, only check checksum and save basic info
         if self.schedule_type is None:
@@ -844,11 +876,24 @@ class LessonPlan(LessonPlanDownloader):
         if should_process:
             logger.info(f"Processing plan for {self.plan_config['name']}")
 
-            # Sheet-based generator for all plans (merged cells, sub-columns,
-            # day names from the sheet); legacy pipeline below is the fallback
+            # Sheet-based generator for all plans (merged cells, sub-columns, day names
+            # from the sheet). A sheet it cannot read is a failed check with its reason:
+            # the old pandas pipeline used to take over here and published a damaged plan
+            # that the validation then hid, with the real cause only in a warning.
+            changed = bool(latest_checksum) and latest_checksum != new_checksum if self.save_to_mongodb else False
+            self.layout_problem = None
             try:
                 file_path = self.file_save_path or os.path.join(self.directory or '', 'downloaded_file.xlsx')
                 groups_html = self._generate_groups_html(file_path)
+            except Exception as e:
+                logger.error(f"Sheet generator failed: {e}", exc_info=True)
+                groups_html, self.layout_problem = None, f"Błąd odczytu arkusza: {e}"
+            if not groups_html:
+                reason = self.layout_problem or "Nie rozpoznano układu arkusza"
+                logger.error(f"Plan not processed: {reason}", extra={"plan_name": self.plan_config.get("name")})
+                self.outcome = {"state": "failed", "reason": reason, "changed": changed, "checksum": new_checksum}
+                return None
+            try:
                 if groups_html:
                     if self.save_to_mongodb:
                         faculty_name = self.plan_config['faculty'].replace(' ', '-').replace('_', '-')
@@ -870,15 +915,25 @@ class LessonPlan(LessonPlanDownloader):
                         if self.is_mixed:
                             document["mixed"] = True
                             document["group_column_info"] = self.group_column_counts
+                        problems = self._blocking_issues(document, file_path)
+                        if problems:
+                            # the last good version stays published
+                            logger.error(f"New version of {collection_name} withheld: {len(problems)} blocking issues")
+                            self.outcome = {"state": "withheld", "changed": changed, "checksum": new_checksum,
+                                            "issues": problems,
+                                            "reason": "Nowa wersja nie zgadza się z plikiem źródłowym"}
+                            return False
                         self._record_changes(collection, collection_name, groups_html, new_checksum)
                         collection.insert_one(document)
                         logger.info(f"Saved plan via sheet generator to {collection_name}")
                     return new_checksum
-                logger.warning("Sheet generator did not recognise the layout, using legacy pipeline")
             except Exception as e:
-                logger.warning(f"Sheet generator failed, falling back to legacy pipeline: {e}")
+                logger.error(f"Saving the plan failed: {e}", exc_info=True)
+                self.outcome = {"state": "failed", "reason": f"Błąd zapisu planu: {e}", "changed": changed,
+                                "checksum": new_checksum}
+                return None
 
-            try:
+            try:  # pragma: no cover - old pandas pipeline, no longer reached
                 self._invalidate_processing_cache()
 
                 # Always process the downloaded file

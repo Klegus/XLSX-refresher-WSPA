@@ -37,7 +37,7 @@ def get_scan_summary():
 from moodle_scanner import group_renames
 
 
-def init_scanner_routes(app, get_plans_config, update_plans_config, request_check_now=None):
+def init_scanner_routes(app, get_plans_config, update_plans_config, request_check_now=None, db=None):
 
     @app.route("/api/scanner/start", methods=["POST"])
     def start_scan():
@@ -175,6 +175,16 @@ def init_scanner_routes(app, get_plans_config, update_plans_config, request_chec
 
         # Wyniki skanu są już w konfiguracji - nie pokazuj ich jako oczekujących
         _scan_state["status"] = "applied"
+        # The daily scan keeps its own list of changes waiting for approval; without this
+        # the panel went on saying "N changes waiting" until the next daily scan
+        if db is not None and added + updated + removed > 0:
+            try:
+                handled = list(set(keys_to_update) | set(keys_to_remove))
+                db.system_config.update_one({"_id": "config"}, {"$pull": {
+                    "auto_scan.pending_changed": {"$in": handled},
+                    "auto_scan.pending_removed": {"$in": handled}}})
+            except Exception as e:
+                logger.warning(f"Could not clear the pending changes of the daily scan: {e}")
 
         message = f"Zastosowano: {added} dodanych, {updated} zaktualizowanych, {removed} usuniętych"
         check_started = False

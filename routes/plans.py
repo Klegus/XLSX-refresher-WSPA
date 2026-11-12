@@ -139,6 +139,23 @@ def init_plan_routes(app, get_semester_collections, db):
             return jsonify({"detail": {"message": BLOCKED_MESSAGE, "blocked": True}}), 423
         return None
 
+    def add_stale(response, collection_name):
+        """Mark a plan whose published version may be older than the file on PUW (the new
+        version was withheld, or the file cannot be read or fetched) - the page warns the
+        student instead of showing old data as current. Covers the attached sheets too."""
+        try:
+            from plan_health import stale
+            from shared_utils import to_iso
+            names = [collection_name] + [p["collection"] for p in response.get("parts") or [] if p.get("collection")]
+            found = [info for info in (stale(h) for h in db.plan_health.find({"_id": {"$in": names}})) if info]
+            if found:
+                first = min(found, key=lambda info: str(info.get("since") or ""))
+                kinds = {info["kind"] for info in found}
+                response["stale"] = {"since": to_iso(first.get("since")),
+                                     "kind": "changed" if "changed" in kinds else "unreachable"}
+        except Exception as e:
+            logger.warning(f"Plan health lookup failed for {collection_name}: {e}")
+
     def plan_meetings(doc):
         """Dates of the meetings ("zj.3" -> dates) for plans that list meeting numbers:
         the calendar in the sheet header first, else the programme's PDF calendar."""
@@ -373,6 +390,7 @@ def init_plan_routes(app, get_semester_collections, db):
             meetings = plan_meetings(latest_plan)
             if meetings:
                 response["zjazdy"] = meetings
+            add_stale(response, collection_name)
             logger.debug("Wysyłanie odpowiedzi")
             return jsonify(response)
         except Exception as e:
@@ -448,6 +466,7 @@ def init_plan_routes(app, get_semester_collections, db):
             parts, _ = plan_parts(collection_name, requested_groups)
             if parts:
                 response["parts"] = parts
+            add_stale(response, collection_name)
             logger.debug(f"Returning HTML for {len(group_htmls)} groups")
             return jsonify(response)
 

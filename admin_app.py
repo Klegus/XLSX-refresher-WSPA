@@ -124,7 +124,7 @@ init_config_routes(
 )
 init_log_routes(admin_app, admin_db)
 init_scanner_routes(admin_app, get_admin_plans_config, update_admin_plans_config,
-                    request_check_now=lambda: request_check_now())
+                    request_check_now=lambda: request_check_now(), db=admin_db)
 init_suggestion_routes(admin_app, admin_db)
 
 
@@ -221,6 +221,8 @@ def overview():
     from plan_naming import describe_plan, MODES_SHORT
     blocks = get_blocks(admin_db)
     validations = {v["_id"]: v.get("status") for v in admin_db.plan_validation.find({}, {"status": 1})}
+    import plan_health
+    health = {h["_id"]: h for h in admin_db.plan_health.find({}, {"issues": 0})}
 
     existing = set(admin_db.list_collection_names())
     plan_rows = []
@@ -248,6 +250,15 @@ def overview():
             "groups_downloaded": len(latest.get("groups") or {}) if latest else 0,
             "validation": validations.get(plan_id),
             "blocked": ("plan" if blocks[col]["plan"] else len(blocks[col]["groups"])) if col in blocks else None,
+            # outcome of the last check: ok / withheld (new version not published) / failed
+            "health": {
+                "state": health[col].get("state"), "reason": health[col].get("reason"),
+                "since": iso(health[col].get("since")), "fails": health[col].get("fails") or 0,
+                "last_ok_at": iso(health[col].get("last_ok_at")), "checked_at": iso(health[col].get("checked_at")),
+                "stale": bool(plan_health.stale(health[col])),
+                "accepted": bool(health[col].get("accept_checksum"))
+                and health[col].get("accept_checksum") == health[col].get("checksum"),
+            } if col in health else None,
         })
 
     last_cycles = list(admin_db.check_cycles.find(
@@ -394,6 +405,40 @@ def ack_validation():
         {"_id": plan_id},
         {"$set": {"ack": {"checksum": doc.get("checksum"), "at": datetime.now()}}})
     return jsonify({"success": True, "message": "Plan zatwierdzony do czasu zmiany pliku"})
+
+
+@admin_app.route("/api/health/<plan_id>", methods=["GET"])
+def plan_health_details(plan_id):
+    """Why the last check of a plan did not publish a new version, with the differences found."""
+    plan = get_admin_plans_config().get(plan_id)
+    if not plan:
+        return jsonify({"success": False, "error": "Nie ma takiego planu"}), 404
+    doc = admin_db.plan_health.find_one({"_id": _plan_collection_name(plan)}) or {}
+    return jsonify({"success": True, "state": doc.get("state"), "reason": doc.get("reason"),
+                    "since": to_iso(doc.get("since")), "fails": doc.get("fails") or 0,
+                    "issues": doc.get("issues") or []})
+
+
+@admin_app.route("/api/health/accept", methods=["POST"])
+def accept_withheld_version():
+    """Admin publishes the withheld file version despite the differences (or takes it back).
+    Tied to the checksum: the next version of the file is checked again."""
+    data = request.get_json(silent=True) or {}
+    plan_id = data.get("plan_id")
+    if not isinstance(plan_id, str):
+        return jsonify({"success": False, "error": "plan_id must be a string"}), 400
+    plan = get_admin_plans_config().get(plan_id)
+    if not plan:
+        return jsonify({"success": False, "error": "Nie ma takiego planu"}), 404
+    col = _plan_collection_name(plan)
+    doc = admin_db.plan_health.find_one({"_id": col})
+    if data.get("revoke"):
+        admin_db.plan_health.update_one({"_id": col}, {"$unset": {"accept_checksum": ""}})
+        return jsonify({"success": True, "message": "Zgoda cofnięta"})
+    if not doc or doc.get("state") != "withheld" or not doc.get("checksum"):
+        return jsonify({"success": False, "error": "Ten plan nie ma wstrzymanej wersji"}), 409
+    admin_db.plan_health.update_one({"_id": col}, {"$set": {"accept_checksum": doc["checksum"]}})
+    return jsonify({"success": True, "message": "Wersja zostanie opublikowana przy najbliższym sprawdzeniu planów"})
 
 
 @admin_app.route("/api/validate/blocking", methods=["POST"])

@@ -12,7 +12,7 @@ COPY admin_auth.py ./
 COPY shared_utils.py ./
 COPY moodle_scanner.py ./
 COPY plan_validator.py ./
-COPY plan_reconciler.py ./
+COPY plan_reconciler.py plan_health.py ./
 COPY plan_naming.py ./
 COPY plan_notes.py ./
 COPY exam_schedule.py ./
