@@ -187,7 +187,7 @@ def test_cells_reach_the_frontend_as_separate_classes(env):
     group = next(iter(PLANS['pielęgniarstwo_zj_3']['groups']))
     data = _plan(env, 'pielęgniarstwo_zj_3', group).get_json()
     for html in [data['plan_html']] + [h for p in data['parts'] for h in p['groups'].values()]:
-        assert '\n' not in html
+        assert '\n\n' not in html
         # a class never starts with its meeting numbers or lecturer (lost lecturer line)
         for lesson in __import__('re').findall(r'<div data-lesson>(.*?)</div>', html):
             assert not __import__('re').match(r'\s*(zj\b|zj\.|mgr\b|dr\b|sala\b)', lesson), lesson

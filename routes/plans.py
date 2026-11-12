@@ -34,7 +34,12 @@ def display_html(html):
     """Plan HTML for the frontend. A cell may hold several classes separated by an empty
     line, each with its own dates or meetings ("zj.4,6" and "zj.0,1,2"): every class is
     wrapped in <div data-lesson> so the week filter and the calendar judge them one by one.
-    Line breaks inside a class become spaces, as before."""
+    The lines of a class (subject and type, lecturer, meetings or dates, room) stay on
+    separate lines ("\n"), so the frontend can lay a class out; HTML rendering and the
+    text matching treat them as spaces, as before."""
+    def lines(text):
+        return '\n'.join(line.strip() for line in text.split('\n') if line.strip())
+
     def cell(m):
         lessons = []
         for part in _LESSON_SEP_RE.split(m.group(2).strip()):
@@ -45,11 +50,12 @@ def display_html(html):
             else:
                 lessons.append(part)
         if len(lessons) > 1:
-            body = ''.join(f'<div data-lesson>{part.replace(chr(10), " ")}</div>' for part in lessons)
+            body = ''.join(f'<div data-lesson>{lines(part)}</div>' for part in lessons)
         else:
-            body = m.group(2).replace('\n', ' ')
+            body = lines(m.group(2))
         return m.group(1) + body + m.group(3)
-    return _CELL_RE.sub(cell, html or '').replace('\n', ' ')
+    # between the tags of the table line breaks still become spaces
+    return re.sub(r'>\s*\n\s*<', '> <', _CELL_RE.sub(cell, html or ''))
 
 
 def natural_key(text):
