@@ -58,16 +58,17 @@ def stale_plans(db):
     return found
 
 
-def take_alerts(db, current=None):
+def unreported(db, current=None):
     """Plans that became out of date and were not reported yet - each failing streak is
-    reported once. Marks them as reported."""
+    reported once (mark_reported after the alert went out)."""
     query = {"state": {"$in": [WITHHELD, FAILED]}, "alerted": {"$ne": True}}
     if current is not None:
         query["_id"] = {"$in": list(current)}
-    fresh = [h for h in db.plan_health.find(query) if stale(h)]
-    if fresh:
-        db.plan_health.update_many({"_id": {"$in": [h["_id"] for h in fresh]}}, {"$set": {"alerted": True}})
-    return fresh
+    return [h for h in db.plan_health.find(query) if stale(h)]
+
+
+def mark_reported(db, plans):
+    db.plan_health.update_many({"_id": {"$in": [h["_id"] for h in plans]}}, {"$set": {"alerted": True}})
 
 
 def accepted(db, collection, checksum):

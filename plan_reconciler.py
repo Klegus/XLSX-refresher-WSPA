@@ -458,6 +458,8 @@ def plan_collection_name(plan_cfg):
 
 def reconcile_all(db, session, plans, progress_cb=None):  # noqa: C901
     """Reconcile every configured plan. Downloads each Excel file once."""
+    import hashlib
+
     import pymongo
 
     files, results = {}, []
@@ -480,6 +482,13 @@ def reconcile_all(db, session, plans, progress_cb=None):  # noqa: C901
                 continue
             doc = db[plan_collection_name(plan_cfg)].find_one(
                 {"groups": {"$exists": True}}, sort=[("timestamp", pymongo.DESCENDING)])
+            stored = str((doc or {}).get("checksum") or "").split("_")[0]
+            if stored and stored != hashlib.md5(files[url], usedforsecurity=False).hexdigest():
+                # The published version comes from an earlier file: the new one was
+                # withheld or could not be read (plan_health knows why). Comparing the old
+                # plan with the new file would only hide the version kept for students.
+                logger.info(f"Validation of {plan_id} skipped, published version is from an earlier file")
+                continue
             result = reconcile_plan(plan_id, plan_cfg, files[url], doc)
         except Exception as e:
             logger.error(f"Reconcile failed for {plan_id}: {e}")
@@ -576,12 +585,17 @@ def get_blocks(db):
     config = db.system_config.find_one({"_id": "config"}) or {}
     if not config.get("validation_blocking", True):
         return {}
+    # a withheld version an admin published anyway ("Opublikuj mimo to") stays visible
+    accepted = {h["_id"]: h["accept_checksum"] for h in db.plan_health.find(
+        {"accept_checksum": {"$exists": True}}, {"accept_checksum": 1})}
     blocks = {}
     for v in db.plan_validation.find(
             {"$or": [{"blocked_plan": True}, {"blocked_groups.0": {"$exists": True}}]},
             {"collection": 1, "checksum": 1, "blocked_plan": 1, "blocked_groups": 1, "ack": 1}):
         ack = v.get("ack") or {}
         if ack.get("checksum") and ack["checksum"] == v.get("checksum"):
+            continue
+        if v.get("checksum") and accepted.get(v["collection"]) == v["checksum"]:
             continue
         blocks[v["collection"]] = {
             "plan": bool(v.get("blocked_plan")),

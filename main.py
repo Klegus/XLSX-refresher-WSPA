@@ -385,15 +385,16 @@ def alert_on_stale_plans(current):
     one plan could show old data for weeks unnoticed."""
     try:
         import plan_health
-        fresh = plan_health.take_alerts(db, current)
+        fresh = plan_health.unreported(db, current)
         if not fresh:
             return
         from routes.suggestions import send_pushover_notification
         lines = [f"{h.get('plan')}: {h.get('reason') or h.get('state')}" for h in fresh[:5]]
         more = f"\n… i {len(fresh) - 5} kolejnych" if len(fresh) > 5 else ""
-        send_pushover_notification(
-            f"{len(fresh)} planów pokazuje starszą wersję niż plik na PUW:\n" + "\n".join(lines) + more,
-            prefix="Plan zajęć: ")
+        if send_pushover_notification(
+                f"Plany pokazujące starszą wersję niż plik na PUW ({len(fresh)}):\n" + "\n".join(lines) + more,
+                prefix="Plan zajęć: "):
+            plan_health.mark_reported(db, fresh)  # a failed send is retried after the next cycle
     except Exception as e:
         logger.error(f"Stale plan alert failed: {e}")
 

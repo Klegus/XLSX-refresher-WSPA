@@ -102,6 +102,16 @@ def test_renamed_groups_keep_the_last_good_version_with_a_warning(env):
     assert resp.status_code == 200 and resp.get_json()['plan_html']
     assert resp.get_json()['stale']['kind'] == 'changed'
 
+    # a restart validates every plan: the kept version must not be hidden by comparing it
+    # with a file it does not come from
+    from plan_reconciler import get_blocks, run_validation
+    env['db'].plans_config.update_one({'_id': 'plans_json'}, {'$set': {f'plans.{KEY}': config}})
+    with mock.patch('shared_utils.fetch_bytes', lambda *a, **k: fixture_bytes(PLANS[KEY])):
+        run_validation(env['db'])
+    assert get_blocks(env['db']) == {}
+    resp = env['api']()
+    assert resp.status_code == 200 and resp.get_json()['stale']['kind'] == 'changed'
+
 
 def test_version_that_differs_from_its_source_is_withheld(env):
     from LessonPlan import LessonPlan
@@ -125,6 +135,38 @@ def test_version_that_differs_from_its_source_is_withheld(env):
         result, health = env['check']()
         assert result and health['state'] == 'ok'
     assert env['db'][env['collection']].count_documents({}) == 2
+
+    # the validation after the cycle finds the same differences - the accepted version stays
+    from plan_reconciler import get_blocks, run_validation
+    with mock.patch('shared_utils.fetch_bytes', lambda *a, **k: fixture_bytes(PLANS[KEY])):
+        results = run_validation(env['db'])
+    assert results and results[0]['status'] == 'error'
+    assert get_blocks(env['db']) == {}
+    data = env['api']().get_json()
+    assert 'Poniedziałek</th></tr></table>' in data['plan_html'] and 'stale' not in data
+    # the next file version is checked again
+    env['db'].plan_health.update_one({'_id': env['collection']}, {'$set': {'accept_checksum': 'other-version'}})
+    assert env['collection'] in get_blocks(env['db'])
+
+
+def test_out_of_date_attached_sheet_marks_the_plan(env):
+    """Plans published in parts: the warning shows when any attached sheet is out of date."""
+    import plan_health
+    from flask import Flask
+    from routes import plans as routes
+    env['check']()
+    plan_health.record(env['db'], 'plans_attached_sheet', 'Arkusz on-line',
+                       {'state': 'withheld', 'changed': True, 'reason': 'x'})
+    env['db']['plans_attached_sheet'].insert_one({'timestamp': '2026-10-01 10:00:00', 'plan_name': 'Arkusz on-line',
+                                                  'groups': {'cały kierunek': '<table><tr><td>x</td></tr></table>'}})
+    part = {'label': 'zajęcia on-line', 'collection': 'plans_attached_sheet', 'meeting': None}
+    app = Flask(__name__)
+    with mock.patch.object(routes, 'companion_sets', lambda db, allowed=None: {
+            env['collection']: {'meeting': None, 'parts': [part]}}):
+        import shared_utils
+        routes.init_plan_routes(app, shared_utils.get_semester_collections, env['db'])
+        data = app.test_client().get(f"/api/plan/{quote(env['collection'])}/{quote(env['group'])}").get_json()
+    assert data['stale']['kind'] == 'changed'
 
 
 def test_unreachable_file_warns_only_after_several_checks(env):
@@ -154,18 +196,22 @@ def test_out_of_date_plan_is_reported_once_per_streak(env):
     db, name = env['db'], env['collection']
     failed = {'state': 'failed', 'reason': 'W arkuszu nie ma grup: A', 'changed': True}
     plan_health.record(db, name, 'Plan', failed)
-    assert [h['_id'] for h in plan_health.take_alerts(db)] == [name]
+    fresh = plan_health.unreported(db)
+    assert [h['_id'] for h in fresh] == [name]
+    assert len(plan_health.unreported(db)) == 1       # the alert did not go out: tried again
+    plan_health.mark_reported(db, fresh)
     plan_health.record(db, name, 'Plan', failed)
-    assert plan_health.take_alerts(db) == []          # same streak
+    assert plan_health.unreported(db) == []           # same streak
     plan_health.record(db, name, 'Plan', {'state': 'ok'})
     plan_health.record(db, name, 'Plan', failed)
-    assert len(plan_health.take_alerts(db)) == 1      # a new streak
+    assert len(plan_health.unreported(db)) == 1       # a new streak
+    plan_health.mark_reported(db, plan_health.unreported(db))
     # a single failed download is not worth an alert
     plan_health.record(db, 'other', 'Other', {'state': 'failed', 'unreachable': True})
-    assert plan_health.take_alerts(db) == []
+    assert plan_health.unreported(db) == []
     # plans removed from the configuration are not reported
     plan_health.record(db, 'gone', 'Gone', failed)
-    assert plan_health.take_alerts(db, current={name}) == []
+    assert plan_health.unreported(db, current={name}) == []
 
 
 def test_validation_does_not_block_a_plan_whose_source_could_not_be_fetched(env):
