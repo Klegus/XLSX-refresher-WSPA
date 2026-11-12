@@ -16,7 +16,7 @@
         }
         body { background: var(--page); font-size: .9375rem; -webkit-font-smoothing: antialiased; }
         .text-muted { color: var(--muted) !important; }
-        .navbar-brand { font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+        .navbar-brand { font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
         .brand-sub { margin-left: .5rem; font-weight: 400; font-size: .8125rem; color: var(--muted); }
         .nav-tabs-line { display: flex; flex-wrap: wrap; gap: 1.5rem; border-bottom: 1px solid var(--line); }
         .nav-tabs-line .nav-link { padding: .6rem 0; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
@@ -40,7 +40,7 @@
         .badge.bg-warning { background-color: #fdf0c8 !important; color: #5c4400 !important; }
         .badge.bg-secondary { background-color: #eef0f3 !important; color: var(--muted); }
         .table { --bs-table-color: var(--ink); --bs-table-hover-bg: #f6f7f9; }
-        .table thead th { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+        .table thead th { font-size: .8125rem; color: var(--muted); font-weight: 500; }
         /* folded detail cards: the header is the switch */
         .card.fold > .card-header { cursor: pointer; user-select: none; }
         .card.fold > .card-header::after { content: '›'; margin-left: .75rem; color: var(--muted); font-size: 1.1rem; transition: transform .15s; }
@@ -53,24 +53,24 @@
         .status-dot.inactive { background: #dc3545; }
         .card { border: 1px solid var(--line); box-shadow: none; border-radius: 0.75rem; }
         .card-header { background: transparent; border-bottom: 1px solid #f0f0f0; font-weight: 600; }
-        .now-card .state-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
-        .now-card .state-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-        .state-idle { background: #eef0f3; color: var(--ink); }
-        .state-running { background: #fff3cd; color: #997404; }
-        .state-maint { background: #f8d7da; color: #b02a37; }
-        .state-empty { background: #e9ecef; color: #6c757d; }
-        .pulse { animation: pulse 1.4s ease-in-out infinite; }
-        @keyframes pulse { 50% { opacity: .45; } }
+        .now-card .state-title { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
+        .now-card .state-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; font-size: 0; }
+        .state-idle { background: #16a34a; }
+        .state-running { background: #d97706; }
+        .state-maint { background: #dc2626; }
+        .state-empty { background: #c9cdd4; }
+        .pulse { animation: pulse 1.6s ease-in-out infinite; }
+        @keyframes pulse { 50% { opacity: .5; } }
         .step { position: relative; padding-left: 2.5rem; padding-bottom: 1.25rem; }
         .step:last-child { padding-bottom: 0; }
         .step::before { content: ''; position: absolute; left: .85rem; top: 1.9rem; bottom: .2rem; width: 2px; background: #e9ecef; }
         .step:last-child::before { display: none; }
-        .step-num { position: absolute; left: 0; top: 0; width: 1.75rem; height: 1.75rem; border-radius: 50%; background: #e9ecef; color: #6c757d; font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center; }
-        .step.done .step-num { background: #d1e7dd; color: #146c43; }
-        .step.active .step-num { background: #fff3cd; color: #997404; }
-        .step.todo .step-num { background: #cfe2ff; color: #0a58ca; }
-        .stat { font-size: 1.6rem; font-weight: 700; line-height: 1; }
-        .stat-label { font-size: .75rem; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; }
+        .step-num { position: absolute; left: 0; top: 0; width: 1.75rem; height: 1.75rem; border-radius: 50%; background: #eef0f3; color: var(--muted); font-weight: 600; font-size: .8125rem; display: flex; align-items: center; justify-content: center; }
+        .step.done .step-num { background: #eef0f3; color: var(--ink); }
+        .step.active .step-num { background: var(--ink); color: #fff; }
+        .step.todo .step-num { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+        .stat { font-size: 1.5rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+        .stat-label { margin-top: .25rem; font-size: .8125rem; color: var(--muted); }
         .plan-row-name { max-width: min(560px, 48vw); white-space: normal; line-height: 1.3; }
         /* the page's sticky bar stays above sticky table headers */
         .navbar.sticky-top { z-index: 1030; }
@@ -135,7 +135,7 @@
                         <!-- Co się dzieje teraz -->
                         <div class="card now-card mb-3">
                             <div class="card-body d-flex gap-3 align-items-center flex-wrap">
-                                <div class="state-icon state-empty" id="nowIcon">•</div>
+                                <div class="state-icon state-empty" id="nowIcon"></div>
                                 <div class="flex-grow-1 min-w-0">
                                     <div class="state-title" id="nowTitle">Ładowanie...</div>
                                     <div class="text-muted small" id="nowSubtitle"></div>
@@ -258,7 +258,7 @@
                         <div id="scanAutoHint"></div>
                         <div id="scanStatus" style="display:none;">
                             <div class="d-flex align-items-center mb-2">
-                                <div class="spinner-border spinner-border-sm text-primary me-2" id="scanSpinner"></div>
+                                <div class="spinner-border spinner-border-sm text-secondary me-2" id="scanSpinner"></div>
                                 <span id="scanProgressText">Uruchamianie...</span>
                             </div>
                         </div>
@@ -323,13 +323,13 @@
                         <h6>Dodaj nowy plan</h6>
                         <div class="row g-2">
                             <div class="col-md-4">
-                                <input type="text" class="form-control form-control-sm" id="planId" placeholder="Plan ID">
+                                <input type="text" class="form-control form-control-sm" id="planId" placeholder="Identyfikator planu">
                             </div>
                             <div class="col-md-8">
                                 <textarea class="form-control form-control-sm" id="planJson" rows="4" placeholder="JSON konfiguracji"></textarea>
                             </div>
                             <div class="col-12">
-                                <button class="btn btn-success btn-sm" onclick="addPlan()">Dodaj plan</button>
+                                <button class="btn btn-primary btn-sm" onclick="addPlan()">Dodaj plan</button>
                             </div>
                         </div>
                     </div>
@@ -375,7 +375,7 @@
                     <div class="card-body">
                         <div id="suggestionsList">
                             <div class="d-flex justify-content-center py-4" id="suggestionsLoading">
-                                <div class="spinner-border text-primary spinner-border-sm"></div>
+                                <div class="spinner-border text-secondary spinner-border-sm"></div>
                             </div>
                             <div id="noSuggestions" class="text-center py-4 d-none">
                                 <p class="text-muted small mb-0">Brak sugestii w tym widoku. Studenci wysyłają je przyciskiem „Zgłoś sugestię lub błąd” pod planem.</p>
@@ -564,7 +564,7 @@
 
         function createLoadingModal(msg) {
             const m = document.createElement('div'); m.className = 'modal fade';
-            m.innerHTML = `<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center p-4"><div class="spinner-border text-primary mb-3"></div><p class="mb-0">${msg}</p></div></div></div>`;
+            m.innerHTML = `<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center p-4"><div class="spinner-border text-secondary mb-3"></div><p class="mb-0">${msg}</p></div></div></div>`;
             return m;
         }
 
@@ -670,7 +670,7 @@
 
         function addPlan() {
             const id = document.getElementById('planId').value;
-            if (!id) { alert('Podaj Plan ID'); return; }
+            if (!id) { alert('Podaj identyfikator planu'); return; }
             try {
                 const data = JSON.parse(document.getElementById('planJson').value);
                 fetch('/api/config', { method: 'POST', headers: {'Content-Type':'application/json'},
@@ -723,7 +723,7 @@
             body.append(head, text);
             if (s.status === 'pending') {
                 const actions = el('div', 'd-flex gap-1 justify-content-end');
-                const ok = el('button', 'btn btn-sm btn-success py-0', 'OK');
+                const ok = el('button', 'btn btn-sm btn-primary py-0', 'Zatwierdź');
                 const no = el('button', 'btn btn-sm btn-danger py-0', 'Odrzuć');
                 ok.addEventListener('click', () => updateSuggestionStatus(String(s.id), 'approved'));
                 no.addEventListener('click', () => updateSuggestionStatus(String(s.id), 'rejected'));
@@ -754,7 +754,7 @@
             fetch('/api/validate').then(r => r.json()).then(data => {
                 if (data.error) { c.innerHTML = `<div class="alert alert-danger">${esc(data.error)}</div>`; return; }
                 let html = `<div class="d-flex gap-2 mb-3"><span class="badge bg-success">${data.ok} OK</span><span class="badge bg-danger">${data.errors} błędów</span></div>`;
-                if (data.errors === 0) { html += '<div class="alert alert-success py-2 mb-0">Wszystkie plany poprawne!</div>'; }
+                if (data.errors === 0) { html += '<div class="alert alert-success py-2 mb-0">Wszystkie plany poprawne</div>'; }
                 else {
                     html += `<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Plan</th><th>Grupa</th><th>Kat.</th><th>Problem</th></tr></thead><tbody>`;
                     data.details.forEach(d => { html += `<tr><td class="small">${esc(d.plan.substring(0,55))}</td><td class="small">${esc(d.group)}</td><td><span class="badge bg-secondary">${esc(d.category)}</span></td><td class="small text-danger">${esc(d.issues.join('; '))}</td></tr>`; });
@@ -824,9 +824,9 @@
             reps.forEach(r => c[reportState(r)]++);
             const tile = (n, label, cls) => `<div class="col-6 col-md-3"><div class="card"><div class="card-body py-2"><div class="stat ${cls}">${n}</div><div class="stat-label">${label}</div></div></div></div>`;
             document.getElementById('validationStats').innerHTML = reps.length ? [
-                tile(c.ok, 'Zgodne ze źródłem', 'text-success'),
-                tile(c.blocked, deepData.blocking_enabled ? 'Zablokowane' : 'Z błędami (widoczne!)', 'text-danger'),
-                tile(c.acked, 'Zatwierdzone ręcznie', 'text-primary'),
+                tile(c.ok, 'Zgodne ze źródłem', ''),
+                tile(c.blocked, deepData.blocking_enabled ? 'Zablokowane' : 'Z błędami (widoczne dla studentów)', c.blocked ? 'text-danger' : ''),
+                tile(c.acked, 'Zatwierdzone ręcznie', ''),
                 tile(c.warn, 'Tylko uwagi', 'text-secondary'),
             ].join('') : '<div class="col"><div class="alert alert-light border mb-0 small">Jeszcze nie było walidacji. Kliknij „Waliduj wszystkie”.</div></div>';
             const last = reps.map(r => r.validated_at).filter(Boolean).sort().pop();
@@ -843,12 +843,12 @@
                 if (validationFilter === 'blocked' && s !== 'blocked') return false;
                 return !term || (r.plan || '').toLowerCase().includes(term);
             }).sort((a, b) => order[reportState(a)] - order[reportState(b)] || (a.plan || '').localeCompare(b.plan || '', 'pl'));
-            if (!reps.length) { list.innerHTML = `<p class="text-muted small mb-0">${deepData.reports.length ? 'Brak planów dla tego filtra 🎉' : ''}</p>`; return; }
+            if (!reps.length) { list.innerHTML = `<p class="text-muted small mb-0">${deepData.reports.length ? 'Brak planów dla tego filtra' : ''}</p>`; return; }
             const kinds = deepData.kinds;
             list.innerHTML = reps.map((r, idx) => {
                 const s = reportState(r), id = 'val-' + idx;
                 const badge = s === 'blocked' ? (r.blocked_plan ? '<span class="badge bg-danger">Zablokowany cały plan</span>' : `<span class="badge bg-danger">Zablokowane grupy: ${r.blocked_groups.length}</span>`)
-                    : s === 'acked' ? '<span class="badge bg-primary">Zatwierdzony ręcznie</span>'
+                    : s === 'acked' ? '<span class="badge bg-secondary">Zatwierdzony ręcznie</span>'
                     : s === 'warn' ? '<span class="badge bg-secondary">Uwagi</span>' : '<span class="badge bg-success">OK</span>';
                 const chips = Object.entries(r.counts || {}).sort((a, b) => kinds[b[0]].severity - kinds[a[0]].severity)
                     .map(([k, n]) => `<span class="badge ${kinds[k].severity >= 3 ? 'bg-danger-subtle text-danger-emphasis' : 'bg-light text-dark'} border">${esc(kinds[k].label)}: ${n}</span>`).join(' ');
@@ -897,13 +897,13 @@
         function purgeDatabase() {
             if (prompt('Usunie pobrane plany, historię zmian i aktualności.\nAby potwierdzić, wpisz: RESET') !== 'RESET') return;
             fetch('/api/purge', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plans: true, activities: true, config: false }) })
-                .then(r => r.json()).then(d => { alert(d.success ? 'Baza wyczyszczona! Skanuj Moodle.' : 'Błąd: ' + d.error); loadPlans(); });
+                .then(r => r.json()).then(d => { alert(d.success ? 'Baza wyczyszczona. Uruchom skan PUW, żeby pobrać plany od nowa.' : 'Błąd: ' + d.error); loadPlans(); });
         }
 
         function purgeDatabaseFull() {
             if (prompt('PEŁNY RESET: usunie wszystko, także konfigurację planów. Strona dla studentów będzie pusta.\nAby potwierdzić, wpisz: USUN WSZYSTKO') !== 'USUN WSZYSTKO') return;
             fetch('/api/purge', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plans: true, activities: true, config: true }) })
-                .then(r => r.json()).then(d => { alert(d.success ? 'Pełny reset!' : 'Błąd: ' + d.error); loadPlans(); });
+                .then(r => r.json()).then(d => { alert(d.success ? 'Baza wyczyszczona w całości' : 'Błąd: ' + d.error); loadPlans(); });
         }
 
         function forceCheck() {
@@ -1009,31 +1009,31 @@
             wrap.style.display = 'none';
             btn.disabled = false; btn.textContent = 'Sprawdź plany teraz';
             if (d.maintenance_mode) {
-                icon.className = 'state-icon state-maint'; icon.textContent = '⏸';
+                icon.className = 'state-icon state-maint'; icon.textContent = '';
                 title.textContent = 'Wstrzymane (maintenance)';
                 sub.textContent = (d.maintenance_reason ? d.maintenance_reason + ' · ' : '') + '„Sprawdź plany teraz” wyłączy maintenance i ruszy z cyklem.';
             } else if (c.running) {
                 const pct = c.total ? Math.round((c.done / c.total) * 100) : 0;
-                icon.className = 'state-icon state-running pulse'; icon.textContent = '⟳';
+                icon.className = 'state-icon state-running pulse'; icon.textContent = '';
                 title.textContent = `Sprawdzanie planów: ${c.done} / ${c.total}`;
                 sub.innerHTML = `${c.current_plan ? 'Teraz: <strong>' + esc(c.current_plan) + '</strong> · ' : ''}start ${fmtAgo(c.started_at)}${c.trigger === 'manual' ? ' (ręcznie)' : ''}${c.changes ? ' · zmiany: ' + c.changes : ''}${c.errors ? ' · błędy: ' + c.errors : ''}`;
                 wrap.style.display = ''; bar.style.width = pct + '%';
                 btn.disabled = true; btn.textContent = 'Cykl trwa...';
             } else if (d.force_check_pending) {
-                icon.className = 'state-icon state-running pulse'; icon.textContent = '⟳';
+                icon.className = 'state-icon state-running pulse'; icon.textContent = '';
                 title.textContent = 'Startuje sprawdzanie...';
                 sub.textContent = 'Backend podejmie zlecenie w ciągu kilku sekund.';
                 btn.disabled = true; btn.textContent = 'Zlecono';
             } else if (c.paused === 'night') {
-                icon.className = 'state-icon state-empty'; icon.textContent = '☾';
+                icon.className = 'state-icon state-empty'; icon.textContent = '';
                 title.textContent = `Przerwa nocna – wznowienie ${c.next_check_at ? fmtIn(c.next_check_at) : 'o 06:00'}`;
                 sub.textContent = 'Plany nie są sprawdzane w godz. 21:00–06:00 (czas warszawski). „Sprawdź plany teraz” uruchomi cykl mimo to.';
             } else if (!d.plans.length) {
-                icon.className = 'state-icon state-empty'; icon.textContent = '∅';
+                icon.className = 'state-icon state-empty'; icon.textContent = '';
                 title.textContent = 'Brak planów w konfiguracji';
                 sub.textContent = 'Zacznij od skanu Moodle (krok 1 po prawej).';
             } else {
-                icon.className = 'state-icon state-idle'; icon.textContent = '✓';
+                icon.className = 'state-icon state-idle'; icon.textContent = '';
                 title.textContent = c.next_check_at ? `Następne sprawdzenie ${fmtIn(c.next_check_at)}` : 'Czeka na pierwszy cykl';
                 const parts = [];
                 if (c.next_check_at) parts.push(`o ${new Date(c.next_check_at).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' })}`);
@@ -1257,7 +1257,7 @@
         function renderScanResults(r) {
             const c = document.getElementById('scanResults'); c.style.display = 'block';
             let html = `<p class="mb-2"><strong>Rok ${r.year}, sem. ${r.semester}</strong> — ${r.total_scraped} znalezionych (w bazie: ${r.total_current})</p>`;
-            if (r.new_count + r.changed_count + r.removed_count === 0) { html += '<div class="alert alert-success py-2">Brak zmian!</div>'; c.innerHTML = html; return; }
+            if (r.new_count + r.changed_count + r.removed_count === 0) { html += '<div class="alert alert-success py-2">Brak zmian</div>'; c.innerHTML = html; return; }
             if (r.new_count > 0) { html += `<h6 class="text-success mt-3 d-flex align-items-center gap-2">Nowe (${r.new_count}) <a href="#" class="small fw-normal" onclick="toggleScanGroup('scan-add', true); return false;">zaznacz wszystkie</a><a href="#" class="small fw-normal text-muted" onclick="toggleScanGroup('scan-add', false); return false;">odznacz</a></h6><div class="list-group mb-2" style="max-height:360px; overflow:auto">`; for (const [k,v] of Object.entries(r.new)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-add" value="${esc(k)}" checked><small><strong>${esc(k)}</strong> — ${esc(v)}</small></label>`; html += '</div>'; }
             if (r.changed_count > 0) { html += `<h6 class="text-warning mt-3">Zmienione (${r.changed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.changed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-update" value="${esc(k)}" checked><small><strong>${esc(k)}</strong> — ${esc(v.join(', '))}</small></label>`; html += '</div>'; }
             if (r.removed_count > 0) { html += `<h6 class="text-danger mt-3">Usunięte (${r.removed_count})</h6><div class="list-group mb-2">`; for (const [k,v] of Object.entries(r.removed)) html += `<label class="list-group-item py-1"><input type="checkbox" class="form-check-input me-2 scan-remove" value="${esc(k)}"><small><strong>${esc(k)}</strong> — ${esc(v)}</small></label>`; html += '</div>'; }
